@@ -2,10 +2,14 @@ package com.xyra.ai;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,8 +17,9 @@ import android.widget.Toast;
 
 public class SettingsActivity extends Activity {
     
-    private static final String PREFS_NAME = "xyra_settings";
-    private static final String KEY_FONT_SIZE = "font_size";
+    public static final String PREFS_NAME = "xyra_settings";
+    public static final String KEY_FONT_SIZE = "font_size";
+    public static final String KEY_FONT_SIZE_VALUE = "font_size_value";
     
     private SharedPreferences prefs;
     
@@ -120,21 +125,43 @@ public class SettingsActivity extends Activity {
     
     private void showFontSizeDialog() {
         final String[] sizes = {"Kecil", "Normal", "Besar", "Sangat Besar"};
+        final int[] sizeValues = {13, 15, 17, 20};
+        
+        String currentSize = prefs.getString(KEY_FONT_SIZE, "Normal");
+        int checkedItem = 1;
+        for (int i = 0; i < sizes.length; i++) {
+            if (sizes[i].equals(currentSize)) {
+                checkedItem = i;
+                break;
+            }
+        }
         
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Pilih Ukuran Font");
         
-        builder.setItems(sizes, new DialogInterface.OnClickListener() {
+        builder.setSingleChoiceItems(sizes, checkedItem, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                prefs.edit().putString(KEY_FONT_SIZE, sizes[which]).apply();
+                prefs.edit()
+                    .putString(KEY_FONT_SIZE, sizes[which])
+                    .putInt(KEY_FONT_SIZE_VALUE, sizeValues[which])
+                    .apply();
+                    
                 TextView tvSize = (TextView) findViewById(R.id.tvCurrentFontSize);
                 tvSize.setText(sizes[which]);
-                Toast.makeText(SettingsActivity.this, "Ukuran: " + sizes[which], Toast.LENGTH_SHORT).show();
+                
+                Toast.makeText(SettingsActivity.this, "Ukuran font: " + sizes[which] + "\nPerubahan akan diterapkan pada chat", Toast.LENGTH_LONG).show();
+                dialog.dismiss();
             }
         });
         
+        builder.setNegativeButton("Batal", null);
         builder.show();
+    }
+    
+    public static int getFontSize(android.content.Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        return prefs.getInt(KEY_FONT_SIZE_VALUE, 15);
     }
     
     private void exportChats() {
@@ -159,19 +186,20 @@ public class SettingsActivity extends Activity {
     }
     
     private void showAboutDialog() {
-        new AlertDialog.Builder(this)
-            .setTitle("Tentang XyraAI")
-            .setMessage("XyraAI v1.2\n\n" +
-                "AI Chat Assistant powered by GROQ API\n\n" +
-                "Fitur:\n" +
-                "- Chat dengan AI Llama 3.3 70B\n" +
-                "- Analisis gambar dengan AI Vision\n" +
-                "- Riwayat chat tersimpan\n" +
-                "- UI modern dan responsif\n" +
-                "- Multi-bahasa otomatis\n\n" +
-                "Dibuat untuk AIDE developers")
-            .setPositiveButton("OK", null)
-            .show();
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_about);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        
+        TextView btnOk = (TextView) dialog.findViewById(R.id.btnOk);
+        btnOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        
+        dialog.show();
     }
     
     private void showExitDialog() {

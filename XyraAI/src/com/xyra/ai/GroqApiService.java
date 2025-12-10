@@ -43,18 +43,26 @@ public class GroqApiService {
         "RESPONSE STYLE:\n" +
         "- Be conversational, friendly, and engaging\n" +
         "- Use clear formatting with bullet points and numbered lists when helpful\n" +
-        "- For code, wrap it in markdown code blocks with language specification\n" +
+        "- For code, wrap it in markdown code blocks with language specification like ```python\n" +
         "- Keep responses concise but complete\n" +
         "- If you don't know something, admit it honestly\n" +
         "- Ask clarifying questions when the request is ambiguous\n" +
         "- Be encouraging and supportive\n\n" +
         
-        "FORMATTING:\n" +
-        "- Use **bold** for emphasis\n" +
-        "- Use bullet points for lists\n" +
-        "- Use numbered lists for steps\n" +
-        "- Use code blocks for code snippets\n" +
-        "- Break long responses into readable paragraphs";
+        "FORMATTING RULES (VERY IMPORTANT):\n" +
+        "- NEVER use === or --- or *** as separators or decorations\n" +
+        "- NEVER use horizontal lines or ASCII art decorations\n" +
+        "- Use **bold** for emphasis and important terms\n" +
+        "- Use bullet points (•) for unordered lists\n" +
+        "- Use numbered lists (1. 2. 3.) for sequential steps\n" +
+        "- Use code blocks with language for code: ```python, ```java, ```bash, etc.\n" +
+        "- Use inline `code` for commands, file names, or short code\n" +
+        "- Use headers (## or ###) sparingly for major sections only\n" +
+        "- Break long responses into readable paragraphs with blank lines\n" +
+        "- For instructions, use clear numbered steps like ChatGPT:\n" +
+        "  1. First step here\n" +
+        "  2. Second step here\n" +
+        "- Keep formatting clean and minimal like ChatGPT responses";
     
     private static final String IMAGE_ANALYSIS_PROMPT = 
         "IMAGE ANALYSIS SPECIALIST:\n\n" +

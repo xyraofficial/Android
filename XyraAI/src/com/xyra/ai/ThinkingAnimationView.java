@@ -2,32 +2,33 @@ package com.xyra.ai;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 public class ThinkingAnimationView extends View {
     
     private Paint dotPaint;
     private Paint glowPaint;
     private Paint textPaint;
+    private Paint bgPaint;
     
-    private int animationFrame = 0;
+    private float animationProgress = 0f;
     private Handler handler;
     private boolean isAnimating = false;
     
-    private static final int DOT_COUNT = 4;
-    private static final float DOT_RADIUS = 6f;
-    private static final float DOT_SPACING = 24f;
+    private static final int DOT_COUNT = 3;
+    private static final float DOT_RADIUS = 5f;
+    private static final float DOT_SPACING = 18f;
     
-    private int[] gradientColors = {0xFF6366F1, 0xFF8B5CF6, 0xFFA855F7, 0xFFEC4899};
+    private int primaryColor = 0xFF22C55E;
+    private int secondaryColor = 0xFF10B981;
+    private int tertiaryColor = 0xFF059669;
     
-    private String[] thinkingSymbols = {"🧠", "✨", "💭", "⚡"};
-    private int currentSymbol = 0;
+    private AccelerateDecelerateInterpolator interpolator;
     
     public ThinkingAnimationView(Context context) {
         super(context);
@@ -45,19 +46,23 @@ public class ThinkingAnimationView extends View {
         
         glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         glowPaint.setStyle(Paint.Style.FILL);
-        glowPaint.setAlpha(80);
         
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setTextSize(28f);
-        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTextSize(14f);
+        textPaint.setColor(0xFF6B7280);
+        
+        bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bgPaint.setStyle(Paint.Style.FILL);
+        bgPaint.setColor(0xFFF3F4F6);
         
         handler = new Handler();
+        interpolator = new AccelerateDecelerateInterpolator();
     }
     
     public void startAnimation() {
         if (isAnimating) return;
         isAnimating = true;
-        animationFrame = 0;
+        animationProgress = 0f;
         runAnimation();
     }
     
@@ -69,9 +74,9 @@ public class ThinkingAnimationView extends View {
     private void runAnimation() {
         if (!isAnimating) return;
         
-        animationFrame++;
-        if (animationFrame % 8 == 0) {
-            currentSymbol = (currentSymbol + 1) % thinkingSymbols.length;
+        animationProgress += 0.05f;
+        if (animationProgress > 1f) {
+            animationProgress = 0f;
         }
         
         invalidate();
@@ -81,7 +86,7 @@ public class ThinkingAnimationView extends View {
             public void run() {
                 runAnimation();
             }
-        }, 100);
+        }, 50);
     }
     
     @Override
@@ -89,37 +94,43 @@ public class ThinkingAnimationView extends View {
         super.onDraw(canvas);
         
         float centerY = getHeight() / 2f;
-        float startX = 40f;
+        float startX = 20f;
         
-        canvas.drawText(thinkingSymbols[currentSymbol], 20f, centerY + 10f, textPaint);
+        RectF bgRect = new RectF(0, 4, getWidth() - 20, getHeight() - 4);
+        canvas.drawRoundRect(bgRect, 20, 20, bgPaint);
         
         for (int i = 0; i < DOT_COUNT; i++) {
-            float x = startX + 30f + (i * DOT_SPACING);
+            float x = startX + (i * DOT_SPACING);
             
-            float phase = (animationFrame + i * 3) % 20;
-            float scale = 0.5f + 0.5f * (float) Math.sin(phase * Math.PI / 10);
-            float yOffset = -8f * (float) Math.sin(phase * Math.PI / 10);
+            float dotPhase = (animationProgress + (i * 0.2f)) % 1f;
+            float bounce = (float) Math.sin(dotPhase * Math.PI * 2);
+            float scale = 0.7f + 0.3f * Math.abs(bounce);
+            float yOffset = -6f * bounce;
             
-            int colorIndex = (animationFrame / 4 + i) % gradientColors.length;
-            dotPaint.setColor(gradientColors[colorIndex]);
+            float alpha = 0.6f + 0.4f * Math.abs(bounce);
             
-            glowPaint.setColor(gradientColors[colorIndex]);
-            glowPaint.setAlpha(60);
-            canvas.drawCircle(x, centerY + yOffset, DOT_RADIUS * scale * 1.8f, glowPaint);
+            int color;
+            if (i == 0) color = primaryColor;
+            else if (i == 1) color = secondaryColor;
+            else color = tertiaryColor;
             
+            glowPaint.setColor(color);
+            glowPaint.setAlpha((int)(40 * alpha));
+            canvas.drawCircle(x, centerY + yOffset, DOT_RADIUS * scale * 2f, glowPaint);
+            
+            dotPaint.setColor(color);
+            dotPaint.setAlpha((int)(255 * alpha));
             canvas.drawCircle(x, centerY + yOffset, DOT_RADIUS * scale, dotPaint);
         }
         
-        textPaint.setColor(0xFFE5E7EB);
-        textPaint.setTextSize(14f);
-        textPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.drawText("Sedang berpikir", startX + 30f + (DOT_COUNT * DOT_SPACING) + 10f, centerY + 5f, textPaint);
+        float textX = startX + (DOT_COUNT * DOT_SPACING) + 12f;
+        canvas.drawText("XyraAI sedang berpikir...", textX, centerY + 5f, textPaint);
     }
     
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int width = 280;
-        int height = 48;
+        int width = 260;
+        int height = 40;
         setMeasuredDimension(width, height);
     }
     

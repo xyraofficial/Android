@@ -221,11 +221,7 @@ public class ChatAdapter extends BaseAdapter {
         LinearLayout thinkingLayout = new LinearLayout(context);
         thinkingLayout.setOrientation(LinearLayout.HORIZONTAL);
         thinkingLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        
-        final TextView symbolView = new TextView(context);
-        symbolView.setTextSize(22);
-        symbolView.setText(thinkingSymbols[0]);
-        thinkingLayout.addView(symbolView);
+        thinkingLayout.setPadding(4, 8, 4, 8);
         
         LinearLayout dotsLayout = new LinearLayout(context);
         dotsLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -234,57 +230,63 @@ public class ChatAdapter extends BaseAdapter {
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        dotsParams.setMargins(16, 0, 16, 0);
+        dotsParams.setMargins(0, 0, 12, 0);
         dotsLayout.setLayoutParams(dotsParams);
         
-        final View[] dots = new View[4];
-        for (int i = 0; i < 4; i++) {
+        final View[] dots = new View[3];
+        int[] dotColorList = {0xFF22C55E, 0xFF10B981, 0xFF059669};
+        for (int i = 0; i < 3; i++) {
             View dot = new View(context);
-            LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(12, 12);
-            dotParams.setMargins(4, 0, 4, 0);
+            LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(10, 10);
+            dotParams.setMargins(3, 0, 3, 0);
             dot.setLayoutParams(dotParams);
-            dot.setBackgroundResource(R.drawable.bg_dot);
+            
+            android.graphics.drawable.GradientDrawable dotBg = new android.graphics.drawable.GradientDrawable();
+            dotBg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            dotBg.setColor(dotColorList[i]);
+            dot.setBackground(dotBg);
+            
             dots[i] = dot;
             dotsLayout.addView(dot);
         }
         thinkingLayout.addView(dotsLayout);
         
         TextView textView = new TextView(context);
-        textView.setText("Sedang berpikir");
-        textView.setTextColor(0xFFFCD34D);
+        textView.setText("XyraAI sedang berpikir...");
+        textView.setTextColor(0xFF6B7280);
         textView.setTextSize(14);
         thinkingLayout.addView(textView);
         
         container.addView(thinkingLayout);
         
-        startDotsAnimation(dots, symbolView);
+        startDotsAnimation(dots);
     }
     
-    private void startDotsAnimation(final View[] dots, final TextView symbolView) {
-        final int[] frame = {0};
+    private void startDotsAnimation(final View[] dots) {
+        final float[] progress = {0f};
         
         final Runnable animationRunnable = new Runnable() {
             @Override
             public void run() {
-                frame[0]++;
+                progress[0] += 0.08f;
+                if (progress[0] > 1f) {
+                    progress[0] = 0f;
+                }
                 
                 for (int i = 0; i < dots.length; i++) {
-                    float phase = (frame[0] + i * 3) % 20;
-                    float scale = 0.6f + 0.4f * (float) Math.sin(phase * Math.PI / 10);
-                    float translationY = -8f * (float) Math.sin(phase * Math.PI / 10);
+                    float dotPhase = (progress[0] + (i * 0.25f)) % 1f;
+                    float bounce = (float) Math.sin(dotPhase * Math.PI * 2);
+                    float scale = 0.7f + 0.3f * Math.abs(bounce);
+                    float translationY = -5f * bounce;
+                    float alpha = 0.6f + 0.4f * Math.abs(bounce);
                     
                     dots[i].setScaleX(scale);
                     dots[i].setScaleY(scale);
                     dots[i].setTranslationY(translationY);
-                    dots[i].setAlpha(0.5f + 0.5f * scale);
+                    dots[i].setAlpha(alpha);
                 }
                 
-                if (frame[0] % 12 == 0) {
-                    currentSymbolIndex = (currentSymbolIndex + 1) % thinkingSymbols.length;
-                    symbolView.setText(thinkingSymbols[currentSymbolIndex]);
-                }
-                
-                handler.postDelayed(this, 80);
+                handler.postDelayed(this, 50);
             }
         };
         

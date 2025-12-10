@@ -23,10 +23,16 @@ public class MessageRenderer {
     
     private Context context;
     private LayoutInflater inflater;
+    private int fontSize;
     
     public MessageRenderer(Context context) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
+        this.fontSize = SettingsActivity.getFontSize(context);
+    }
+    
+    public void refreshFontSize() {
+        this.fontSize = SettingsActivity.getFontSize(context);
     }
     
     public void renderMessage(String content, LinearLayout container) {
@@ -118,8 +124,8 @@ public class MessageRenderer {
         textView.setLayoutParams(params);
         
         textView.setTextColor(0xFF2D3436);
-        textView.setTextSize(15);
-        textView.setLineSpacing(6, 1.1f);
+        textView.setTextSize(fontSize);
+        textView.setLineSpacing(6, 1.15f);
         
         SpannableStringBuilder formatted = formatText(text);
         textView.setText(formatted);

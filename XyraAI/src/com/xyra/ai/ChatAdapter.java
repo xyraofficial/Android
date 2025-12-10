@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,12 +22,14 @@ public class ChatAdapter extends BaseAdapter {
     private List<Message> messages;
     private LayoutInflater inflater;
     private SimpleDateFormat timeFormat;
+    private MessageRenderer messageRenderer;
     
     public ChatAdapter(Context context) {
         this.context = context;
         this.messages = new ArrayList<Message>();
         this.inflater = LayoutInflater.from(context);
         this.timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        this.messageRenderer = new MessageRenderer(context);
     }
     
     @Override
@@ -59,29 +62,56 @@ public class ChatAdapter extends BaseAdapter {
         Message message = messages.get(position);
         int viewType = getItemViewType(position);
         
-        ViewHolder holder;
+        if (viewType == TYPE_USER) {
+            return getUserView(message, convertView, parent);
+        } else {
+            return getAIView(message, convertView, parent);
+        }
+    }
+    
+    private View getUserView(Message message, View convertView, ViewGroup parent) {
+        UserViewHolder holder;
         
-        if (convertView == null) {
-            holder = new ViewHolder();
-            
-            if (viewType == TYPE_USER) {
-                convertView = inflater.inflate(R.layout.item_message_user, parent, false);
-            } else {
-                convertView = inflater.inflate(R.layout.item_message_ai, parent, false);
-            }
-            
+        if (convertView == null || convertView.getTag() == null || !(convertView.getTag() instanceof UserViewHolder)) {
+            convertView = inflater.inflate(R.layout.item_message_user, parent, false);
+            holder = new UserViewHolder();
             holder.tvMessage = (TextView) convertView.findViewById(R.id.tvMessage);
             holder.tvTime = (TextView) convertView.findViewById(R.id.tvTime);
             convertView.setTag(holder);
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            holder = (UserViewHolder) convertView.getTag();
         }
         
-        if (viewType == TYPE_AI) {
-            CharSequence formattedText = MarkdownParser.parse(message.getContent());
-            holder.tvMessage.setText(formattedText);
+        holder.tvMessage.setText(message.getContent());
+        holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
+        
+        return convertView;
+    }
+    
+    private View getAIView(Message message, View convertView, ViewGroup parent) {
+        AIViewHolder holder;
+        
+        if (convertView == null || convertView.getTag() == null || !(convertView.getTag() instanceof AIViewHolder)) {
+            convertView = inflater.inflate(R.layout.item_message_ai, parent, false);
+            holder = new AIViewHolder();
+            holder.messageContainer = (LinearLayout) convertView.findViewById(R.id.messageContainer);
+            holder.tvTime = (TextView) convertView.findViewById(R.id.tvTime);
+            convertView.setTag(holder);
         } else {
-            holder.tvMessage.setText(message.getContent());
+            holder = (AIViewHolder) convertView.getTag();
+        }
+        
+        String content = message.getContent();
+        
+        if (content.equals("Thinking...") || content.equals("Sedang berpikir...")) {
+            holder.messageContainer.removeAllViews();
+            TextView tvThinking = new TextView(context);
+            tvThinking.setText(content);
+            tvThinking.setTextColor(0xFFFCD34D);
+            tvThinking.setTextSize(15);
+            holder.messageContainer.addView(tvThinking);
+        } else {
+            messageRenderer.renderMessage(content, holder.messageContainer);
         }
         
         holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
@@ -117,8 +147,13 @@ public class ChatAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
     
-    static class ViewHolder {
+    static class UserViewHolder {
         TextView tvMessage;
+        TextView tvTime;
+    }
+    
+    static class AIViewHolder {
+        LinearLayout messageContainer;
         TextView tvTime;
     }
 }

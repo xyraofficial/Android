@@ -56,48 +56,6 @@
                 android:layout_marginBottom="12dp" />
 
             <LinearLayout
-                android:id="@+id/settingApiKey"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_setting_item"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="API Key"
-                        android:textColor="@color/textPrimary"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Konfigurasi GROQ API Key"
-                        android:textColor="@color/textSecondary"
-                        android:textSize="13sp"
-                        android:layout_marginTop="4dp" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=">"
-                    android:textColor="@color/textSecondary"
-                    android:textSize="18sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/settingModel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -149,49 +107,6 @@
                 android:textStyle="bold"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="12dp" />
-
-            <LinearLayout
-                android:id="@+id/settingTheme"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_setting_item"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tema"
-                        android:textColor="@color/textPrimary"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/tvCurrentTheme"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Dark Mode"
-                        android:textColor="@color/textSecondary"
-                        android:textSize="13sp"
-                        android:layout_marginTop="4dp" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=">"
-                    android:textColor="@color/textSecondary"
-                    android:textSize="18sp" />
-
-            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/settingFontSize"

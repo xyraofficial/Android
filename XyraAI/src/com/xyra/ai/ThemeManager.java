@@ -44,16 +44,7 @@ public class ThemeManager {
     }
     
     public static boolean isDarkMode(Context context) {
-        String theme = getCurrentTheme(context);
-        
-        if (THEME_DARK.equals(theme)) {
-            return true;
-        } else if (THEME_LIGHT.equals(theme)) {
-            return false;
-        } else {
-            int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
-        }
+        return true;
     }
     
     public static ThemeColors getThemeColors(Context context) {

@@ -17,7 +17,9 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Base64;
+import android.view.GestureDetector;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -87,6 +89,8 @@ public class MainActivity extends Activity {
     private ImageView ivFullscreenImage;
     private ImageButton btnCloseFullscreen;
     
+    private GestureDetector gestureDetector;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,6 +102,7 @@ public class MainActivity extends Activity {
         setupListView();
         setupDrawer();
         setupClickListeners();
+        setupSwipeGesture();
         initGroqService();
         initChatHistory();
         
@@ -322,6 +327,55 @@ public class MainActivity extends Activity {
     
     private void refreshChatHistoryList() {
         chatHistoryAdapter.setItems(chatHistory.getChatList());
+    }
+    
+    private void setupSwipeGesture() {
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            private static final int SWIPE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+            
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                if (e1 == null || e2 == null) return false;
+                
+                float diffX = e2.getX() - e1.getX();
+                float diffY = e2.getY() - e1.getY();
+                
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
+                            if (!isDrawerOpen) {
+                                openDrawer();
+                            }
+                        } else {
+                            if (isDrawerOpen) {
+                                closeDrawer();
+                            }
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+        
+        View mainContent = findViewById(R.id.mainContent);
+        if (mainContent != null) {
+            mainContent.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return gestureDetector.onTouchEvent(event);
+                }
+            });
+        }
+    }
+    
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (gestureDetector != null) {
+            gestureDetector.onTouchEvent(ev);
+        }
+        return super.dispatchTouchEvent(ev);
     }
     
     private void openDrawer() {

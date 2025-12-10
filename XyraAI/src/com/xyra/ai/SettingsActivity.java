@@ -14,8 +14,6 @@ import android.widget.Toast;
 public class SettingsActivity extends Activity {
     
     private static final String PREFS_NAME = "xyra_settings";
-    private static final String KEY_API_KEY = "api_key";
-    private static final String KEY_THEME = "theme";
     private static final String KEY_FONT_SIZE = "font_size";
     
     private SharedPreferences prefs;
@@ -43,13 +41,10 @@ public class SettingsActivity extends Activity {
     }
     
     private void loadCurrentSettings() {
-        String theme = prefs.getString(KEY_THEME, "System Default");
-        TextView tvTheme = (TextView) findViewById(R.id.tvCurrentTheme);
-        if (tvTheme != null) {
-            String description = "Mengikuti Tema HP";
-            if ("Dark".equals(theme)) description = "Tampilan Gelap";
-            else if ("Light".equals(theme)) description = "Tampilan Cerah";
-            tvTheme.setText(theme + " - " + description);
+        String fontSize = prefs.getString(KEY_FONT_SIZE, "Normal");
+        TextView tvFontSize = (TextView) findViewById(R.id.tvCurrentFontSize);
+        if (tvFontSize != null) {
+            tvFontSize.setText(fontSize);
         }
     }
     
@@ -62,24 +57,10 @@ public class SettingsActivity extends Activity {
             }
         });
         
-        findViewById(R.id.settingApiKey).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showApiKeyDialog();
-            }
-        });
-        
         findViewById(R.id.settingModel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showModelDialog();
-            }
-        });
-        
-        findViewById(R.id.settingTheme).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showThemeDialog();
             }
         });
         
@@ -119,29 +100,6 @@ public class SettingsActivity extends Activity {
         });
     }
     
-    private void showApiKeyDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("API Key");
-        
-        final EditText input = new EditText(this);
-        input.setHint("Masukkan GROQ API Key");
-        input.setText(prefs.getString(KEY_API_KEY, ""));
-        input.setPadding(48, 32, 48, 32);
-        builder.setView(input);
-        
-        builder.setPositiveButton("Simpan", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String apiKey = input.getText().toString().trim();
-                prefs.edit().putString(KEY_API_KEY, apiKey).apply();
-                Toast.makeText(SettingsActivity.this, "API Key disimpan", Toast.LENGTH_SHORT).show();
-            }
-        });
-        
-        builder.setNegativeButton("Batal", null);
-        builder.show();
-    }
-    
     private void showModelDialog() {
         final String[] models = {"Llama 3.3 70B", "Llama 4 Scout (Vision)", "Mixtral 8x7B"};
         
@@ -157,38 +115,6 @@ public class SettingsActivity extends Activity {
             }
         });
         
-        builder.show();
-    }
-    
-    private void showThemeDialog() {
-        final String[] themes = {"System Default", "Dark", "Light"};
-        final String[] themeDescriptions = {"Mengikuti Tema HP", "Tampilan Gelap", "Tampilan Cerah"};
-        
-        String currentTheme = prefs.getString(KEY_THEME, "System Default");
-        int selectedIndex = 0;
-        for (int i = 0; i < themes.length; i++) {
-            if (themes[i].equals(currentTheme)) {
-                selectedIndex = i;
-                break;
-            }
-        }
-        
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pilih Tema");
-        
-        builder.setSingleChoiceItems(themes, selectedIndex, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                prefs.edit().putString(KEY_THEME, themes[which]).apply();
-                TextView tvTheme = (TextView) findViewById(R.id.tvCurrentTheme);
-                tvTheme.setText(themes[which] + " - " + themeDescriptions[which]);
-                Toast.makeText(SettingsActivity.this, "Tema: " + themes[which], Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-                recreate();
-            }
-        });
-        
-        builder.setNegativeButton("Batal", null);
         builder.show();
     }
     

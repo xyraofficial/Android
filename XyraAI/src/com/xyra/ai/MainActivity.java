@@ -115,6 +115,49 @@ public class MainActivity extends Activity {
         if (drawerLayout != null) {
             drawerLayout.setBackgroundColor(colors.drawerBackground);
         }
+        
+        View header = findViewById(R.id.header);
+        if (header != null) {
+            header.setBackgroundColor(colors.headerBackground);
+        }
+        
+        View inputArea = findViewById(R.id.inputArea);
+        if (inputArea != null) {
+            inputArea.setBackgroundColor(colors.surface);
+        }
+        
+        if (etMessage != null) {
+            etMessage.setBackgroundColor(colors.inputBackground);
+            etMessage.setTextColor(colors.textPrimary);
+            etMessage.setHintTextColor(colors.textSecondary);
+        }
+        
+        if (tvStatus != null) {
+            tvStatus.setTextColor(colors.textSecondary);
+        }
+        
+        if (tvTyping != null) {
+            tvTyping.setTextColor(colors.textSecondary);
+        }
+        
+        if (etSearch != null) {
+            etSearch.setBackgroundColor(colors.inputBackground);
+            etSearch.setTextColor(colors.textPrimary);
+            etSearch.setHintTextColor(colors.textSecondary);
+        }
+        
+        TextView tvTitle = (TextView) findViewById(R.id.tvTitle);
+        if (tvTitle != null) {
+            tvTitle.setTextColor(colors.textPrimary);
+        }
+        
+        if (listView != null) {
+            listView.setBackgroundColor(colors.background);
+        }
+        
+        if (chatAdapter != null) {
+            chatAdapter.setThemeColors(colors);
+        }
     }
     
     private void initViews() {
@@ -863,6 +906,16 @@ public class MainActivity extends Activity {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null && getCurrentFocus() != null) {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeManager.applyTheme(this);
+        applyThemeColors();
+        if (chatAdapter != null) {
+            chatAdapter.setThemeColors(ThemeManager.getThemeColors(this));
         }
     }
     

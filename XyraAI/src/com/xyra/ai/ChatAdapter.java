@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
@@ -41,6 +42,8 @@ public class ChatAdapter extends BaseAdapter {
     private int currentSymbolIndex = 0;
     private int[] dotColors = {0xFF6366F1, 0xFF8B5CF6, 0xFFA855F7, 0xFFEC4899};
     
+    private ThemeManager.ThemeColors themeColors;
+    
     public ChatAdapter(Context context) {
         this.context = context;
         this.messages = new ArrayList<Message>();
@@ -50,6 +53,12 @@ public class ChatAdapter extends BaseAdapter {
         this.typingAnimator = new TypingAnimator();
         this.handler = new Handler(Looper.getMainLooper());
         this.currentChatId = null;
+        this.themeColors = ThemeManager.getThemeColors(context);
+    }
+    
+    public void setThemeColors(ThemeManager.ThemeColors colors) {
+        this.themeColors = colors;
+        notifyDataSetChanged();
     }
     
     @Override
@@ -146,6 +155,19 @@ public class ChatAdapter extends BaseAdapter {
         
         holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
         
+        if (themeColors != null) {
+            holder.tvMessage.setTextColor(themeColors.isDark ? 0xFFECECF1 : 0xFFFFFFFF);
+            holder.tvTime.setTextColor(themeColors.isDark ? 0xFFCBD5E1 : 0xFFE0E0E0);
+            View bubbleContainer = convertView.findViewById(R.id.bubbleContainer);
+            if (bubbleContainer != null) {
+                GradientDrawable userBubbleBg = new GradientDrawable();
+                userBubbleBg.setShape(GradientDrawable.RECTANGLE);
+                userBubbleBg.setColor(themeColors.userBubble);
+                userBubbleBg.setCornerRadii(new float[]{48, 48, 48, 48, 12, 12, 48, 48});
+                bubbleContainer.setBackground(userBubbleBg);
+            }
+        }
+        
         return convertView;
     }
     
@@ -171,6 +193,18 @@ public class ChatAdapter extends BaseAdapter {
         }
         
         holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
+        
+        if (themeColors != null) {
+            holder.tvTime.setTextColor(themeColors.textSecondary);
+            View aiBubbleContainer = convertView.findViewById(R.id.aiBubbleContainer);
+            if (aiBubbleContainer != null) {
+                GradientDrawable aiBubbleBg = new GradientDrawable();
+                aiBubbleBg.setShape(GradientDrawable.RECTANGLE);
+                aiBubbleBg.setColor(themeColors.aiBubble);
+                aiBubbleBg.setCornerRadii(new float[]{12, 12, 48, 48, 48, 48, 48, 48});
+                aiBubbleContainer.setBackground(aiBubbleBg);
+            }
+        }
         
         return convertView;
     }

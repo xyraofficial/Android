@@ -92,6 +92,9 @@ public class MainActivity extends Activity {
     
     private ImageView ivSidebarAvatar;
     
+    private AvatarAnimator avatarAnimator;
+    private View avatarSection;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

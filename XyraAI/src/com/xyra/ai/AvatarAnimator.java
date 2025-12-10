@@ -94,6 +94,34 @@ public class AvatarAnimator {
         bounce.start();
     }
     
+    public void startIdleAnimation() {
+        if (avatarView == null || isAnimating) return;
+        
+        stopAnimation();
+        isAnimating = true;
+        
+        ObjectAnimator breatheY = ObjectAnimator.ofFloat(avatarView, "translationY", 0f, -5f, 0f);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(avatarView, "scaleX", 1f, 1.02f, 1f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(avatarView, "scaleY", 1f, 1.02f, 1f);
+        ObjectAnimator tilt = ObjectAnimator.ofFloat(avatarView, "rotation", 0f, 2f, 0f, -2f, 0f);
+        
+        currentAnimation = new AnimatorSet();
+        currentAnimation.playTogether(breatheY, scaleX, scaleY, tilt);
+        currentAnimation.setDuration(3000);
+        currentAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
+        
+        currentAnimation.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                if (isAnimating && avatarView != null) {
+                    currentAnimation.start();
+                }
+            }
+        });
+        
+        currentAnimation.start();
+    }
+    
     public void stopAnimation() {
         isAnimating = false;
         if (currentAnimation != null) {

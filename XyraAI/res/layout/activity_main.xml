@@ -262,13 +262,39 @@
             android:layout_height="wrap_content"
             android:background="@color/headerBackground"
             android:orientation="vertical"
+            android:gravity="center_horizontal"
             android:padding="20dp">
 
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/ic_launcher"
-                android:contentDescription="Logo" />
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+                
+                <View
+                    android:id="@+id/sidebarAvatarGlow"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_sidebar_avatar_glow" />
+                
+                <FrameLayout
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_sidebar_avatar_container"
+                    android:padding="3dp">
+                    
+                    <ImageView
+                        android:id="@+id/ivSidebarAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_avatar_female"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="AI Avatar" />
+                        
+                </FrameLayout>
+                
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"

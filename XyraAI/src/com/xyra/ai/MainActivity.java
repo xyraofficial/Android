@@ -95,6 +95,10 @@ public class MainActivity extends Activity {
     private View avatarGlow;
     private AvatarAnimator avatarAnimator;
     
+    private ImageView ivSidebarAvatar;
+    private View sidebarAvatarGlow;
+    private AvatarAnimator sidebarAvatarAnimator;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -202,6 +206,13 @@ public class MainActivity extends Activity {
         
         if (ivAvatar != null) {
             avatarAnimator = new AvatarAnimator(ivAvatar);
+        }
+        
+        ivSidebarAvatar = (ImageView) findViewById(R.id.ivSidebarAvatar);
+        sidebarAvatarGlow = findViewById(R.id.sidebarAvatarGlow);
+        
+        if (ivSidebarAvatar != null) {
+            sidebarAvatarAnimator = new AvatarAnimator(ivSidebarAvatar);
         }
     }
     
@@ -400,6 +411,14 @@ public class MainActivity extends Activity {
             .translationX(0)
             .setDuration(250)
             .start();
+        
+        if (sidebarAvatarAnimator != null) {
+            sidebarAvatarAnimator.startIdleAnimation();
+        }
+        
+        if (sidebarAvatarGlow != null) {
+            startGlowPulseAnimation(sidebarAvatarGlow);
+        }
     }
     
     private void closeDrawer() {
@@ -417,6 +436,36 @@ public class MainActivity extends Activity {
             .translationX(-280 * getResources().getDisplayMetrics().density)
             .setDuration(250)
             .start();
+        
+        if (sidebarAvatarAnimator != null) {
+            sidebarAvatarAnimator.stopAnimation();
+        }
+        
+        if (sidebarAvatarGlow != null) {
+            sidebarAvatarGlow.clearAnimation();
+        }
+    }
+    
+    private void startGlowPulseAnimation(final View glowView) {
+        android.animation.ObjectAnimator scaleX = android.animation.ObjectAnimator.ofFloat(glowView, "scaleX", 1f, 1.15f, 1f);
+        android.animation.ObjectAnimator scaleY = android.animation.ObjectAnimator.ofFloat(glowView, "scaleY", 1f, 1.15f, 1f);
+        android.animation.ObjectAnimator alpha = android.animation.ObjectAnimator.ofFloat(glowView, "alpha", 0.6f, 1f, 0.6f);
+        
+        android.animation.AnimatorSet animatorSet = new android.animation.AnimatorSet();
+        animatorSet.playTogether(scaleX, scaleY, alpha);
+        animatorSet.setDuration(2000);
+        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        
+        animatorSet.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                if (isDrawerOpen && sidebarAvatarGlow != null) {
+                    startGlowPulseAnimation(glowView);
+                }
+            }
+        });
+        
+        animatorSet.start();
     }
     
     private void showMessageOptions(final int position) {

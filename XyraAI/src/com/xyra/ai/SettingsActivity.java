@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -93,7 +94,7 @@ public class SettingsActivity extends Activity {
         findViewById(R.id.settingAbout).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAboutDialog();
+                openInfoActivity();
             }
         });
         
@@ -185,21 +186,10 @@ public class SettingsActivity extends Activity {
             .show();
     }
     
-    private void showAboutDialog() {
-        final Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_about);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        
-        TextView btnOk = (TextView) dialog.findViewById(R.id.btnOk);
-        btnOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        
-        dialog.show();
+    private void openInfoActivity() {
+        Intent intent = new Intent(this, InfoActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
     
     private void showExitDialog() {

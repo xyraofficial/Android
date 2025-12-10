@@ -77,6 +77,43 @@
         android:listSelector="@android:color/transparent" />
 
     <LinearLayout
+        android:id="@+id/imagePreviewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/backgroundSecondary"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/ivPreview"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Image Preview" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="8dp"
+            android:text="Gambar terpilih"
+            android:textColor="@color/textSecondary"
+            android:textSize="14sp" />
+
+        <ImageButton
+            android:id="@+id/btnRemoveImage"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Remove Image"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:padding="8dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/backgroundSecondary"

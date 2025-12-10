@@ -28,12 +28,21 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import android.os.Environment;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 
 public class MainActivity extends Activity {
     
     private static final String API_KEY = "YOUR_GROQ_API_KEY_HERE";
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final int CAMERA_REQUEST = 2;
+    private static final int FILE_REQUEST = 3;
+    private static final int PERMISSION_REQUEST = 100;
     
     private ListView listView;
     private EditText etMessage;
@@ -180,23 +189,101 @@ public class MainActivity extends Activity {
     }
     
     private void openImagePicker() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Pilih Sumber Gambar");
+        
+        String[] options = {"Kamera", "Galeri Foto", "File"};
+        
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which) {
+                    case 0:
+                        openCamera();
+                        break;
+                    case 1:
+                        openGallery();
+                        break;
+                    case 2:
+                        openFilePicker();
+                        break;
+                }
+            }
+        });
+        
+        builder.show();
+    }
+    
+    private void openCamera() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST);
+                return;
+            }
+        }
+        
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, CAMERA_REQUEST);
+        } else {
+            Toast.makeText(this, "Kamera tidak tersedia", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void openGallery() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+    
+    private void openFilePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(Intent.createChooser(intent, "Pilih File Gambar"), FILE_REQUEST);
+    }
+    
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openCamera();
+            } else {
+                Toast.makeText(this, "Izin kamera diperlukan", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        
+        Bitmap bitmap = null;
+        
+        if (requestCode == CAMERA_REQUEST && data != null) {
+            Bundle extras = data.getExtras();
+            if (extras != null) {
+                bitmap = (Bitmap) extras.get("data");
+            }
+        } else if ((requestCode == PICK_IMAGE_REQUEST || requestCode == FILE_REQUEST) && data != null) {
             selectedImageUri = data.getData();
-            
             try {
                 InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                bitmap = BitmapFactory.decodeStream(inputStream);
                 inputStream.close();
-                
+            } catch (Exception e) {
+                Toast.makeText(this, "Gagal memuat gambar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        
+        if (bitmap != null) {
+            try {
                 Bitmap scaledBitmap = scaleBitmap(bitmap, 512);
                 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();

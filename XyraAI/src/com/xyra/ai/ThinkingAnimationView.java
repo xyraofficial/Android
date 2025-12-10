@@ -58,7 +58,7 @@ public class ThinkingAnimationView extends View {
         if (isAnimating) return;
         isAnimating = true;
         animationFrame = 0;
-        animate();
+        runAnimation();
     }
     
     public void stopAnimation() {
@@ -66,7 +66,7 @@ public class ThinkingAnimationView extends View {
         handler.removeCallbacksAndMessages(null);
     }
     
-    private void animate() {
+    private void runAnimation() {
         if (!isAnimating) return;
         
         animationFrame++;
@@ -79,7 +79,7 @@ public class ThinkingAnimationView extends View {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                animate();
+                runAnimation();
             }
         }, 100);
     }

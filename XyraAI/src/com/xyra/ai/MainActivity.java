@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
     
     private String selectedImageBase64 = null;
     private Uri selectedImageUri = null;
+    private boolean userScrolledUp = false;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +113,22 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (chatAdapter.isTyping()) {
                     chatAdapter.skipTypingAnimation();
+                }
+            }
+        });
+        
+        listView.setOnScrollListener(new android.widget.AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(android.widget.AbsListView view, int scrollState) {
+                if (scrollState == SCROLL_STATE_TOUCH_SCROLL) {
+                    userScrolledUp = true;
+                }
+            }
+            
+            @Override
+            public void onScroll(android.widget.AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (firstVisibleItem + visibleItemCount >= totalItemCount - 1) {
+                    userScrolledUp = false;
                 }
             }
         });
@@ -422,7 +439,7 @@ public class MainActivity extends Activity {
         }
         
         chatAdapter.addMessage(new Message(displayMessage, Message.TYPE_USER));
-        scrollToBottom();
+        forceScrollToBottom();
         
         etMessage.setText("");
         hideKeyboard();
@@ -430,7 +447,7 @@ public class MainActivity extends Activity {
         setWaitingState(true);
         
         chatAdapter.addMessage(new Message("thinking", Message.TYPE_AI));
-        scrollToBottom();
+        forceScrollToBottom();
         
         final String imageToSend = selectedImageBase64;
         final String textToSend = TextUtils.isEmpty(messageText) ? "Tolong analisis dan jelaskan gambar ini" : messageText;
@@ -503,6 +520,19 @@ public class MainActivity extends Activity {
     }
     
     private void scrollToBottom() {
+        if (userScrolledUp) {
+            return;
+        }
+        listView.post(new Runnable() {
+            @Override
+            public void run() {
+                listView.setSelection(chatAdapter.getCount() - 1);
+            }
+        });
+    }
+    
+    private void forceScrollToBottom() {
+        userScrolledUp = false;
         listView.post(new Runnable() {
             @Override
             public void run() {

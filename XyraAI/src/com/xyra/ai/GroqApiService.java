@@ -219,7 +219,14 @@ public class GroqApiService {
         
         JSONObject systemMessage = new JSONObject();
         systemMessage.put("role", "system");
-        systemMessage.put("content", SYSTEM_PROMPT + "\n\nYou can also analyze images. When given an image, describe what you see in detail and answer any questions about it.");
+        systemMessage.put("content", SYSTEM_PROMPT + "\n\nIMAGE ANALYSIS RULES:\n" +
+            "- ALWAYS go straight to the main point/problem first\n" +
+            "- If you see an error message, identify the EXACT error and give the DIRECT solution\n" +
+            "- Do NOT give generic advice - be specific based on what you see\n" +
+            "- For code/terminal errors: identify the typo or mistake immediately\n" +
+            "- Keep initial response short and focused on the core issue\n" +
+            "- Example: If user types 'pkhj' instead of 'pkg', say 'You typed pkhj but should be pkg'\n" +
+            "- Only explain further if user asks for more details");
         messages.put(systemMessage);
         
         for (int i = 0; i < conversationHistory.size() - 2; i++) {

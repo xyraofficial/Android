@@ -12,9 +12,10 @@ public class TypingAnimator {
     private boolean isAnimating;
     private int typingSpeed;
     
-    private static final int DEFAULT_SPEED = 15;
-    private static final int FAST_SPEED = 5;
-    private static final int SLOW_SPEED = 30;
+    private static final int DEFAULT_SPEED = 3;
+    private static final int FAST_SPEED = 1;
+    private static final int SLOW_SPEED = 8;
+    private static final int CHUNK_SIZE = 5;
     
     public interface TypingCallback {
         void onTextUpdated(String currentText);
@@ -54,7 +55,8 @@ public class TypingAnimator {
             return;
         }
         
-        currentIndex++;
+        int charsToAdd = Math.min(CHUNK_SIZE, fullText.length() - currentIndex);
+        currentIndex += charsToAdd;
         
         int speed = calculateSpeed();
         

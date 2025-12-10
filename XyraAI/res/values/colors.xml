@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6366F1</color>
+    <color name="colorPrimaryDark">#4F46E5</color>
+    <color name="colorAccent">#8B5CF6</color>
+    
+    <color name="background">#0F0F23</color>
+    <color name="backgroundSecondary">#1A1A2E</color>
+    <color name="surface">#16213E</color>
+    
+    <color name="textPrimary">#FFFFFF</color>
+    <color name="textSecondary">#A0AEC0</color>
+    
+    <color name="userBubble">#6366F1</color>
+    <color name="aiBubble">#2D3748</color>
+    
+    <color name="inputBackground">#1E293B</color>
+    <color name="divider">#374151</color>
+</resources>

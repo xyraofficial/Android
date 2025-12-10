@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">XyraAI</string>
+    <string name="hint_message">Type your message...</string>
+    <string name="send">Send</string>
+    <string name="welcome_message">Hello! I\'m Xyra, your AI assistant. How can I help you today?</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_api">Error getting response. Please try again.</string>
+    <string name="thinking">Thinking...</string>
+</resources>

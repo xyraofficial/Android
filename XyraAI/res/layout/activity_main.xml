@@ -167,8 +167,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_quick_reply"
-                            android:paddingHorizontal="16dp"
-                            android:paddingVertical="10dp"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
                             android:layout_margin="4dp"
                             android:text="Bantu coding"
                             android:textColor="@color/colorAccent"
@@ -181,8 +183,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_quick_reply"
-                            android:paddingHorizontal="16dp"
-                            android:paddingVertical="10dp"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
                             android:layout_margin="4dp"
                             android:text="Jelaskan sesuatu"
                             android:textColor="@color/colorAccent"
@@ -204,8 +208,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_quick_reply"
-                            android:paddingHorizontal="16dp"
-                            android:paddingVertical="10dp"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
                             android:layout_margin="4dp"
                             android:text="Tulis email"
                             android:textColor="@color/colorAccent"
@@ -218,8 +224,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bg_quick_reply"
-                            android:paddingHorizontal="16dp"
-                            android:paddingVertical="10dp"
+                            android:paddingLeft="16dp"
+                            android:paddingRight="16dp"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
                             android:layout_margin="4dp"
                             android:text="Ide kreatif"
                             android:textColor="@color/colorAccent"
@@ -279,8 +287,10 @@
             android:background="#F5F5F5"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="16dp">
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
             <ImageButton
                 android:id="@+id/btnImage"
@@ -296,12 +306,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/bg_input_rounded"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="4dp"
-                android:paddingVertical="4dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
                 android:minHeight="56dp">
 
                 <EditText
@@ -313,8 +326,10 @@
                     android:hint="@string/hint_message"
                     android:inputType="textMultiLine|textCapSentences"
                     android:maxLines="5"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
                     android:textColor="@color/textPrimary"
                     android:textColorHint="#9CA3AF"
                     android:textCursorDrawable="@null"
@@ -437,7 +452,8 @@
             android:background="@drawable/bg_drawer_item"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:layout_marginHorizontal="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -462,8 +478,10 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/divider"
-            android:layout_marginVertical="8dp"
-            android:layout_marginHorizontal="16dp" />
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -483,7 +501,8 @@
             android:layout_weight="1"
             android:divider="@android:color/transparent"
             android:dividerHeight="4dp"
-            android:paddingHorizontal="8dp" />
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" />
 
         <View
             android:layout_width="match_parent"

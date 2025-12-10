@@ -70,7 +70,6 @@ public class MainActivity extends Activity {
     private EditText etSearch;
     private ListView chatHistoryList;
     private LinearLayout btnNewChat;
-    private LinearLayout btnClearChats;
     private LinearLayout btnSettings;
     
     private ChatAdapter chatAdapter;
@@ -186,7 +185,6 @@ public class MainActivity extends Activity {
         etSearch = (EditText) findViewById(R.id.etSearch);
         chatHistoryList = (ListView) findViewById(R.id.chatHistoryList);
         btnNewChat = (LinearLayout) findViewById(R.id.btnNewChat);
-        btnClearChats = (LinearLayout) findViewById(R.id.btnClearChats);
         btnSettings = (LinearLayout) findViewById(R.id.btnSettings);
         
         fullscreenImageContainer = (FrameLayout) findViewById(R.id.fullscreenImageContainer);
@@ -515,13 +513,6 @@ public class MainActivity extends Activity {
             }
         });
         
-        btnClearChats.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleDeleteMode();
-            }
-        });
-        
         btnSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -531,15 +522,6 @@ public class MainActivity extends Activity {
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         });
-    }
-    
-    private void toggleDeleteMode() {
-        boolean newMode = !chatHistoryAdapter.isDeleteMode();
-        chatHistoryAdapter.setDeleteMode(newMode);
-        
-        if (newMode) {
-            Toast.makeText(this, "Tap X untuk menghapus chat", Toast.LENGTH_SHORT).show();
-        }
     }
     
     private void openImagePicker() {
@@ -714,9 +696,8 @@ public class MainActivity extends Activity {
     private void showMainMenu() {
         PopupMenu popup = new PopupMenu(this, btnMenu);
         popup.getMenu().add(0, 1, 0, "Chat Baru");
-        popup.getMenu().add(0, 2, 1, "Hapus Riwayat");
-        popup.getMenu().add(0, 3, 2, "Pengaturan");
-        popup.getMenu().add(0, 4, 3, "Tentang");
+        popup.getMenu().add(0, 2, 1, "Pengaturan");
+        popup.getMenu().add(0, 3, 2, "Tentang");
         
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -726,14 +707,11 @@ public class MainActivity extends Activity {
                         startNewChat();
                         return true;
                     case 2:
-                        confirmClearHistory();
-                        return true;
-                    case 3:
                         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(intent);
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                         return true;
-                    case 4:
+                    case 3:
                         showAbout();
                         return true;
                 }
@@ -750,14 +728,15 @@ public class MainActivity extends Activity {
             return;
         }
         
-        saveChat();
+        if (chatAdapter.getCount() > 0) {
+            saveChat();
+        }
         
         chatAdapter.clearMessages();
         chatHistory.startNewChat();
         chatAdapter.setCurrentChatId(chatHistory.getCurrentChatId());
         clearSelectedImage();
         addWelcomeMessage();
-        refreshChatHistoryList();
         Toast.makeText(this, "Chat baru dimulai", Toast.LENGTH_SHORT).show();
     }
     

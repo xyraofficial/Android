@@ -296,32 +296,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/btnClearChats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_drawer_item"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:layout_marginHorizontal="8dp"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🗑"
-                android:textSize="18sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:text="Hapus Chat"
-                android:textColor="@color/textPrimary"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

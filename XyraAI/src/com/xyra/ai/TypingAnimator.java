@@ -12,10 +12,10 @@ public class TypingAnimator {
     private boolean isAnimating;
     private int typingSpeed;
     
-    private static final int DEFAULT_SPEED = 1;
+    private static final int DEFAULT_SPEED = 0;
     private static final int FAST_SPEED = 0;
-    private static final int SLOW_SPEED = 3;
-    private static final int CHUNK_SIZE = 8;
+    private static final int SLOW_SPEED = 0;
+    private static final int CHUNK_SIZE = 50;
     
     public interface TypingCallback {
         void onTextUpdated(String currentText);

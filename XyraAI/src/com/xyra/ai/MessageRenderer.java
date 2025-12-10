@@ -150,6 +150,17 @@ public class MessageRenderer {
                 header.setSpan(new StyleSpan(Typeface.BOLD), 0, header.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 header.setSpan(new RelativeSizeSpan(1.3f), 0, header.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 builder.append(header);
+            } else if (line.matches("^\\s*[-*+]\\s+.*")) {
+                String bulletContent = line.replaceFirst("^\\s*[-*+]\\s+", "");
+                SpannableStringBuilder formatted = formatInlineStyles(bulletContent);
+                builder.append("  \u2022 ");
+                builder.append(formatted);
+            } else if (line.matches("^\\s*\\d+\\.\\s+.*")) {
+                String numMatch = line.replaceFirst("^\\s*(\\d+)\\.\\s+.*", "$1");
+                String listContent = line.replaceFirst("^\\s*\\d+\\.\\s+", "");
+                SpannableStringBuilder formatted = formatInlineStyles(listContent);
+                builder.append("  " + numMatch + ". ");
+                builder.append(formatted);
             } else {
                 SpannableStringBuilder formatted = formatInlineStyles(line);
                 builder.append(formatted);
@@ -180,6 +191,23 @@ public class MessageRenderer {
                 start, start + boldText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             
             offset += 4;
+        }
+        
+        text = builder.toString();
+        Pattern italicPattern = Pattern.compile("(?<!\\*)\\*([^*]+)\\*(?!\\*)");
+        Matcher italicMatcher = italicPattern.matcher(text);
+        offset = 0;
+        
+        while (italicMatcher.find()) {
+            int start = italicMatcher.start() - offset;
+            int end = italicMatcher.end() - offset;
+            String italicText = italicMatcher.group(1);
+            
+            builder.replace(start, end, italicText);
+            builder.setSpan(new StyleSpan(Typeface.ITALIC), 
+                start, start + italicText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            
+            offset += 2;
         }
         
         text = builder.toString();

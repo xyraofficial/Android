@@ -11,8 +11,7 @@
         android:background="@color/headerBackground"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingHorizontal="16dp">
 
         <ImageButton
             android:id="@+id/btnBack"

@@ -1,6 +1,5 @@
 package com.xyra.ai;
 
-import com.xyra.ai.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -45,24 +44,14 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import java.util.ArrayList;
 import java.util.List;
-import android.app.Dialog;
-import android.graphics.drawable.ColorDrawable;
-import android.view.Window;
-import android.graphics.Color;
 
 public class MainActivity extends Activity {
     
-    private static final String API_KEY = "YOUR_GROQ_API_KEY_HERE";
+    private static final String API_KEY = "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";
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
     private static final int FILE_REQUEST = 3;
     private static final int PERMISSION_REQUEST = 100;
-    
-    private UserManager userManager;
-    private LinearLayout btnProfile;
-    private TextView tvProfileInitialSidebar;
-    private TextView tvProfileNameSidebar;
-    private TextView tvProfileEmailSidebar;
     
     private ListView listView;
     private EditText etMessage;
@@ -116,16 +105,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeManager.applyTheme(this);
-        
-        userManager = new UserManager(this);
-        
-        if (userManager.shouldShowLogin()) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivity(loginIntent);
-            finish();
-            return;
-        }
-        
         setContentView(R.layout.activity_main);
         
         initViews();
@@ -136,7 +115,6 @@ public class MainActivity extends Activity {
         setupSwipeGesture();
         initGroqService();
         initChatHistory();
-        updateProfileDisplay();
         
         addWelcomeMessage();
     }
@@ -223,11 +201,6 @@ public class MainActivity extends Activity {
         btnCloseFullscreen = (ImageButton) findViewById(R.id.btnCloseFullscreen);
         
         ivSidebarAvatar = (ImageView) findViewById(R.id.ivSidebarAvatar);
-        
-        btnProfile = (LinearLayout) findViewById(R.id.btnProfile);
-        tvProfileInitialSidebar = (TextView) findViewById(R.id.tvProfileInitialSidebar);
-        tvProfileNameSidebar = (TextView) findViewById(R.id.tvProfileNameSidebar);
-        tvProfileEmailSidebar = (TextView) findViewById(R.id.tvProfileEmailSidebar);
         
         welcomeState = (LinearLayout) findViewById(R.id.welcomeState);
         quickReply1 = (TextView) findViewById(R.id.quickReply1);
@@ -569,22 +542,6 @@ public class MainActivity extends Activity {
             }
         });
         
-        if (btnProfile != null) {
-            btnProfile.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    closeDrawer();
-                    if (userManager.isLoggedIn()) {
-                        showProfileDialog();
-                    } else {
-                        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-                        startActivity(loginIntent);
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    }
-                }
-            });
-        }
-        
         setupQuickReplies();
     }
     
@@ -825,9 +782,8 @@ public class MainActivity extends Activity {
     private void showMainMenu() {
         PopupMenu popup = new PopupMenu(this, btnMenu);
         popup.getMenu().add(0, 1, 0, "Chat Baru");
-        popup.getMenu().add(0, 2, 1, "Profil");
-        popup.getMenu().add(0, 3, 2, "Pengaturan");
-        popup.getMenu().add(0, 4, 3, "Info");
+        popup.getMenu().add(0, 2, 1, "Pengaturan");
+        popup.getMenu().add(0, 3, 2, "Tentang");
         
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -837,23 +793,12 @@ public class MainActivity extends Activity {
                         startNewChat();
                         return true;
                     case 2:
-                        if (userManager.isLoggedIn()) {
-                            showProfileDialog();
-                        } else {
-                            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-                            startActivity(loginIntent);
-                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                        }
-                        return true;
-                    case 3:
                         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(intent);
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                         return true;
-                    case 4:
-                        Intent infoIntent = new Intent(MainActivity.this, InfoActivity.class);
-                        startActivity(infoIntent);
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    case 3:
+                        showAbout();
                         return true;
                 }
                 return false;
@@ -861,105 +806,6 @@ public class MainActivity extends Activity {
         });
         
         popup.show();
-    }
-    
-    private void updateProfileDisplay() {
-        if (userManager == null) return;
-        
-        if (userManager.isLoggedIn()) {
-            if (tvProfileInitialSidebar != null) {
-                tvProfileInitialSidebar.setText(userManager.getUserInitial());
-            }
-            if (tvProfileNameSidebar != null) {
-                tvProfileNameSidebar.setText(userManager.getUserName());
-            }
-            if (tvProfileEmailSidebar != null) {
-                tvProfileEmailSidebar.setText(userManager.getUserEmail());
-            }
-        } else {
-            if (tvProfileInitialSidebar != null) {
-                tvProfileInitialSidebar.setText("U");
-            }
-            if (tvProfileNameSidebar != null) {
-                tvProfileNameSidebar.setText("Profil");
-            }
-            if (tvProfileEmailSidebar != null) {
-                tvProfileEmailSidebar.setText("Ketuk untuk masuk");
-            }
-        }
-    }
-    
-    private void showProfileDialog() {
-        final Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_profile);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        
-        TextView tvInitial = (TextView) dialog.findViewById(R.id.tvProfileInitial);
-        TextView tvName = (TextView) dialog.findViewById(R.id.tvProfileName);
-        TextView tvEmail = (TextView) dialog.findViewById(R.id.tvProfileEmail);
-        TextView tvLoginType = (TextView) dialog.findViewById(R.id.tvLoginType);
-        TextView tvTotalChats = (TextView) dialog.findViewById(R.id.tvTotalChats);
-        TextView tvJoinDate = (TextView) dialog.findViewById(R.id.tvJoinDate);
-        TextView btnLogout = (TextView) dialog.findViewById(R.id.btnLogout);
-        TextView btnClose = (TextView) dialog.findViewById(R.id.btnCloseProfile);
-        
-        if (tvInitial != null) {
-            tvInitial.setText(userManager.getUserInitial());
-        }
-        if (tvName != null) {
-            tvName.setText(userManager.getUserName());
-        }
-        if (tvEmail != null) {
-            tvEmail.setText(userManager.getUserEmail());
-        }
-        if (tvLoginType != null) {
-            tvLoginType.setText(userManager.getLoginType() + " Account");
-        }
-        if (tvTotalChats != null && chatHistory != null) {
-            int count = chatHistory.getChatList().size();
-            tvTotalChats.setText(count + " percakapan");
-        }
-        if (tvJoinDate != null) {
-            tvJoinDate.setText(userManager.getJoinDate());
-        }
-        
-        if (btnLogout != null) {
-            btnLogout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                    confirmLogout();
-                }
-            });
-        }
-        
-        if (btnClose != null) {
-            btnClose.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                }
-            });
-        }
-        
-        dialog.show();
-    }
-    
-    private void confirmLogout() {
-        new AlertDialog.Builder(this)
-            .setTitle("Keluar")
-            .setMessage("Apakah Anda yakin ingin keluar dari akun?")
-            .setPositiveButton("Keluar", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    userManager.logout();
-                    Toast.makeText(MainActivity.this, "Berhasil keluar", Toast.LENGTH_SHORT).show();
-                    updateProfileDisplay();
-                }
-            })
-            .setNegativeButton("Batal", null)
-            .show();
     }
     
     private void startNewChat() {
@@ -1268,7 +1114,6 @@ public class MainActivity extends Activity {
         if (chatAdapter != null) {
             chatAdapter.setThemeColors(ThemeManager.getThemeColors(this));
         }
-        updateProfileDisplay();
     }
     
     @Override

@@ -1,6 +1,5 @@
 package com.xyra.ai;
 
-import com.xyra.ai.R;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

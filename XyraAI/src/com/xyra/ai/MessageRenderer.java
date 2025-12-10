@@ -1,6 +1,5 @@
 package com.xyra.ai;
 
-import com.xyra.ai.R;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;

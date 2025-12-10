@@ -90,11 +90,6 @@ public class MainActivity extends Activity {
     
     private GestureDetector gestureDetector;
     
-    private FrameLayout avatarSection;
-    private ImageView ivAvatar;
-    private View avatarGlow;
-    private AvatarAnimator avatarAnimator;
-    
     private ImageView ivSidebarAvatar;
     
     @Override
@@ -138,7 +133,6 @@ public class MainActivity extends Activity {
         }
         
         if (etMessage != null) {
-            etMessage.setBackgroundColor(colors.inputBackground);
             etMessage.setTextColor(colors.textPrimary);
             etMessage.setHintTextColor(colors.textSecondary);
         }
@@ -152,7 +146,6 @@ public class MainActivity extends Activity {
         }
         
         if (etSearch != null) {
-            etSearch.setBackgroundColor(colors.inputBackground);
             etSearch.setTextColor(colors.textPrimary);
             etSearch.setHintTextColor(colors.textSecondary);
         }
@@ -197,14 +190,6 @@ public class MainActivity extends Activity {
         fullscreenImageContainer = (FrameLayout) findViewById(R.id.fullscreenImageContainer);
         ivFullscreenImage = (ImageView) findViewById(R.id.ivFullscreenImage);
         btnCloseFullscreen = (ImageButton) findViewById(R.id.btnCloseFullscreen);
-        
-        avatarSection = (FrameLayout) findViewById(R.id.avatarSection);
-        ivAvatar = (ImageView) findViewById(R.id.ivAvatar);
-        avatarGlow = findViewById(R.id.avatarGlow);
-        
-        if (ivAvatar != null) {
-            avatarAnimator = new AvatarAnimator(ivAvatar);
-        }
         
         ivSidebarAvatar = (ImageView) findViewById(R.id.ivSidebarAvatar);
     }

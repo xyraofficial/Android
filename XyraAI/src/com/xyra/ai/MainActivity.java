@@ -7,6 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -46,6 +47,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
+    
+    private static final String PREFS_NAME = "XyraAIProfile";
+    private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     
     private static final String API_KEY = "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";
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -106,6 +110,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeManager.applyTheme(this);
+        
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return;
+        }
+        
         setContentView(R.layout.activity_main);
         
         initViews();
@@ -118,6 +128,18 @@ public class MainActivity extends Activity {
         initChatHistory();
         
         addWelcomeMessage();
+    }
+    
+    private boolean isLoggedIn() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+    }
+    
+    private void redirectToLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
     
     private void applyThemeColors() {

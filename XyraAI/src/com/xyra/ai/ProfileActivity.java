@@ -8,17 +8,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Base64;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,10 +23,6 @@ import android.widget.Toast;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import org.json.JSONObject;
 
 public class ProfileActivity extends Activity {
     
@@ -47,8 +39,6 @@ public class ProfileActivity extends Activity {
     private ImageView ivVerifiedBadge;
     private TextView tvUserName;
     private TextView tvUserEmail;
-    private LinearLayout loginSection;
-    private LinearLayout btnGoogleSignIn;
     private LinearLayout accountInfoSection;
     private LinearLayout btnSignOut;
     private TextView tvUserId;
@@ -63,14 +53,31 @@ public class ProfileActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeManager.applyTheme(this);
-        setContentView(R.layout.activity_profile);
         
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        
+        if (!isLoggedIn()) {
+            redirectToLogin();
+            return;
+        }
+        
+        setContentView(R.layout.activity_profile);
         
         initViews();
         setupClickListeners();
         loadUserData();
         animateEntrance();
+    }
+    
+    private boolean isLoggedIn() {
+        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+    }
+    
+    private void redirectToLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
     
     private void initViews() {
@@ -79,8 +86,6 @@ public class ProfileActivity extends Activity {
         ivVerifiedBadge = (ImageView) findViewById(R.id.ivVerifiedBadge);
         tvUserName = (TextView) findViewById(R.id.tvUserName);
         tvUserEmail = (TextView) findViewById(R.id.tvUserEmail);
-        loginSection = (LinearLayout) findViewById(R.id.loginSection);
-        btnGoogleSignIn = (LinearLayout) findViewById(R.id.btnGoogleSignIn);
         accountInfoSection = (LinearLayout) findViewById(R.id.accountInfoSection);
         btnSignOut = (LinearLayout) findViewById(R.id.btnSignOut);
         tvUserId = (TextView) findViewById(R.id.tvUserId);
@@ -94,14 +99,6 @@ public class ProfileActivity extends Activity {
             @Override
             public void onClick(View v) {
                 animateExit();
-            }
-        });
-        
-        btnGoogleSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                animateButtonPress(v);
-                startGoogleSignIn();
             }
         });
         
@@ -147,17 +144,6 @@ public class ProfileActivity extends Activity {
                 .start();
         }
         
-        if (loginSection.getVisibility() == View.VISIBLE) {
-            loginSection.setAlpha(0f);
-            loginSection.setTranslationY(30f);
-            loginSection.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(400)
-                .setStartDelay(200)
-                .start();
-        }
-        
         if (accountInfoSection.getVisibility() == View.VISIBLE) {
             accountInfoSection.setAlpha(0f);
             accountInfoSection.setTranslationY(30f);
@@ -194,8 +180,6 @@ public class ProfileActivity extends Activity {
         
         if (isLoggedIn) {
             showLoggedInState();
-        } else {
-            showLoggedOutState();
         }
         
         loadChatCount();
@@ -214,7 +198,6 @@ public class ProfileActivity extends Activity {
         tvUserEmailInfo.setText(userEmail);
         tvJoinDate.setText(joinDate);
         
-        loginSection.setVisibility(View.GONE);
         accountInfoSection.setVisibility(View.VISIBLE);
         btnSignOut.setVisibility(View.VISIBLE);
         ivVerifiedBadge.setVisibility(View.VISIBLE);
@@ -222,18 +205,6 @@ public class ProfileActivity extends Activity {
         if (!photoUrl.isEmpty()) {
             loadProfileImage(photoUrl);
         }
-    }
-    
-    private void showLoggedOutState() {
-        tvUserName.setText("Guest User");
-        tvUserEmail.setText("Belum login");
-        
-        loginSection.setVisibility(View.VISIBLE);
-        accountInfoSection.setVisibility(View.GONE);
-        btnSignOut.setVisibility(View.GONE);
-        ivVerifiedBadge.setVisibility(View.GONE);
-        
-        ivProfileAvatar.setImageResource(R.drawable.ic_user_placeholder);
     }
     
     private void loadChatCount() {
@@ -269,81 +240,6 @@ public class ProfileActivity extends Activity {
         }).start();
     }
     
-    private void startGoogleSignIn() {
-        showInfoDialog(
-            "Login dengan Google",
-            "Untuk menggunakan Firebase Authentication dengan Google Sign-In di AIDE:\n\n" +
-            "1. Buka Firebase Console\n" +
-            "2. Buat project baru\n" +
-            "3. Aktifkan Google Sign-In\n" +
-            "4. Download google-services.json\n" +
-            "5. Tambahkan konfigurasi ke project\n\n" +
-            "Fitur ini memerlukan setup Firebase terlebih dahulu.\n\n" +
-            "Untuk demo, klik OK untuk simulasi login."
-        );
-    }
-    
-    private void showInfoDialog(String title, String message) {
-        new AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    simulateLogin();
-                }
-            })
-            .setNegativeButton("Batal", null)
-            .show();
-    }
-    
-    private void simulateLogin() {
-        String currentDate = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID")).format(new Date());
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putString(KEY_USER_ID, "xyra_user_" + System.currentTimeMillis());
-        editor.putString(KEY_USER_NAME, "XyraAI User");
-        editor.putString(KEY_USER_EMAIL, "user@example.com");
-        editor.putString(KEY_JOIN_DATE, currentDate);
-        editor.putString(KEY_USER_PHOTO, "");
-        editor.apply();
-        
-        Toast.makeText(this, "Login berhasil!", Toast.LENGTH_SHORT).show();
-        
-        animateLoginSuccess();
-    }
-    
-    private void animateLoginSuccess() {
-        loginSection.animate()
-            .alpha(0f)
-            .translationY(-30f)
-            .setDuration(300)
-            .withEndAction(new Runnable() {
-                @Override
-                public void run() {
-                    loginSection.setVisibility(View.GONE);
-                    showLoggedInState();
-                    
-                    accountInfoSection.setAlpha(0f);
-                    accountInfoSection.setTranslationY(30f);
-                    accountInfoSection.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setDuration(400)
-                        .start();
-                    
-                    btnSignOut.setAlpha(0f);
-                    btnSignOut.animate()
-                        .alpha(1f)
-                        .setDuration(400)
-                        .setStartDelay(200)
-                        .start();
-                }
-            })
-            .start();
-    }
-    
     private void confirmSignOut() {
         new AlertDialog.Builder(this)
             .setTitle("Keluar")
@@ -365,36 +261,16 @@ public class ProfileActivity extends Activity {
         
         Toast.makeText(this, "Berhasil keluar", Toast.LENGTH_SHORT).show();
         
-        animateSignOut();
-    }
-    
-    private void animateSignOut() {
-        accountInfoSection.animate()
-            .alpha(0f)
-            .translationY(-30f)
-            .setDuration(300)
-            .start();
-        
-        btnSignOut.animate()
-            .alpha(0f)
-            .setDuration(200)
-            .withEndAction(new Runnable() {
-                @Override
-                public void run() {
-                    btnSignOut.setVisibility(View.GONE);
-                    accountInfoSection.setVisibility(View.GONE);
-                    showLoggedOutState();
-                    
-                    loginSection.setAlpha(0f);
-                    loginSection.setTranslationY(30f);
-                    loginSection.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setDuration(400)
-                        .start();
-                }
-            })
-            .start();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+            }
+        }, 500);
     }
     
     @Override

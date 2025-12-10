@@ -71,6 +71,7 @@ public class MainActivity extends Activity {
     private ListView chatHistoryList;
     private LinearLayout btnNewChat;
     private LinearLayout btnSettings;
+    private LinearLayout btnProfile;
     
     private ChatAdapter chatAdapter;
     private GroqApiService groqApiService;
@@ -195,6 +196,7 @@ public class MainActivity extends Activity {
         chatHistoryList = (ListView) findViewById(R.id.chatHistoryList);
         btnNewChat = (LinearLayout) findViewById(R.id.btnNewChat);
         btnSettings = (LinearLayout) findViewById(R.id.btnSettings);
+        btnProfile = (LinearLayout) findViewById(R.id.btnProfile);
         
         fullscreenImageContainer = (FrameLayout) findViewById(R.id.fullscreenImageContainer);
         ivFullscreenImage = (ImageView) findViewById(R.id.ivFullscreenImage);
@@ -542,6 +544,18 @@ public class MainActivity extends Activity {
             }
         });
         
+        if (btnProfile != null) {
+            btnProfile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeDrawer();
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            });
+        }
+        
         setupQuickReplies();
     }
     
@@ -781,23 +795,29 @@ public class MainActivity extends Activity {
     
     private void showMainMenu() {
         PopupMenu popup = new PopupMenu(this, btnMenu);
-        popup.getMenu().add(0, 1, 0, "Chat Baru");
-        popup.getMenu().add(0, 2, 1, "Pengaturan");
-        popup.getMenu().add(0, 3, 2, "Tentang");
+        popup.getMenu().add(0, 1, 0, "Profil Saya");
+        popup.getMenu().add(0, 2, 1, "Chat Baru");
+        popup.getMenu().add(0, 3, 2, "Pengaturan");
+        popup.getMenu().add(0, 4, 3, "Tentang");
         
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case 1:
-                        startNewChat();
+                        Intent profileIntent = new Intent(MainActivity.this, ProfileActivity.class);
+                        startActivity(profileIntent);
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                         return true;
                     case 2:
+                        startNewChat();
+                        return true;
+                    case 3:
                         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                         startActivity(intent);
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                         return true;
-                    case 3:
+                    case 4:
                         showAbout();
                         return true;
                 }

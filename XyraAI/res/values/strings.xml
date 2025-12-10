@@ -26,4 +26,10 @@
     <string name="icon_terms">T</string>
     <string name="icon_privacy">P</string>
     <string name="icon_license">L</string>
+    
+    <string name="profile">Profil Saya</string>
+    <string name="login_google">Masuk dengan Google</string>
+    <string name="logout">Keluar</string>
+    <string name="guest_user">Guest User</string>
+    <string name="not_logged_in">Belum login</string>
 </resources>

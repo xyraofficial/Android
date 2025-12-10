@@ -12,7 +12,9 @@ public class NetworkUtils {
         
         if (connectivityManager != null) {
             NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+                return true;
+            }
         }
         
         return false;
@@ -24,7 +26,9 @@ public class NetworkUtils {
         
         if (connectivityManager != null) {
             NetworkInfo wifiNetwork = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            return wifiNetwork != null && wifiNetwork.isConnected();
+            if (wifiNetwork != null && wifiNetwork.isConnected()) {
+                return true;
+            }
         }
         
         return false;
@@ -36,7 +40,9 @@ public class NetworkUtils {
         
         if (connectivityManager != null) {
             NetworkInfo mobileNetwork = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-            return mobileNetwork != null && mobileNetwork.isConnected();
+            if (mobileNetwork != null && mobileNetwork.isConnected()) {
+                return true;
+            }
         }
         
         return false;

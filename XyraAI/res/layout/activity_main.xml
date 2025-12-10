@@ -5,7 +5,6 @@
     android:background="@color/background"
     android:orientation="vertical">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +22,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
             android:orientation="vertical">
 
             <TextView
@@ -46,16 +45,18 @@
 
     </LinearLayout>
 
-    <!-- Chat Messages RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <ListView
+        android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:padding="8dp"
         android:clipToPadding="false"
-        android:padding="8dp" />
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:cacheColorHint="@android:color/transparent"
+        android:listSelector="@android:color/transparent" />
 
-    <!-- Input Area -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -82,7 +83,7 @@
             android:id="@+id/btnSend"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:background="@drawable/bg_send_button"
             android:contentDescription="@string/send"
             android:src="@drawable/ic_send"

@@ -1,7 +1,7 @@
 package com.xyra.ai;
 
 public class Config {
-    public static final String GROQ_API_KEY = "YOUR_GROQ_API_KEY_HERE";
+    public static final String GROQ_API_KEY = "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";
     
     public static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
     

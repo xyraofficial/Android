@@ -7,16 +7,14 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class MainActivity extends Activity {
     
     private static final String API_KEY = "YOUR_GROQ_API_KEY_HERE";
     
-    private RecyclerView recyclerView;
+    private ListView listView;
     private EditText etMessage;
     private ImageButton btnSend;
     private TextView tvStatus;
@@ -31,7 +29,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         initViews();
-        setupRecyclerView();
+        setupListView();
         setupClickListeners();
         initGroqService();
         
@@ -39,18 +37,17 @@ public class MainActivity extends Activity {
     }
     
     private void initViews() {
-        recyclerView = findViewById(R.id.recyclerView);
-        etMessage = findViewById(R.id.etMessage);
-        btnSend = findViewById(R.id.btnSend);
-        tvStatus = findViewById(R.id.tvStatus);
+        listView = (ListView) findViewById(R.id.listView);
+        etMessage = (EditText) findViewById(R.id.etMessage);
+        btnSend = (ImageButton) findViewById(R.id.btnSend);
+        tvStatus = (TextView) findViewById(R.id.tvStatus);
     }
     
-    private void setupRecyclerView() {
-        chatAdapter = new ChatAdapter();
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setStackFromEnd(true);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(chatAdapter);
+    private void setupListView() {
+        chatAdapter = new ChatAdapter(this);
+        listView.setAdapter(chatAdapter);
+        listView.setDivider(null);
+        listView.setDividerHeight(0);
     }
     
     private void setupClickListeners() {
@@ -118,12 +115,10 @@ public class MainActivity extends Activity {
     }
     
     private void scrollToBottom() {
-        recyclerView.post(new Runnable() {
+        listView.post(new Runnable() {
             @Override
             public void run() {
-                if (chatAdapter.getItemCount() > 0) {
-                    recyclerView.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
-                }
+                listView.setSelection(chatAdapter.getCount() - 1);
             }
         });
     }

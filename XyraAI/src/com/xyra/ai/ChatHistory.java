@@ -22,7 +22,8 @@ public class ChatHistory {
         try {
             JSONArray jsonArray = new JSONArray();
             
-            for (Message msg : messages) {
+            for (int i = 0; i < messages.size(); i++) {
+                Message msg = messages.get(i);
                 JSONObject jsonMsg = new JSONObject();
                 jsonMsg.put("content", msg.getContent());
                 jsonMsg.put("type", msg.getType());
@@ -30,14 +31,16 @@ public class ChatHistory {
                 jsonArray.put(jsonMsg);
             }
             
-            prefs.edit().putString(KEY_MESSAGES, jsonArray.toString()).apply();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(KEY_MESSAGES, jsonArray.toString());
+            editor.apply();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     
     public List<Message> loadMessages() {
-        List<Message> messages = new ArrayList<>();
+        List<Message> messages = new ArrayList<Message>();
         
         try {
             String json = prefs.getString(KEY_MESSAGES, "[]");
@@ -60,6 +63,8 @@ public class ChatHistory {
     }
     
     public void clearHistory() {
-        prefs.edit().remove(KEY_MESSAGES).apply();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(KEY_MESSAGES);
+        editor.apply();
     }
 }

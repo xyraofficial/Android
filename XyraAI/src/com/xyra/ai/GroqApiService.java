@@ -10,8 +10,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class GroqApiService {
     
@@ -19,8 +17,8 @@ public class GroqApiService {
     private static final String MODEL = "llama-3.3-70b-versatile";
     
     private String apiKey;
-    private ExecutorService executor;
     private Handler mainHandler;
+    private Thread workerThread;
     
     public interface ChatCallback {
         void onSuccess(String response);
@@ -29,19 +27,32 @@ public class GroqApiService {
     
     public GroqApiService(String apiKey) {
         this.apiKey = apiKey;
-        this.executor = Executors.newSingleThreadExecutor();
         this.mainHandler = new Handler(Looper.getMainLooper());
     }
     
-    public void sendMessage(List<Message> conversationHistory, ChatCallback callback) {
-        executor.execute(() -> {
-            try {
-                String response = makeApiCall(conversationHistory);
-                mainHandler.post(() -> callback.onSuccess(response));
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
+    public void sendMessage(final List<Message> conversationHistory, final ChatCallback callback) {
+        workerThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final String response = makeApiCall(conversationHistory);
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onSuccess(response);
+                        }
+                    });
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
+                }
             }
         });
+        workerThread.start();
     }
     
     private String makeApiCall(List<Message> conversationHistory) throws Exception {
@@ -58,16 +69,16 @@ public class GroqApiService {
             
             JSONObject requestBody = buildRequestBody(conversationHistory);
             
-            try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = requestBody.toString().getBytes("utf-8");
-                os.write(input, 0, input.length);
-            }
+            OutputStream os = connection.getOutputStream();
+            byte[] input = requestBody.toString().getBytes("UTF-8");
+            os.write(input, 0, input.length);
+            os.close();
             
             int responseCode = connection.getResponseCode();
             
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(connection.getInputStream(), "utf-8"));
+                    new InputStreamReader(connection.getInputStream(), "UTF-8"));
                 StringBuilder response = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -78,7 +89,7 @@ public class GroqApiService {
                 return parseResponse(response.toString());
             } else {
                 BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(connection.getErrorStream(), "utf-8"));
+                    new InputStreamReader(connection.getErrorStream(), "UTF-8"));
                 StringBuilder error = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -110,7 +121,8 @@ public class GroqApiService {
             "If you don't know something, admit it honestly.");
         messages.put(systemMessage);
         
-        for (Message msg : conversationHistory) {
+        for (int i = 0; i < conversationHistory.size(); i++) {
+            Message msg = conversationHistory.get(i);
             JSONObject messageObj = new JSONObject();
             if (msg.getType() == Message.TYPE_USER) {
                 messageObj.put("role", "user");
@@ -140,8 +152,8 @@ public class GroqApiService {
     }
     
     public void shutdown() {
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
+        if (workerThread != null && workerThread.isAlive()) {
+            workerThread.interrupt();
         }
     }
 }

@@ -199,9 +199,16 @@ public class MainActivity extends Activity {
     }
     
     private void loadChatFromHistory(ChatHistory.ChatItem item) {
+        if (isWaitingResponse) {
+            Toast.makeText(this, "Tunggu respons selesai", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        saveChat();
+        
         chatHistory.loadChat(item.id);
-        List<Message> messages = chatHistory.loadMessages();
-        chatAdapter.setMessages(messages);
+        List<Message> messages = chatHistory.loadMessagesForChat(item.id);
+        chatAdapter.setMessages(messages, item.id);
         closeDrawer();
         
         if (messages.isEmpty()) {
@@ -567,10 +574,19 @@ public class MainActivity extends Activity {
     }
     
     private void startNewChat() {
+        if (isWaitingResponse) {
+            Toast.makeText(this, "Tunggu respons selesai", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        saveChat();
+        
         chatAdapter.clearMessages();
         chatHistory.startNewChat();
+        chatAdapter.setCurrentChatId(chatHistory.getCurrentChatId());
         clearSelectedImage();
         addWelcomeMessage();
+        refreshChatHistoryList();
         Toast.makeText(this, "Chat baru dimulai", Toast.LENGTH_SHORT).show();
     }
     
@@ -610,11 +626,19 @@ public class MainActivity extends Activity {
     
     private void initChatHistory() {
         chatHistory = new ChatHistory(this);
+        chatAdapter.setCurrentChatId(chatHistory.getCurrentChatId());
+        
+        List<Message> savedMessages = chatHistory.loadMessages();
+        if (!savedMessages.isEmpty()) {
+            chatAdapter.setMessages(savedMessages, chatHistory.getCurrentChatId());
+        }
     }
     
     private void addWelcomeMessage() {
-        String welcome = getString(R.string.welcome_message);
-        chatAdapter.addMessage(new Message(welcome, Message.TYPE_AI));
+        if (chatAdapter.getCount() == 0) {
+            String welcome = getString(R.string.welcome_message);
+            chatAdapter.addMessage(new Message(welcome, Message.TYPE_AI));
+        }
     }
     
     private void sendMessage() {
@@ -653,52 +677,70 @@ public class MainActivity extends Activity {
         
         final String imageToSend = selectedImageBase64;
         final String textToSend = TextUtils.isEmpty(messageText) ? "Analisis gambar ini secara detail. Identifikasi masalah utama jika ada error atau bug, dan berikan solusi langsung." : messageText;
+        final String requestChatId = chatAdapter.getCurrentChatId();
+        final List<Message> requestMessages = new ArrayList<Message>(chatAdapter.getMessages());
         
         clearSelectedImage();
         
         if (imageToSend != null) {
-            groqApiService.sendMessageWithImage(chatAdapter.getMessages(), textToSend, imageToSend, new GroqApiService.ChatCallback() {
+            groqApiService.sendMessageWithImage(requestMessages, textToSend, imageToSend, new GroqApiService.ChatCallback() {
                 @Override
                 public void onSuccess(final String response) {
-                    chatAdapter.updateLastMessageWithTyping(response, new Runnable() {
-                        @Override
-                        public void run() {
-                            setWaitingState(false);
-                            saveChat();
-                        }
-                    });
-                    scrollToBottom();
+                    handleApiResponse(response, requestChatId, requestMessages);
                 }
                 
                 @Override
                 public void onError(String error) {
-                    chatAdapter.updateLastMessage(getString(R.string.error_api) + "\n" + error);
-                    scrollToBottom();
-                    setWaitingState(false);
+                    handleApiError(error, requestChatId);
                 }
             });
         } else {
-            groqApiService.sendMessage(chatAdapter.getMessages(), new GroqApiService.ChatCallback() {
+            groqApiService.sendMessage(requestMessages, new GroqApiService.ChatCallback() {
                 @Override
                 public void onSuccess(final String response) {
-                    chatAdapter.updateLastMessageWithTyping(response, new Runnable() {
-                        @Override
-                        public void run() {
-                            setWaitingState(false);
-                            saveChat();
-                        }
-                    });
-                    scrollToBottom();
+                    handleApiResponse(response, requestChatId, requestMessages);
                 }
                 
                 @Override
                 public void onError(String error) {
-                    chatAdapter.updateLastMessage(getString(R.string.error_api) + "\n" + error);
-                    scrollToBottom();
-                    setWaitingState(false);
+                    handleApiError(error, requestChatId);
                 }
             });
         }
+    }
+    
+    private void handleApiResponse(final String response, final String requestChatId, final List<Message> requestMessages) {
+        boolean isCurrentChat = requestChatId.equals(chatAdapter.getCurrentChatId());
+        
+        if (isCurrentChat) {
+            chatAdapter.updateLastMessageWithTyping(response, requestChatId, new Runnable() {
+                @Override
+                public void run() {
+                    setWaitingState(false);
+                    saveChat();
+                    refreshChatHistoryList();
+                }
+            });
+            scrollToBottom();
+        } else {
+            if (requestMessages.size() > 0) {
+                Message lastMsg = requestMessages.get(requestMessages.size() - 1);
+                lastMsg.setContent(response);
+            }
+            chatHistory.saveMessagesToChat(requestChatId, requestMessages);
+            refreshChatHistoryList();
+            setWaitingState(false);
+        }
+    }
+    
+    private void handleApiError(String error, String requestChatId) {
+        boolean isCurrentChat = requestChatId.equals(chatAdapter.getCurrentChatId());
+        
+        if (isCurrentChat) {
+            chatAdapter.updateLastMessage(getString(R.string.error_api) + "\n" + error, requestChatId);
+            scrollToBottom();
+        }
+        setWaitingState(false);
     }
     
     private void saveChat() {

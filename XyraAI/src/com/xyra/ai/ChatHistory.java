@@ -11,9 +11,9 @@ import java.util.UUID;
 public class ChatHistory {
     
     private static final String PREFS_NAME = "xyra_chat_history";
-    private static final String KEY_MESSAGES = "messages";
     private static final String KEY_CHATS = "chats";
     private static final String KEY_CURRENT_CHAT = "current_chat";
+    private static final String KEY_MESSAGES_PREFIX = "messages_";
     
     private SharedPreferences prefs;
     private Context context;
@@ -24,6 +24,11 @@ public class ChatHistory {
     }
     
     public void saveMessages(List<Message> messages) {
+        String currentChatId = getCurrentChatId();
+        saveMessagesToChat(currentChatId, messages);
+    }
+    
+    public void saveMessagesToChat(String chatId, List<Message> messages) {
         try {
             JSONArray jsonArray = new JSONArray();
             
@@ -40,20 +45,19 @@ public class ChatHistory {
             }
             
             SharedPreferences.Editor editor = prefs.edit();
-            editor.putString(KEY_MESSAGES, jsonArray.toString());
+            editor.putString(KEY_MESSAGES_PREFIX + chatId, jsonArray.toString());
             editor.apply();
             
-            saveChatPreview(messages);
+            saveChatPreview(chatId, messages);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     
-    private void saveChatPreview(List<Message> messages) {
+    private void saveChatPreview(String chatId, List<Message> messages) {
         if (messages.isEmpty()) return;
         
         try {
-            String currentChatId = getCurrentChatId();
             JSONArray chats = getChatsArray();
             
             String preview = "";
@@ -61,6 +65,9 @@ public class ChatHistory {
                 Message msg = messages.get(i);
                 if (msg.getType() == Message.TYPE_USER) {
                     preview = msg.getContent();
+                    if (preview.startsWith("[Gambar] ")) {
+                        preview = preview.substring(9);
+                    }
                     if (preview.length() > 50) {
                         preview = preview.substring(0, 47) + "...";
                     }
@@ -75,7 +82,7 @@ public class ChatHistory {
             boolean found = false;
             for (int i = 0; i < chats.length(); i++) {
                 JSONObject chat = chats.getJSONObject(i);
-                if (chat.getString("id").equals(currentChatId)) {
+                if (chat.getString("id").equals(chatId)) {
                     chat.put("preview", preview);
                     chat.put("timestamp", System.currentTimeMillis());
                     chat.put("messageCount", messages.size());
@@ -86,7 +93,7 @@ public class ChatHistory {
             
             if (!found) {
                 JSONObject newChat = new JSONObject();
-                newChat.put("id", currentChatId);
+                newChat.put("id", chatId);
                 newChat.put("preview", preview);
                 newChat.put("timestamp", System.currentTimeMillis());
                 newChat.put("messageCount", messages.size());
@@ -101,10 +108,15 @@ public class ChatHistory {
     }
     
     public List<Message> loadMessages() {
+        String currentChatId = getCurrentChatId();
+        return loadMessagesForChat(currentChatId);
+    }
+    
+    public List<Message> loadMessagesForChat(String chatId) {
         List<Message> messages = new ArrayList<Message>();
         
         try {
-            String json = prefs.getString(KEY_MESSAGES, "[]");
+            String json = prefs.getString(KEY_MESSAGES_PREFIX + chatId, "[]");
             JSONArray jsonArray = new JSONArray(json);
             
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -117,6 +129,7 @@ public class ChatHistory {
                 if (jsonMsg.has("imageBase64")) {
                     msg.setImageBase64(jsonMsg.getString("imageBase64"));
                 }
+                msg.setChatId(chatId);
                 messages.add(msg);
             }
         } catch (Exception e) {
@@ -127,8 +140,9 @@ public class ChatHistory {
     }
     
     public void clearHistory() {
+        String currentChatId = getCurrentChatId();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(KEY_MESSAGES);
+        editor.remove(KEY_MESSAGES_PREFIX + currentChatId);
         editor.apply();
     }
     
@@ -143,10 +157,27 @@ public class ChatHistory {
     
     public void startNewChat() {
         String newChatId = UUID.randomUUID().toString();
-        prefs.edit()
-            .putString(KEY_CURRENT_CHAT, newChatId)
-            .remove(KEY_MESSAGES)
-            .apply();
+        
+        try {
+            JSONArray chats = getChatsArray();
+            JSONObject newChat = new JSONObject();
+            newChat.put("id", newChatId);
+            newChat.put("preview", "Chat baru");
+            newChat.put("timestamp", System.currentTimeMillis());
+            newChat.put("messageCount", 0);
+            chats.put(newChat);
+            
+            prefs.edit()
+                .putString(KEY_CURRENT_CHAT, newChatId)
+                .putString(KEY_MESSAGES_PREFIX + newChatId, "[]")
+                .putString(KEY_CHATS, chats.toString())
+                .apply();
+        } catch (Exception e) {
+            prefs.edit()
+                .putString(KEY_CURRENT_CHAT, newChatId)
+                .putString(KEY_MESSAGES_PREFIX + newChatId, "[]")
+                .apply();
+        }
     }
     
     public List<ChatItem> getChatList() {
@@ -183,7 +214,10 @@ public class ChatHistory {
                 }
             }
             
-            prefs.edit().putString(KEY_CHATS, newChats.toString()).apply();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(KEY_CHATS, newChats.toString());
+            editor.remove(KEY_MESSAGES_PREFIX + chatId);
+            editor.apply();
             
             String currentChatId = getCurrentChatId();
             if (currentChatId.equals(chatId)) {
@@ -220,6 +254,10 @@ public class ChatHistory {
         }
         
         return results;
+    }
+    
+    public void clearAllData() {
+        prefs.edit().clear().apply();
     }
     
     public static class ChatItem {

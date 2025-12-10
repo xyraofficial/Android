@@ -187,7 +187,8 @@ public class SettingsActivity extends Activity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     prefs.edit().clear().apply();
-                    getSharedPreferences("xyra_chat_history", MODE_PRIVATE).edit().clear().apply();
+                    ChatHistory chatHistory = new ChatHistory(SettingsActivity.this);
+                    chatHistory.clearAllData();
                     Toast.makeText(SettingsActivity.this, "Semua data dihapus", Toast.LENGTH_SHORT).show();
                 }
             })

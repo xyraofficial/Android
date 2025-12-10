@@ -35,6 +35,7 @@ public class ChatAdapter extends BaseAdapter {
     private MessageRenderer messageRenderer;
     private TypingAnimator typingAnimator;
     private Handler handler;
+    private String currentChatId;
     
     private String[] thinkingSymbols = {"🧠", "✨", "💭", "⚡", "🔮", "💫"};
     private int currentSymbolIndex = 0;
@@ -48,6 +49,7 @@ public class ChatAdapter extends BaseAdapter {
         this.messageRenderer = new MessageRenderer(context);
         this.typingAnimator = new TypingAnimator();
         this.handler = new Handler(Looper.getMainLooper());
+        this.currentChatId = null;
     }
     
     @Override
@@ -247,8 +249,19 @@ public class ChatAdapter extends BaseAdapter {
     }
     
     public void addMessage(Message message) {
+        if (currentChatId != null) {
+            message.setChatId(currentChatId);
+        }
         messages.add(message);
         notifyDataSetChanged();
+    }
+    
+    public void setCurrentChatId(String chatId) {
+        this.currentChatId = chatId;
+    }
+    
+    public String getCurrentChatId() {
+        return currentChatId;
     }
     
     public void updateLastMessage(String content) {
@@ -299,9 +312,45 @@ public class ChatAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
     
-    public void setMessages(List<Message> newMessages) {
+    public void updateLastMessageWithTyping(final String content, final String chatId, final Runnable onComplete) {
+        if (!messages.isEmpty() && chatId != null && chatId.equals(currentChatId)) {
+            final int lastIndex = messages.size() - 1;
+            
+            typingAnimator.startTyping(content, new TypingAnimator.TypingCallback() {
+                @Override
+                public void onTextUpdated(String currentText) {
+                    if (chatId.equals(currentChatId)) {
+                        messages.get(lastIndex).setContent(currentText);
+                        notifyDataSetChanged();
+                    }
+                }
+                
+                @Override
+                public void onTypingComplete(String fullText) {
+                    if (chatId.equals(currentChatId)) {
+                        messages.get(lastIndex).setContent(fullText);
+                        notifyDataSetChanged();
+                        if (onComplete != null) {
+                            onComplete.run();
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    public void updateLastMessage(String content, String chatId) {
+        if (!messages.isEmpty() && chatId != null && chatId.equals(currentChatId)) {
+            int lastIndex = messages.size() - 1;
+            messages.get(lastIndex).setContent(content);
+            notifyDataSetChanged();
+        }
+    }
+    
+    public void setMessages(List<Message> newMessages, String chatId) {
         messages.clear();
         messages.addAll(newMessages);
+        this.currentChatId = chatId;
         notifyDataSetChanged();
     }
     

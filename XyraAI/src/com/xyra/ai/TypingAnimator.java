@@ -12,10 +12,10 @@ public class TypingAnimator {
     private boolean isAnimating;
     private int typingSpeed;
     
-    private static final int DEFAULT_SPEED = 3;
-    private static final int FAST_SPEED = 1;
-    private static final int SLOW_SPEED = 8;
-    private static final int CHUNK_SIZE = 5;
+    private static final int DEFAULT_SPEED = 1;
+    private static final int FAST_SPEED = 0;
+    private static final int SLOW_SPEED = 3;
+    private static final int CHUNK_SIZE = 8;
     
     public interface TypingCallback {
         void onTextUpdated(String currentText);
@@ -82,11 +82,11 @@ public class TypingAnimator {
         char currentChar = fullText.charAt(currentIndex - 1);
         
         if (currentChar == '\n') {
-            return SLOW_SPEED * 2;
+            return SLOW_SPEED;
         } else if (currentChar == '.' || currentChar == '!' || currentChar == '?') {
             return SLOW_SPEED;
         } else if (currentChar == ',' || currentChar == ';' || currentChar == ':') {
-            return SLOW_SPEED / 2;
+            return FAST_SPEED;
         } else if (currentChar == ' ') {
             return FAST_SPEED;
         }

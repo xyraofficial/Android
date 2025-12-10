@@ -3,14 +3,18 @@ package com.xyra.ai;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.text.SimpleDateFormat;
@@ -91,12 +95,44 @@ public class ChatAdapter extends BaseAdapter {
             holder = new UserViewHolder();
             holder.tvMessage = (TextView) convertView.findViewById(R.id.tvMessage);
             holder.tvTime = (TextView) convertView.findViewById(R.id.tvTime);
+            holder.ivUserImage = (ImageView) convertView.findViewById(R.id.ivUserImage);
             convertView.setTag(holder);
         } else {
             holder = (UserViewHolder) convertView.getTag();
         }
         
-        holder.tvMessage.setText(message.getContent());
+        if (message.hasImage()) {
+            holder.ivUserImage.setVisibility(View.VISIBLE);
+            
+            if (message.getImageBitmap() != null) {
+                holder.ivUserImage.setImageBitmap(message.getImageBitmap());
+            } else if (message.getImageBase64() != null) {
+                try {
+                    byte[] decodedBytes = Base64.decode(message.getImageBase64(), Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                    holder.ivUserImage.setImageBitmap(bitmap);
+                    message.setImageBitmap(bitmap);
+                } catch (Exception e) {
+                    holder.ivUserImage.setVisibility(View.GONE);
+                }
+            }
+            
+            String content = message.getContent();
+            if (content.startsWith("[Gambar] ")) {
+                content = content.substring(9);
+            }
+            if (content.isEmpty() || content.equals("Analisis gambar ini")) {
+                holder.tvMessage.setVisibility(View.GONE);
+            } else {
+                holder.tvMessage.setVisibility(View.VISIBLE);
+                holder.tvMessage.setText(content);
+            }
+        } else {
+            holder.ivUserImage.setVisibility(View.GONE);
+            holder.tvMessage.setVisibility(View.VISIBLE);
+            holder.tvMessage.setText(message.getContent());
+        }
+        
         holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
         
         return convertView;
@@ -272,6 +308,7 @@ public class ChatAdapter extends BaseAdapter {
     static class UserViewHolder {
         TextView tvMessage;
         TextView tvTime;
+        ImageView ivUserImage;
     }
     
     static class AIViewHolder {

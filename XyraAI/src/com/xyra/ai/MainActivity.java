@@ -13,10 +13,14 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -35,6 +39,7 @@ import android.os.Environment;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import java.util.List;
 
 public class MainActivity extends Activity {
     
@@ -49,19 +54,31 @@ public class MainActivity extends Activity {
     private ImageButton btnSend;
     private ImageButton btnMenu;
     private ImageButton btnImage;
+    private ImageButton btnDrawer;
     private TextView tvStatus;
     private TextView tvTyping;
     private LinearLayout imagePreviewContainer;
     private ImageView ivPreview;
     private ImageButton btnRemoveImage;
     
+    private LinearLayout drawerLayout;
+    private View drawerOverlay;
+    private EditText etSearch;
+    private ListView chatHistoryList;
+    private LinearLayout btnNewChat;
+    private LinearLayout btnClearChats;
+    private LinearLayout btnSettings;
+    
     private ChatAdapter chatAdapter;
     private GroqApiService groqApiService;
     private ChatHistory chatHistory;
+    private ChatHistoryAdapter chatHistoryAdapter;
     private boolean isWaitingResponse = false;
+    private boolean isDrawerOpen = false;
     
     private String selectedImageBase64 = null;
     private Uri selectedImageUri = null;
+    private Bitmap selectedImageBitmap = null;
     private boolean userScrolledUp = false;
     
     @Override
@@ -71,6 +88,7 @@ public class MainActivity extends Activity {
         
         initViews();
         setupListView();
+        setupDrawer();
         setupClickListeners();
         initGroqService();
         initChatHistory();
@@ -84,6 +102,7 @@ public class MainActivity extends Activity {
         btnSend = (ImageButton) findViewById(R.id.btnSend);
         btnMenu = (ImageButton) findViewById(R.id.btnMenu);
         btnImage = (ImageButton) findViewById(R.id.btnImage);
+        btnDrawer = (ImageButton) findViewById(R.id.btnDrawer);
         tvStatus = (TextView) findViewById(R.id.tvStatus);
         tvTyping = (TextView) findViewById(R.id.tvTyping);
         
@@ -92,6 +111,14 @@ public class MainActivity extends Activity {
             ivPreview = (ImageView) findViewById(R.id.ivPreview);
             btnRemoveImage = (ImageButton) findViewById(R.id.btnRemoveImage);
         }
+        
+        drawerLayout = (LinearLayout) findViewById(R.id.drawerLayout);
+        drawerOverlay = findViewById(R.id.drawerOverlay);
+        etSearch = (EditText) findViewById(R.id.etSearch);
+        chatHistoryList = (ListView) findViewById(R.id.chatHistoryList);
+        btnNewChat = (LinearLayout) findViewById(R.id.btnNewChat);
+        btnClearChats = (LinearLayout) findViewById(R.id.btnClearChats);
+        btnSettings = (LinearLayout) findViewById(R.id.btnSettings);
     }
     
     private void setupListView() {
@@ -134,13 +161,119 @@ public class MainActivity extends Activity {
         });
     }
     
+    private void setupDrawer() {
+        chatHistoryAdapter = new ChatHistoryAdapter(this);
+        chatHistoryList.setAdapter(chatHistoryAdapter);
+        
+        chatHistoryAdapter.setOnChatItemClickListener(new ChatHistoryAdapter.OnChatItemClickListener() {
+            @Override
+            public void onChatClick(ChatHistory.ChatItem item) {
+                loadChatFromHistory(item);
+            }
+            
+            @Override
+            public void onChatDelete(ChatHistory.ChatItem item) {
+                confirmDeleteChat(item);
+            }
+        });
+        
+        drawerOverlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeDrawer();
+            }
+        });
+        
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterChats(s.toString());
+            }
+            
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+    
+    private void loadChatFromHistory(ChatHistory.ChatItem item) {
+        chatHistory.loadChat(item.id);
+        List<Message> messages = chatHistory.loadMessages();
+        chatAdapter.setMessages(messages);
+        closeDrawer();
+        
+        if (messages.isEmpty()) {
+            addWelcomeMessage();
+        }
+    }
+    
+    private void confirmDeleteChat(final ChatHistory.ChatItem item) {
+        new AlertDialog.Builder(this)
+            .setTitle("Hapus Chat")
+            .setMessage("Hapus chat \"" + item.preview + "\"?")
+            .setPositiveButton("Hapus", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    chatHistory.deleteChat(item.id);
+                    refreshChatHistoryList();
+                    Toast.makeText(MainActivity.this, "Chat dihapus", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton("Batal", null)
+            .show();
+    }
+    
+    private void filterChats(String query) {
+        if (query.isEmpty()) {
+            chatHistoryAdapter.setItems(chatHistory.getChatList());
+        } else {
+            chatHistoryAdapter.setItems(chatHistory.searchChats(query));
+        }
+    }
+    
+    private void refreshChatHistoryList() {
+        chatHistoryAdapter.setItems(chatHistory.getChatList());
+    }
+    
+    private void openDrawer() {
+        isDrawerOpen = true;
+        refreshChatHistoryList();
+        
+        drawerOverlay.setVisibility(View.VISIBLE);
+        drawerOverlay.animate().alpha(1f).setDuration(200);
+        
+        drawerLayout.animate()
+            .translationX(0)
+            .setDuration(250)
+            .start();
+    }
+    
+    private void closeDrawer() {
+        isDrawerOpen = false;
+        chatHistoryAdapter.setDeleteMode(false);
+        
+        drawerOverlay.animate().alpha(0f).setDuration(200).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                drawerOverlay.setVisibility(View.GONE);
+            }
+        });
+        
+        drawerLayout.animate()
+            .translationX(-280 * getResources().getDisplayMetrics().density)
+            .setDuration(250)
+            .start();
+    }
+    
     private void showMessageOptions(final int position) {
         final Message message = (Message) chatAdapter.getItem(position);
         
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Options");
+        builder.setTitle("Opsi");
         
-        String[] options = {"Copy Text", "Share"};
+        String[] options = {"Salin Teks", "Bagikan"};
         
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
@@ -163,14 +296,14 @@ public class MainActivity extends Activity {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("XyraAI", text);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Disalin ke clipboard", Toast.LENGTH_SHORT).show();
     }
     
     private void shareText(String text) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, text);
-        startActivity(Intent.createChooser(intent, "Share via"));
+        startActivity(Intent.createChooser(intent, "Bagikan via"));
     }
     
     private void setupClickListeners() {
@@ -195,6 +328,17 @@ public class MainActivity extends Activity {
             }
         });
         
+        btnDrawer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isDrawerOpen) {
+                    closeDrawer();
+                } else {
+                    openDrawer();
+                }
+            }
+        });
+        
         if (btnRemoveImage != null) {
             btnRemoveImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -202,6 +346,40 @@ public class MainActivity extends Activity {
                     clearSelectedImage();
                 }
             });
+        }
+        
+        btnNewChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startNewChat();
+                closeDrawer();
+            }
+        });
+        
+        btnClearChats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleDeleteMode();
+            }
+        });
+        
+        btnSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeDrawer();
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+        });
+    }
+    
+    private void toggleDeleteMode() {
+        boolean newMode = !chatHistoryAdapter.isDeleteMode();
+        chatHistoryAdapter.setDeleteMode(newMode);
+        
+        if (newMode) {
+            Toast.makeText(this, "Tap X untuk menghapus chat", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -307,6 +485,7 @@ public class MainActivity extends Activity {
                 scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
                 byte[] imageBytes = baos.toByteArray();
                 selectedImageBase64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+                selectedImageBitmap = scaledBitmap;
                 
                 showImagePreview(scaledBitmap);
                 
@@ -316,6 +495,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "Gagal memuat gambar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 selectedImageBase64 = null;
                 selectedImageUri = null;
+                selectedImageBitmap = null;
             }
         }
     }
@@ -347,6 +527,7 @@ public class MainActivity extends Activity {
     private void clearSelectedImage() {
         selectedImageBase64 = null;
         selectedImageUri = null;
+        selectedImageBitmap = null;
         if (imagePreviewContainer != null) {
             imagePreviewContainer.setVisibility(View.GONE);
         }
@@ -354,9 +535,10 @@ public class MainActivity extends Activity {
     
     private void showMainMenu() {
         PopupMenu popup = new PopupMenu(this, btnMenu);
-        popup.getMenu().add(0, 1, 0, "New Chat");
-        popup.getMenu().add(0, 2, 1, "Clear History");
-        popup.getMenu().add(0, 3, 2, "About");
+        popup.getMenu().add(0, 1, 0, "Chat Baru");
+        popup.getMenu().add(0, 2, 1, "Hapus Riwayat");
+        popup.getMenu().add(0, 3, 2, "Pengaturan");
+        popup.getMenu().add(0, 4, 3, "Tentang");
         
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -369,6 +551,11 @@ public class MainActivity extends Activity {
                         confirmClearHistory();
                         return true;
                     case 3:
+                        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                        startActivity(intent);
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                        return true;
+                    case 4:
                         showAbout();
                         return true;
                 }
@@ -381,30 +568,38 @@ public class MainActivity extends Activity {
     
     private void startNewChat() {
         chatAdapter.clearMessages();
-        chatHistory.clearHistory();
+        chatHistory.startNewChat();
         clearSelectedImage();
         addWelcomeMessage();
-        Toast.makeText(this, "New chat started", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Chat baru dimulai", Toast.LENGTH_SHORT).show();
     }
     
     private void confirmClearHistory() {
         new AlertDialog.Builder(this)
-            .setTitle("Clear History")
-            .setMessage("Are you sure you want to clear all chat history?")
-            .setPositiveButton("Clear", new DialogInterface.OnClickListener() {
+            .setTitle("Hapus Riwayat")
+            .setMessage("Apakah Anda yakin ingin menghapus semua riwayat chat?")
+            .setPositiveButton("Hapus", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     startNewChat();
                 }
             })
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Batal", null)
             .show();
     }
     
     private void showAbout() {
         new AlertDialog.Builder(this)
-            .setTitle("About XyraAI")
-            .setMessage("XyraAI v1.1\n\nPowered by GROQ API with Llama 3.3 70B\n\nFeatures:\n- Multi-language support\n- Auto language detection\n- Typing animation\n- Image analysis\n- Code assistance\n- Beautiful thinking animation\n- And more!")
+            .setTitle("Tentang XyraAI")
+            .setMessage("XyraAI v1.2\n\n" +
+                "Powered by GROQ API dengan Llama 3.3 70B\n\n" +
+                "Fitur:\n" +
+                "- Multi-bahasa otomatis\n" +
+                "- Animasi mengetik\n" +
+                "- Analisis gambar dengan preview\n" +
+                "- Bantuan kode\n" +
+                "- Riwayat chat tersimpan\n" +
+                "- UI modern dan responsif")
             .setPositiveButton("OK", null)
             .show();
     }
@@ -435,10 +630,17 @@ public class MainActivity extends Activity {
         
         String displayMessage = messageText;
         if (selectedImageBase64 != null) {
-            displayMessage = "[Gambar] " + (TextUtils.isEmpty(messageText) ? "Analisis gambar ini" : messageText);
+            displayMessage = TextUtils.isEmpty(messageText) ? "Analisis gambar ini" : messageText;
         }
         
-        chatAdapter.addMessage(new Message(displayMessage, Message.TYPE_USER));
+        Message userMessage = new Message(displayMessage, Message.TYPE_USER);
+        
+        if (selectedImageBitmap != null) {
+            userMessage.setImageBitmap(selectedImageBitmap);
+            userMessage.setImageBase64(selectedImageBase64);
+        }
+        
+        chatAdapter.addMessage(userMessage);
         forceScrollToBottom();
         
         etMessage.setText("");
@@ -450,7 +652,7 @@ public class MainActivity extends Activity {
         forceScrollToBottom();
         
         final String imageToSend = selectedImageBase64;
-        final String textToSend = TextUtils.isEmpty(messageText) ? "Tolong analisis dan jelaskan gambar ini" : messageText;
+        final String textToSend = TextUtils.isEmpty(messageText) ? "Analisis gambar ini secara detail. Identifikasi masalah utama jika ada error atau bug, dan berikan solusi langsung." : messageText;
         
         clearSelectedImage();
         
@@ -545,6 +747,15 @@ public class MainActivity extends Activity {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         if (imm != null && getCurrentFocus() != null) {
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+    
+    @Override
+    public void onBackPressed() {
+        if (isDrawerOpen) {
+            closeDrawer();
+        } else {
+            super.onBackPressed();
         }
     }
     

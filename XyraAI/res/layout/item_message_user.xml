@@ -15,6 +15,15 @@
         android:orientation="vertical"
         android:padding="12dp">
 
+        <ImageView
+            android:id="@+id/ivUserImage"
+            android:layout_width="200dp"
+            android:layout_height="150dp"
+            android:layout_marginBottom="8dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:contentDescription="Attached Image" />
+
         <TextView
             android:id="@+id/tvMessage"
             android:layout_width="wrap_content"

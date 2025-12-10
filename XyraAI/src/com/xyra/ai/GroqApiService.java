@@ -56,6 +56,31 @@ public class GroqApiService {
         "- Use code blocks for code snippets\n" +
         "- Break long responses into readable paragraphs";
     
+    private static final String IMAGE_ANALYSIS_PROMPT = 
+        "IMAGE ANALYSIS SPECIALIST:\n\n" +
+        "CRITICAL RULES - FOLLOW EXACTLY:\n" +
+        "1. LANGSUNG ke inti masalah - jangan bertele-tele\n" +
+        "2. Identifikasi ERROR/BUG dengan SPESIFIK:\n" +
+        "   - Baca SETIAP teks di gambar dengan teliti\n" +
+        "   - Jika ada error message, COPY persis kata-katanya\n" +
+        "   - Jika ada typo, tunjukkan: 'Kamu tulis X, seharusnya Y'\n" +
+        "3. BERIKAN SOLUSI LANGSUNG:\n" +
+        "   - Untuk error: berikan fix code yang bisa di-copy paste\n" +
+        "   - Untuk bug: jelaskan step by step cara perbaiki\n" +
+        "4. FORMAT RESPONS:\n" +
+        "   - Baris 1: Masalah utama dalam 1 kalimat\n" +
+        "   - Baris 2-5: Solusi spesifik\n" +
+        "   - Code block jika perlu\n" +
+        "5. JANGAN:\n" +
+        "   - Jangan bilang 'sepertinya' atau 'mungkin'\n" +
+        "   - Jangan beri saran generic\n" +
+        "   - Jangan terlalu panjang di awal\n\n" +
+        "CONTOH RESPONS YANG BENAR:\n" +
+        "Error: 'pkhj not found'\n" +
+        "Masalah: Typo pada command. Kamu tulis 'pkhj' tapi seharusnya 'pkg'.\n" +
+        "Fix: Jalankan ulang dengan command:\n" +
+        "```\npkg install python\n```";
+    
     private String apiKey;
     private Handler mainHandler;
     private Thread workerThread;
@@ -199,7 +224,11 @@ public class GroqApiService {
             } else {
                 messageObj.put("role", "assistant");
             }
-            messageObj.put("content", msg.getContent());
+            String content = msg.getContent();
+            if (msg.hasImage()) {
+                content = content.replace("[Gambar] ", "");
+            }
+            messageObj.put("content", content);
             messages.put(messageObj);
         }
         
@@ -211,7 +240,7 @@ public class GroqApiService {
     private JSONObject buildRequestBodyWithImage(List<Message> conversationHistory, String text, String imageBase64) throws Exception {
         JSONObject body = new JSONObject();
         body.put("model", VISION_MODEL);
-        body.put("temperature", 0.7);
+        body.put("temperature", 0.5);
         body.put("max_tokens", 4096);
         body.put("top_p", 0.9);
         
@@ -219,14 +248,7 @@ public class GroqApiService {
         
         JSONObject systemMessage = new JSONObject();
         systemMessage.put("role", "system");
-        systemMessage.put("content", SYSTEM_PROMPT + "\n\nIMAGE ANALYSIS RULES:\n" +
-            "- ALWAYS go straight to the main point/problem first\n" +
-            "- If you see an error message, identify the EXACT error and give the DIRECT solution\n" +
-            "- Do NOT give generic advice - be specific based on what you see\n" +
-            "- For code/terminal errors: identify the typo or mistake immediately\n" +
-            "- Keep initial response short and focused on the core issue\n" +
-            "- Example: If user types 'pkhj' instead of 'pkg', say 'You typed pkhj but should be pkg'\n" +
-            "- Only explain further if user asks for more details");
+        systemMessage.put("content", SYSTEM_PROMPT + "\n\n" + IMAGE_ANALYSIS_PROMPT);
         messages.put(systemMessage);
         
         for (int i = 0; i < conversationHistory.size() - 2; i++) {
@@ -251,7 +273,7 @@ public class GroqApiService {
         
         JSONObject textContent = new JSONObject();
         textContent.put("type", "text");
-        textContent.put("text", text);
+        textContent.put("text", text + "\n\nAnalisis gambar ini dengan teliti. Identifikasi masalah utama dan berikan solusi spesifik.");
         contentArray.put(textContent);
         
         JSONObject imageContent = new JSONObject();
@@ -272,8 +294,7 @@ public class GroqApiService {
     private boolean isThinkingMessage(String content) {
         return content.equals("Thinking...") || 
                content.equals("Sedang berpikir...") ||
-               content.equals("thinking") ||
-               content.startsWith("[Gambar]");
+               content.equals("thinking");
     }
     
     private String parseResponse(String jsonResponse) throws Exception {

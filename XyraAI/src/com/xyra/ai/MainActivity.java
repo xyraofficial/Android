@@ -95,6 +95,12 @@ public class MainActivity extends Activity {
     private AvatarAnimator avatarAnimator;
     private View avatarSection;
     
+    private LinearLayout welcomeState;
+    private TextView quickReply1;
+    private TextView quickReply2;
+    private TextView quickReply3;
+    private TextView quickReply4;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,6 +201,12 @@ public class MainActivity extends Activity {
         btnCloseFullscreen = (ImageButton) findViewById(R.id.btnCloseFullscreen);
         
         ivSidebarAvatar = (ImageView) findViewById(R.id.ivSidebarAvatar);
+        
+        welcomeState = (LinearLayout) findViewById(R.id.welcomeState);
+        quickReply1 = (TextView) findViewById(R.id.quickReply1);
+        quickReply2 = (TextView) findViewById(R.id.quickReply2);
+        quickReply3 = (TextView) findViewById(R.id.quickReply3);
+        quickReply4 = (TextView) findViewById(R.id.quickReply4);
     }
     
     private void setupListView() {
@@ -527,6 +539,73 @@ public class MainActivity extends Activity {
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         });
+        
+        setupQuickReplies();
+    }
+    
+    private void setupQuickReplies() {
+        if (quickReply1 != null) {
+            quickReply1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    handleQuickReply("Bantu saya membuat kode untuk ");
+                }
+            });
+        }
+        
+        if (quickReply2 != null) {
+            quickReply2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    handleQuickReply("Jelaskan tentang ");
+                }
+            });
+        }
+        
+        if (quickReply3 != null) {
+            quickReply3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    handleQuickReply("Tulis email profesional tentang ");
+                }
+            });
+        }
+        
+        if (quickReply4 != null) {
+            quickReply4.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    handleQuickReply("Berikan ide kreatif untuk ");
+                }
+            });
+        }
+    }
+    
+    private void handleQuickReply(String text) {
+        hideWelcomeState();
+        etMessage.setText(text);
+        etMessage.setSelection(text.length());
+        etMessage.requestFocus();
+        showKeyboard();
+    }
+    
+    private void showKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(etMessage, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+    
+    private void showWelcomeState() {
+        if (welcomeState != null) {
+            welcomeState.setVisibility(View.VISIBLE);
+        }
+    }
+    
+    private void hideWelcomeState() {
+        if (welcomeState != null) {
+            welcomeState.setVisibility(View.GONE);
+        }
     }
     
     private void openImagePicker() {
@@ -792,12 +871,13 @@ public class MainActivity extends Activity {
     
     private void addWelcomeMessage() {
         if (chatAdapter.getCount() == 0) {
+            showWelcomeState();
             showAvatarSection(true);
-            String welcome = getString(R.string.welcome_message);
-            chatAdapter.addMessage(new Message(welcome, Message.TYPE_AI));
             if (avatarAnimator != null) {
                 avatarAnimator.startWaveAnimation();
             }
+        } else {
+            hideWelcomeState();
         }
     }
     
@@ -817,6 +897,8 @@ public class MainActivity extends Activity {
         if (TextUtils.isEmpty(messageText) && selectedImageBase64 == null) {
             return;
         }
+        
+        hideWelcomeState();
         
         String displayMessage = messageText;
         if (selectedImageBase64 != null) {

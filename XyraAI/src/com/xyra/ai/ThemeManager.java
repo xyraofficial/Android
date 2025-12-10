@@ -44,7 +44,7 @@ public class ThemeManager {
     }
     
     public static boolean isDarkMode(Context context) {
-        return true;
+        return false;
     }
     
     public static ThemeColors getThemeColors(Context context) {
@@ -68,20 +68,20 @@ public class ThemeManager {
             colors.colorAccent = Color.parseColor("#10A37F");
             colors.statusBar = Color.parseColor("#343541");
         } else {
-            colors.background = Color.parseColor("#FFFFFF");
-            colors.backgroundSecondary = Color.parseColor("#F7F7F8");
-            colors.surface = Color.parseColor("#ECECEC");
-            colors.textPrimary = Color.parseColor("#202123");
-            colors.textSecondary = Color.parseColor("#6E6E80");
-            colors.userBubble = Color.parseColor("#10A37F");
-            colors.aiBubble = Color.parseColor("#F7F7F8");
+            colors.background = Color.parseColor("#F0F0F3");
+            colors.backgroundSecondary = Color.parseColor("#E8E8EB");
+            colors.surface = Color.parseColor("#F0F0F3");
+            colors.textPrimary = Color.parseColor("#2D3436");
+            colors.textSecondary = Color.parseColor("#636E72");
+            colors.userBubble = Color.parseColor("#6C63FF");
+            colors.aiBubble = Color.parseColor("#FFFFFF");
             colors.inputBackground = Color.parseColor("#FFFFFF");
-            colors.divider = Color.parseColor("#E5E5E5");
-            colors.drawerBackground = Color.parseColor("#F7F7F8");
-            colors.headerBackground = Color.parseColor("#FFFFFF");
-            colors.colorPrimary = Color.parseColor("#10A37F");
-            colors.colorAccent = Color.parseColor("#10A37F");
-            colors.statusBar = Color.parseColor("#FFFFFF");
+            colors.divider = Color.parseColor("#DFE6E9");
+            colors.drawerBackground = Color.parseColor("#F0F0F3");
+            colors.headerBackground = Color.parseColor("#F0F0F3");
+            colors.colorPrimary = Color.parseColor("#6C63FF");
+            colors.colorAccent = Color.parseColor("#6C63FF");
+            colors.statusBar = Color.parseColor("#F0F0F3");
         }
         
         return colors;

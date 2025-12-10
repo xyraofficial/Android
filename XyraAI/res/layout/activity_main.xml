@@ -56,7 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/status_online"
-                    android:textColor="#A5F3FC"
+                    android:textColor="#10B981"
                     android:textSize="12sp" />
                 
                 <TextView
@@ -64,7 +64,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/typing"
-                    android:textColor="#FCD34D"
+                    android:textColor="#6C63FF"
                     android:textSize="12sp"
                     android:visibility="gone" />
 
@@ -81,18 +81,159 @@
 
         </LinearLayout>
 
-
-        <ListView
-            android:id="@+id/listView"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:clipToPadding="false"
-            android:stackFromBottom="true"
-            android:transcriptMode="alwaysScroll"
-            android:cacheColorHint="@android:color/transparent"
-            android:listSelector="@android:color/transparent" />
+            android:layout_weight="1">
+
+            <ListView
+                android:id="@+id/listView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:clipToPadding="false"
+                android:stackFromBottom="true"
+                android:transcriptMode="alwaysScroll"
+                android:cacheColorHint="@android:color/transparent"
+                android:listSelector="@android:color/transparent" />
+
+            <LinearLayout
+                android:id="@+id/welcomeState"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:background="@drawable/bg_welcome_avatar"
+                    android:gravity="center"
+                    android:elevation="8dp"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_xyra_avatar"
+                        android:scaleType="centerCrop"
+                        android:contentDescription="XyraAI Avatar" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Hai, Saya XyraAI!"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Asisten AI pintar siap membantu Anda"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="14sp"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:text="Coba tanya sesuatu:"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/quickReply1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_quick_reply"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="10dp"
+                            android:layout_margin="4dp"
+                            android:text="Bantu coding"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="13sp"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                        <TextView
+                            android:id="@+id/quickReply2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_quick_reply"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="10dp"
+                            android:layout_margin="4dp"
+                            android:text="Jelaskan sesuatu"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="13sp"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="4dp">
+
+                        <TextView
+                            android:id="@+id/quickReply3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_quick_reply"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="10dp"
+                            android:layout_margin="4dp"
+                            android:text="Tulis email"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="13sp"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                        <TextView
+                            android:id="@+id/quickReply4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_quick_reply"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="10dp"
+                            android:layout_margin="4dp"
+                            android:text="Ide kreatif"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="13sp"
+                            android:clickable="true"
+                            android:focusable="true" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/imagePreviewContainer"
@@ -135,44 +276,47 @@
             android:id="@+id/inputArea"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/backgroundSecondary"
+            android:background="@color/background"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="8dp">
+            android:padding="12dp">
 
             <ImageButton
                 android:id="@+id/btnImage"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_neumorphic_button"
                 android:contentDescription="Attach Image"
                 android:src="@drawable/ic_image"
-                android:padding="8dp" />
+                android:padding="10dp"
+                android:elevation="4dp" />
 
             <EditText
                 android:id="@+id/etMessage"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginLeft="4dp"
-                android:background="@drawable/bg_input"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/bg_input_neumorphic"
                 android:hint="@string/hint_message"
                 android:inputType="textMultiLine|textCapSentences"
                 android:maxLines="5"
-                android:padding="12dp"
+                android:padding="14dp"
                 android:textColor="@color/textPrimary"
                 android:textColorHint="@color/textSecondary"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:elevation="2dp" />
 
             <ImageButton
                 android:id="@+id/btnSend"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginLeft="8dp"
-                android:background="@drawable/bg_send_button"
+                android:background="@drawable/bg_send_neumorphic"
                 android:contentDescription="@string/send"
                 android:src="@drawable/ic_send"
-                android:padding="12dp" />
+                android:padding="12dp"
+                android:elevation="4dp" />
 
         </LinearLayout>
 

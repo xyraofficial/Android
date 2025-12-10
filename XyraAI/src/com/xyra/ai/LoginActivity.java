@@ -1,5 +1,6 @@
 package com.xyra.ai;
 
+import com.xyra.ai.R;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;

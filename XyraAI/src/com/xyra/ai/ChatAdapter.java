@@ -1,5 +1,6 @@
 package com.xyra.ai;
 
+import com.xyra.ai.R;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;

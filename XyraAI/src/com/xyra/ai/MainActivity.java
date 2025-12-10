@@ -300,7 +300,9 @@ public class MainActivity extends Activity {
         closeDrawer();
         
         if (messages.isEmpty()) {
-            addWelcomeMessage();
+            showWelcomeState();
+        } else {
+            hideWelcomeState();
         }
     }
     
@@ -866,6 +868,9 @@ public class MainActivity extends Activity {
         List<Message> savedMessages = chatHistory.loadMessages();
         if (!savedMessages.isEmpty()) {
             chatAdapter.setMessages(savedMessages, chatHistory.getCurrentChatId());
+            hideWelcomeState();
+        } else {
+            showWelcomeState();
         }
     }
     

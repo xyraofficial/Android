@@ -305,11 +305,13 @@ public class LoginActivity extends Activity {
     }
     
     private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(Task<AuthResult> task) {
+        try {
+            AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+            Task<AuthResult> signInTask = mAuth.signInWithCredential(credential);
+            signInTask.addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(Task<AuthResult> task) {
+                    try {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Firebase authentication successful");
                             FirebaseUser user = mAuth.getCurrentUser();
@@ -320,12 +322,24 @@ public class LoginActivity extends Activity {
                         } else {
                             Log.e(TAG, "Firebase authentication failed", task.getException());
                             showLoading(false);
-                            Toast.makeText(LoginActivity.this, 
-                                    "Autentikasi gagal: " + task.getException().getMessage(), 
-                                    Toast.LENGTH_LONG).show();
+                            String errorMsg = "Autentikasi gagal";
+                            if (task.getException() != null) {
+                                errorMsg += ": " + task.getException().getMessage();
+                            }
+                            Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                         }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in onComplete", e);
+                        showLoading(false);
+                        Toast.makeText(LoginActivity.this, "Terjadi kesalahan: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
-                });
+                }
+            });
+        } catch (Exception e) {
+            Log.e(TAG, "Firebase auth error", e);
+            showLoading(false);
+            Toast.makeText(this, "Autentikasi error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
     
     private void updateUserPrefs(FirebaseUser user) {

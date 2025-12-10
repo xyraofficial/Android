@@ -15,6 +15,7 @@ public class GroqApiService {
     
     private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
     private static final String MODEL = "llama-3.3-70b-versatile";
+    private static final String VISION_MODEL = "llama-3.2-90b-vision-preview";
     
     private static final String SYSTEM_PROMPT = 
         "You are Xyra, a highly intelligent, helpful, and friendly AI assistant similar to ChatGPT. " +
@@ -74,7 +75,7 @@ public class GroqApiService {
             @Override
             public void run() {
                 try {
-                    final String response = makeApiCall(conversationHistory);
+                    final String response = makeApiCall(conversationHistory, null, null);
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -94,7 +95,32 @@ public class GroqApiService {
         workerThread.start();
     }
     
-    private String makeApiCall(List<Message> conversationHistory) throws Exception {
+    public void sendMessageWithImage(final List<Message> conversationHistory, final String text, final String imageBase64, final ChatCallback callback) {
+        workerThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final String response = makeApiCall(conversationHistory, text, imageBase64);
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onSuccess(response);
+                        }
+                    });
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+        workerThread.start();
+    }
+    
+    private String makeApiCall(List<Message> conversationHistory, String imageText, String imageBase64) throws Exception {
         URL url = new URL(API_URL);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         
@@ -106,7 +132,12 @@ public class GroqApiService {
             connection.setConnectTimeout(30000);
             connection.setReadTimeout(60000);
             
-            JSONObject requestBody = buildRequestBody(conversationHistory);
+            JSONObject requestBody;
+            if (imageBase64 != null && !imageBase64.isEmpty()) {
+                requestBody = buildRequestBodyWithImage(conversationHistory, imageText, imageBase64);
+            } else {
+                requestBody = buildRequestBody(conversationHistory);
+            }
             
             OutputStream os = connection.getOutputStream();
             byte[] input = requestBody.toString().getBytes("UTF-8");
@@ -159,7 +190,7 @@ public class GroqApiService {
         
         for (int i = 0; i < conversationHistory.size(); i++) {
             Message msg = conversationHistory.get(i);
-            if (msg.getContent().equals("Thinking...") || msg.getContent().equals("Sedang berpikir...")) {
+            if (isThinkingMessage(msg.getContent())) {
                 continue;
             }
             JSONObject messageObj = new JSONObject();
@@ -175,6 +206,67 @@ public class GroqApiService {
         body.put("messages", messages);
         
         return body;
+    }
+    
+    private JSONObject buildRequestBodyWithImage(List<Message> conversationHistory, String text, String imageBase64) throws Exception {
+        JSONObject body = new JSONObject();
+        body.put("model", VISION_MODEL);
+        body.put("temperature", 0.7);
+        body.put("max_tokens", 4096);
+        body.put("top_p", 0.9);
+        
+        JSONArray messages = new JSONArray();
+        
+        JSONObject systemMessage = new JSONObject();
+        systemMessage.put("role", "system");
+        systemMessage.put("content", SYSTEM_PROMPT + "\n\nYou can also analyze images. When given an image, describe what you see in detail and answer any questions about it.");
+        messages.put(systemMessage);
+        
+        for (int i = 0; i < conversationHistory.size() - 2; i++) {
+            Message msg = conversationHistory.get(i);
+            if (isThinkingMessage(msg.getContent())) {
+                continue;
+            }
+            JSONObject messageObj = new JSONObject();
+            if (msg.getType() == Message.TYPE_USER) {
+                messageObj.put("role", "user");
+            } else {
+                messageObj.put("role", "assistant");
+            }
+            messageObj.put("content", msg.getContent());
+            messages.put(messageObj);
+        }
+        
+        JSONObject userMessage = new JSONObject();
+        userMessage.put("role", "user");
+        
+        JSONArray contentArray = new JSONArray();
+        
+        JSONObject textContent = new JSONObject();
+        textContent.put("type", "text");
+        textContent.put("text", text);
+        contentArray.put(textContent);
+        
+        JSONObject imageContent = new JSONObject();
+        imageContent.put("type", "image_url");
+        JSONObject imageUrl = new JSONObject();
+        imageUrl.put("url", "data:image/jpeg;base64," + imageBase64);
+        imageContent.put("image_url", imageUrl);
+        contentArray.put(imageContent);
+        
+        userMessage.put("content", contentArray);
+        messages.put(userMessage);
+        
+        body.put("messages", messages);
+        
+        return body;
+    }
+    
+    private boolean isThinkingMessage(String content) {
+        return content.equals("Thinking...") || 
+               content.equals("Sedang berpikir...") ||
+               content.equals("thinking") ||
+               content.startsWith("[Gambar]");
     }
     
     private String parseResponse(String jsonResponse) throws Exception {

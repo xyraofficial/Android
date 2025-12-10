@@ -6,35 +6,53 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.view.Menu;
+import android.util.Base64;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 public class MainActivity extends Activity {
     
     private static final String API_KEY = "YOUR_GROQ_API_KEY_HERE";
+    private static final int PICK_IMAGE_REQUEST = 1;
     
     private ListView listView;
     private EditText etMessage;
     private ImageButton btnSend;
     private ImageButton btnMenu;
+    private ImageButton btnImage;
     private TextView tvStatus;
     private TextView tvTyping;
+    private LinearLayout imagePreviewContainer;
+    private ImageView ivPreview;
+    private ImageButton btnRemoveImage;
     
     private ChatAdapter chatAdapter;
     private GroqApiService groqApiService;
     private ChatHistory chatHistory;
     private boolean isWaitingResponse = false;
+    
+    private String selectedImageBase64 = null;
+    private Uri selectedImageUri = null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +73,15 @@ public class MainActivity extends Activity {
         etMessage = (EditText) findViewById(R.id.etMessage);
         btnSend = (ImageButton) findViewById(R.id.btnSend);
         btnMenu = (ImageButton) findViewById(R.id.btnMenu);
+        btnImage = (ImageButton) findViewById(R.id.btnImage);
         tvStatus = (TextView) findViewById(R.id.tvStatus);
         tvTyping = (TextView) findViewById(R.id.tvTyping);
+        
+        imagePreviewContainer = (LinearLayout) findViewById(R.id.imagePreviewContainer);
+        if (imagePreviewContainer != null) {
+            ivPreview = (ImageView) findViewById(R.id.ivPreview);
+            btnRemoveImage = (ImageButton) findViewById(R.id.btnRemoveImage);
+        }
     }
     
     private void setupListView() {
@@ -70,6 +95,15 @@ public class MainActivity extends Activity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 showMessageOptions(position);
                 return true;
+            }
+        });
+        
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (chatAdapter.isTyping()) {
+                    chatAdapter.skipTypingAnimation();
+                }
             }
         });
     }
@@ -107,10 +141,10 @@ public class MainActivity extends Activity {
     }
     
     private void shareText(String text) {
-        android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_SEND);
+        Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
-        intent.putExtra(android.content.Intent.EXTRA_TEXT, text);
-        startActivity(android.content.Intent.createChooser(intent, "Share via"));
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        startActivity(Intent.createChooser(intent, "Share via"));
     }
     
     private void setupClickListeners() {
@@ -127,6 +161,91 @@ public class MainActivity extends Activity {
                 showMainMenu();
             }
         });
+        
+        btnImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openImagePicker();
+            }
+        });
+        
+        if (btnRemoveImage != null) {
+            btnRemoveImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    clearSelectedImage();
+                }
+            });
+        }
+    }
+    
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType("image/*");
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
+            selectedImageUri = data.getData();
+            
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                inputStream.close();
+                
+                Bitmap scaledBitmap = scaleBitmap(bitmap, 512);
+                
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                byte[] imageBytes = baos.toByteArray();
+                selectedImageBase64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+                
+                showImagePreview(scaledBitmap);
+                
+                Toast.makeText(this, "Gambar dipilih! Tulis pertanyaan tentang gambar ini.", Toast.LENGTH_SHORT).show();
+                
+            } catch (Exception e) {
+                Toast.makeText(this, "Gagal memuat gambar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                selectedImageBase64 = null;
+                selectedImageUri = null;
+            }
+        }
+    }
+    
+    private Bitmap scaleBitmap(Bitmap bitmap, int maxSize) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        
+        if (width <= maxSize && height <= maxSize) {
+            return bitmap;
+        }
+        
+        float scale = Math.min((float) maxSize / width, (float) maxSize / height);
+        int newWidth = Math.round(width * scale);
+        int newHeight = Math.round(height * scale);
+        
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+    }
+    
+    private void showImagePreview(Bitmap bitmap) {
+        if (imagePreviewContainer != null && ivPreview != null) {
+            ivPreview.setImageBitmap(bitmap);
+            imagePreviewContainer.setVisibility(View.VISIBLE);
+        } else {
+            Toast.makeText(this, "Gambar siap dikirim", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void clearSelectedImage() {
+        selectedImageBase64 = null;
+        selectedImageUri = null;
+        if (imagePreviewContainer != null) {
+            imagePreviewContainer.setVisibility(View.GONE);
+        }
     }
     
     private void showMainMenu() {
@@ -159,6 +278,7 @@ public class MainActivity extends Activity {
     private void startNewChat() {
         chatAdapter.clearMessages();
         chatHistory.clearHistory();
+        clearSelectedImage();
         addWelcomeMessage();
         Toast.makeText(this, "New chat started", Toast.LENGTH_SHORT).show();
     }
@@ -180,7 +300,7 @@ public class MainActivity extends Activity {
     private void showAbout() {
         new AlertDialog.Builder(this)
             .setTitle("About XyraAI")
-            .setMessage("XyraAI v1.0\n\nPowered by GROQ API with Llama 3.3 70B\n\nFeatures:\n- Multi-language support\n- Auto language detection\n- ChatGPT-like responses\n- Code assistance\n- And more!")
+            .setMessage("XyraAI v1.1\n\nPowered by GROQ API with Llama 3.3 70B\n\nFeatures:\n- Multi-language support\n- Auto language detection\n- Typing animation\n- Image analysis\n- Code assistance\n- Beautiful thinking animation\n- And more!")
             .setPositiveButton("OK", null)
             .show();
     }
@@ -205,11 +325,16 @@ public class MainActivity extends Activity {
         
         String messageText = etMessage.getText().toString().trim();
         
-        if (TextUtils.isEmpty(messageText)) {
+        if (TextUtils.isEmpty(messageText) && selectedImageBase64 == null) {
             return;
         }
         
-        chatAdapter.addMessage(new Message(messageText, Message.TYPE_USER));
+        String displayMessage = messageText;
+        if (selectedImageBase64 != null) {
+            displayMessage = "[Gambar] " + (TextUtils.isEmpty(messageText) ? "Analisis gambar ini" : messageText);
+        }
+        
+        chatAdapter.addMessage(new Message(displayMessage, Message.TYPE_USER));
         scrollToBottom();
         
         etMessage.setText("");
@@ -217,25 +342,57 @@ public class MainActivity extends Activity {
         
         setWaitingState(true);
         
-        chatAdapter.addMessage(new Message(getString(R.string.thinking), Message.TYPE_AI));
+        chatAdapter.addMessage(new Message("thinking", Message.TYPE_AI));
         scrollToBottom();
         
-        groqApiService.sendMessage(chatAdapter.getMessages(), new GroqApiService.ChatCallback() {
-            @Override
-            public void onSuccess(String response) {
-                chatAdapter.updateLastMessage(response);
-                scrollToBottom();
-                setWaitingState(false);
-                saveChat();
-            }
-            
-            @Override
-            public void onError(String error) {
-                chatAdapter.updateLastMessage(getString(R.string.error_api) + "\n" + error);
-                scrollToBottom();
-                setWaitingState(false);
-            }
-        });
+        final String imageToSend = selectedImageBase64;
+        final String textToSend = TextUtils.isEmpty(messageText) ? "Tolong analisis dan jelaskan gambar ini" : messageText;
+        
+        clearSelectedImage();
+        
+        if (imageToSend != null) {
+            groqApiService.sendMessageWithImage(chatAdapter.getMessages(), textToSend, imageToSend, new GroqApiService.ChatCallback() {
+                @Override
+                public void onSuccess(final String response) {
+                    chatAdapter.updateLastMessageWithTyping(response, new Runnable() {
+                        @Override
+                        public void run() {
+                            setWaitingState(false);
+                            saveChat();
+                        }
+                    });
+                    scrollToBottom();
+                }
+                
+                @Override
+                public void onError(String error) {
+                    chatAdapter.updateLastMessage(getString(R.string.error_api) + "\n" + error);
+                    scrollToBottom();
+                    setWaitingState(false);
+                }
+            });
+        } else {
+            groqApiService.sendMessage(chatAdapter.getMessages(), new GroqApiService.ChatCallback() {
+                @Override
+                public void onSuccess(final String response) {
+                    chatAdapter.updateLastMessageWithTyping(response, new Runnable() {
+                        @Override
+                        public void run() {
+                            setWaitingState(false);
+                            saveChat();
+                        }
+                    });
+                    scrollToBottom();
+                }
+                
+                @Override
+                public void onError(String error) {
+                    chatAdapter.updateLastMessage(getString(R.string.error_api) + "\n" + error);
+                    scrollToBottom();
+                    setWaitingState(false);
+                }
+            });
+        }
     }
     
     private void saveChat() {
@@ -246,6 +403,8 @@ public class MainActivity extends Activity {
         isWaitingResponse = waiting;
         btnSend.setEnabled(!waiting);
         btnSend.setAlpha(waiting ? 0.5f : 1.0f);
+        btnImage.setEnabled(!waiting);
+        btnImage.setAlpha(waiting ? 0.5f : 1.0f);
         
         if (waiting) {
             tvStatus.setVisibility(View.GONE);

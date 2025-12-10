@@ -84,11 +84,21 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
+        <ImageButton
+            android:id="@+id/btnImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Attach Image"
+            android:src="@drawable/ic_image"
+            android:padding="8dp" />
+
         <EditText
             android:id="@+id/etMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginLeft="4dp"
             android:background="@drawable/bg_input"
             android:hint="@string/hint_message"
             android:inputType="textMultiLine|textCapSentences"

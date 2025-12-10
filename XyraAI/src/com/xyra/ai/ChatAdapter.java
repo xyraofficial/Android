@@ -1,9 +1,15 @@
 package com.xyra.ai;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,6 +29,12 @@ public class ChatAdapter extends BaseAdapter {
     private LayoutInflater inflater;
     private SimpleDateFormat timeFormat;
     private MessageRenderer messageRenderer;
+    private TypingAnimator typingAnimator;
+    private Handler handler;
+    
+    private String[] thinkingSymbols = {"🧠", "✨", "💭", "⚡", "🔮", "💫"};
+    private int currentSymbolIndex = 0;
+    private int[] dotColors = {0xFF6366F1, 0xFF8B5CF6, 0xFFA855F7, 0xFFEC4899};
     
     public ChatAdapter(Context context) {
         this.context = context;
@@ -30,6 +42,8 @@ public class ChatAdapter extends BaseAdapter {
         this.inflater = LayoutInflater.from(context);
         this.timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         this.messageRenderer = new MessageRenderer(context);
+        this.typingAnimator = new TypingAnimator();
+        this.handler = new Handler(Looper.getMainLooper());
     }
     
     @Override
@@ -103,13 +117,8 @@ public class ChatAdapter extends BaseAdapter {
         
         String content = message.getContent();
         
-        if (content.equals("Thinking...") || content.equals("Sedang berpikir...")) {
-            holder.messageContainer.removeAllViews();
-            TextView tvThinking = new TextView(context);
-            tvThinking.setText(content);
-            tvThinking.setTextColor(0xFFFCD34D);
-            tvThinking.setTextSize(15);
-            holder.messageContainer.addView(tvThinking);
+        if (isThinkingMessage(content)) {
+            showThinkingAnimation(holder.messageContainer);
         } else {
             messageRenderer.renderMessage(content, holder.messageContainer);
         }
@@ -117,6 +126,88 @@ public class ChatAdapter extends BaseAdapter {
         holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
         
         return convertView;
+    }
+    
+    private boolean isThinkingMessage(String content) {
+        return content.equals("Thinking...") || 
+               content.equals("Sedang berpikir...") ||
+               content.equals("thinking");
+    }
+    
+    private void showThinkingAnimation(final LinearLayout container) {
+        container.removeAllViews();
+        
+        LinearLayout thinkingLayout = new LinearLayout(context);
+        thinkingLayout.setOrientation(LinearLayout.HORIZONTAL);
+        thinkingLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        
+        final TextView symbolView = new TextView(context);
+        symbolView.setTextSize(22);
+        symbolView.setText(thinkingSymbols[0]);
+        thinkingLayout.addView(symbolView);
+        
+        LinearLayout dotsLayout = new LinearLayout(context);
+        dotsLayout.setOrientation(LinearLayout.HORIZONTAL);
+        dotsLayout.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams dotsParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        dotsParams.setMargins(16, 0, 16, 0);
+        dotsLayout.setLayoutParams(dotsParams);
+        
+        final View[] dots = new View[4];
+        for (int i = 0; i < 4; i++) {
+            View dot = new View(context);
+            LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(12, 12);
+            dotParams.setMargins(4, 0, 4, 0);
+            dot.setLayoutParams(dotParams);
+            dot.setBackgroundResource(R.drawable.bg_dot);
+            dots[i] = dot;
+            dotsLayout.addView(dot);
+        }
+        thinkingLayout.addView(dotsLayout);
+        
+        TextView textView = new TextView(context);
+        textView.setText("Sedang berpikir");
+        textView.setTextColor(0xFFFCD34D);
+        textView.setTextSize(14);
+        thinkingLayout.addView(textView);
+        
+        container.addView(thinkingLayout);
+        
+        startDotsAnimation(dots, symbolView);
+    }
+    
+    private void startDotsAnimation(final View[] dots, final TextView symbolView) {
+        final int[] frame = {0};
+        
+        final Runnable animationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                frame[0]++;
+                
+                for (int i = 0; i < dots.length; i++) {
+                    float phase = (frame[0] + i * 3) % 20;
+                    float scale = 0.6f + 0.4f * (float) Math.sin(phase * Math.PI / 10);
+                    float translationY = -8f * (float) Math.sin(phase * Math.PI / 10);
+                    
+                    dots[i].setScaleX(scale);
+                    dots[i].setScaleY(scale);
+                    dots[i].setTranslationY(translationY);
+                    dots[i].setAlpha(0.5f + 0.5f * scale);
+                }
+                
+                if (frame[0] % 12 == 0) {
+                    currentSymbolIndex = (currentSymbolIndex + 1) % thinkingSymbols.length;
+                    symbolView.setText(thinkingSymbols[currentSymbolIndex]);
+                }
+                
+                handler.postDelayed(this, 80);
+            }
+        };
+        
+        handler.post(animationRunnable);
     }
     
     public void addMessage(Message message) {
@@ -130,6 +221,37 @@ public class ChatAdapter extends BaseAdapter {
             messages.get(lastIndex).setContent(content);
             notifyDataSetChanged();
         }
+    }
+    
+    public void updateLastMessageWithTyping(final String content, final Runnable onComplete) {
+        if (!messages.isEmpty()) {
+            final int lastIndex = messages.size() - 1;
+            
+            typingAnimator.startTyping(content, new TypingAnimator.TypingCallback() {
+                @Override
+                public void onTextUpdated(String currentText) {
+                    messages.get(lastIndex).setContent(currentText);
+                    notifyDataSetChanged();
+                }
+                
+                @Override
+                public void onTypingComplete(String fullText) {
+                    messages.get(lastIndex).setContent(fullText);
+                    notifyDataSetChanged();
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
+                }
+            });
+        }
+    }
+    
+    public void skipTypingAnimation() {
+        typingAnimator.skipToEnd();
+    }
+    
+    public boolean isTyping() {
+        return typingAnimator.isAnimating();
     }
     
     public List<Message> getMessages() {

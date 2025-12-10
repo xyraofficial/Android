@@ -859,7 +859,53 @@ public class MainActivity extends Activity {
             }
         });
         
+        View btnYoutube = dialogView.findViewById(R.id.btnYoutube);
+        if (btnYoutube != null) {
+            btnYoutube.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openUrl("https://youtube.com/@Kz.tutorial");
+                }
+            });
+        }
+        
+        View btnFacebook = dialogView.findViewById(R.id.btnFacebook);
+        if (btnFacebook != null) {
+            btnFacebook.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openUrl("https://www.facebook.com/pangkey.jul");
+                }
+            });
+        }
+        
+        View btnEmail = dialogView.findViewById(R.id.btnEmail);
+        if (btnEmail != null) {
+            btnEmail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                    emailIntent.setData(Uri.parse("mailto:xyraofficialsup@gmail.com"));
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "XyraAI Feedback");
+                    try {
+                        startActivity(Intent.createChooser(emailIntent, "Kirim Email"));
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Tidak ada aplikasi email", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+        
         dialog.show();
+    }
+    
+    private void openUrl(String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, "Tidak dapat membuka link", Toast.LENGTH_SHORT).show();
+        }
     }
     
     private void initGroqService() {

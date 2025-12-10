@@ -218,11 +218,6 @@ public class ChatHistory {
             editor.putString(KEY_CHATS, newChats.toString());
             editor.remove(KEY_MESSAGES_PREFIX + chatId);
             editor.apply();
-            
-            String currentChatId = getCurrentChatId();
-            if (currentChatId.equals(chatId)) {
-                startNewChat();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }

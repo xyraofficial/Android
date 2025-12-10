@@ -19,8 +19,11 @@ XyraAI/
 ├── .project                   # Project metadata
 ├── project.properties         # SDK target
 ├── libs/                      # JAR libraries folder
+├── google-services.json       # Firebase configuration
 ├── src/com/xyra/ai/           # Java source files
+│   ├── LoginActivity.java     # Login screen (app entry point)
 │   ├── MainActivity.java      # Main activity with drawer
+│   ├── ProfileActivity.java   # User profile (logout only)
 │   ├── ChatAdapter.java       # RecyclerView adapter with chatId tracking
 │   ├── ChatHistoryAdapter.java # Drawer chat list adapter
 │   ├── Message.java           # Message model with image support
@@ -50,6 +53,7 @@ The GROQ API key needs to be added to:
 - `src/com/xyra/ai/Config.java` (GROQ_API_KEY constant)
 
 ## Features
+- **Login Screen** with smooth animations and Google Sign-In button
 - **Light Neumorphism/Soft UI theme** with clean white aesthetic
 - Welcome state with XyraAI avatar, greeting, and 4 quick reply buttons
 - Real-time AI responses using GROQ/Llama 3.3 70B
@@ -61,6 +65,7 @@ The GROQ API key needs to be added to:
 - Settings screen with smooth UI and Exit App button
 - Network status indicator
 - Typing/thinking indicator
+- User profile with logout functionality
 
 ## Theme Details
 - **Color Palette**: Clean white backgrounds (#FFFFFF, #F5F7FA) with purple accent (#6C63FF)
@@ -69,10 +74,19 @@ The GROQ API key needs to be added to:
 - **Quick Replies**: "Bantu coding", "Jelaskan topik", "Tulis teks", "Ide kreatif"
 
 ## Architecture Notes
+- **Authentication Flow**: LoginActivity is the entry point, checks login status and redirects accordingly
+- **Login Guard**: MainActivity and ProfileActivity redirect to LoginActivity if not authenticated
 - **Multi-chat persistence**: Uses per-chatId JSON storage in SharedPreferences
 - **Async handling**: Captures chatId at send time, saves responses to correct chat
 - **MVP design**: Chat switching blocked during pending responses to ensure data integrity
 - **Drawer refresh**: Previews update immediately after any save operation
+
+## Recent Changes (December 2025)
+- Added LoginActivity as the new app entry point with smooth animations
+- Moved Google Sign-In from ProfileActivity to LoginActivity
+- Added login guards to MainActivity and ProfileActivity
+- ProfileActivity now only shows account info and logout button
+- Added google-services.json for Firebase configuration
 
 ## Secrets
 - `GROQ_API_KEY` - Your GROQ API key for AI chat functionality

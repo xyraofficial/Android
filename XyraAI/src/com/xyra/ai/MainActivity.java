@@ -842,19 +842,24 @@ public class MainActivity extends Activity {
     }
     
     private void showAbout() {
-        new AlertDialog.Builder(this)
-            .setTitle("Tentang XyraAI")
-            .setMessage("XyraAI v1.2\n\n" +
-                "Powered by GROQ API dengan Llama 3.3 70B\n\n" +
-                "Fitur:\n" +
-                "- Multi-bahasa otomatis\n" +
-                "- Animasi mengetik\n" +
-                "- Analisis gambar dengan preview\n" +
-                "- Bantuan kode\n" +
-                "- Riwayat chat tersimpan\n" +
-                "- UI modern dan responsif")
-            .setPositiveButton("OK", null)
-            .show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_about, null);
+        builder.setView(dialogView);
+        
+        final AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+        
+        TextView btnOk = (TextView) dialogView.findViewById(R.id.btnOk);
+        btnOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        
+        dialog.show();
     }
     
     private void initGroqService() {

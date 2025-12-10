@@ -117,9 +117,9 @@ public class MessageRenderer {
         params.setMargins(0, 4, 0, 4);
         textView.setLayoutParams(params);
         
-        textView.setTextColor(0xFFE5E7EB);
+        textView.setTextColor(0xFF2D3436);
         textView.setTextSize(15);
-        textView.setLineSpacing(4, 1);
+        textView.setLineSpacing(6, 1.1f);
         
         SpannableStringBuilder formatted = formatText(text);
         textView.setText(formatted);
@@ -221,9 +221,9 @@ public class MessageRenderer {
             String codeText = codeMatcher.group(1);
             
             builder.replace(start, end, codeText);
-            builder.setSpan(new ForegroundColorSpan(0xFF10B981), 
+            builder.setSpan(new ForegroundColorSpan(0xFF6C63FF), 
                 start, start + codeText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            builder.setSpan(new android.text.style.BackgroundColorSpan(0xFF1E293B), 
+            builder.setSpan(new android.text.style.BackgroundColorSpan(0xFFE8E8F0), 
                 start, start + codeText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             
             offset += 2;

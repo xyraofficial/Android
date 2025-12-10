@@ -23,11 +23,34 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_settings);
         
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         
+        applyThemeColors();
         setupClickListeners();
+        loadCurrentSettings();
+    }
+    
+    private void applyThemeColors() {
+        ThemeManager.ThemeColors colors = ThemeManager.getThemeColors(this);
+        
+        View rootView = findViewById(android.R.id.content);
+        if (rootView != null) {
+            rootView.setBackgroundColor(colors.background);
+        }
+    }
+    
+    private void loadCurrentSettings() {
+        String theme = prefs.getString(KEY_THEME, "System Default");
+        TextView tvTheme = (TextView) findViewById(R.id.tvCurrentTheme);
+        if (tvTheme != null) {
+            String description = "Mengikuti Tema HP";
+            if ("Dark".equals(theme)) description = "Tampilan Gelap";
+            else if ("Light".equals(theme)) description = "Tampilan Cerah";
+            tvTheme.setText(theme + " - " + description);
+        }
     }
     
     private void setupClickListeners() {
@@ -138,21 +161,34 @@ public class SettingsActivity extends Activity {
     }
     
     private void showThemeDialog() {
-        final String[] themes = {"Dark Mode", "Light Mode", "Auto"};
+        final String[] themes = {"System Default", "Dark", "Light"};
+        final String[] themeDescriptions = {"Mengikuti Tema HP", "Tampilan Gelap", "Tampilan Cerah"};
+        
+        String currentTheme = prefs.getString(KEY_THEME, "System Default");
+        int selectedIndex = 0;
+        for (int i = 0; i < themes.length; i++) {
+            if (themes[i].equals(currentTheme)) {
+                selectedIndex = i;
+                break;
+            }
+        }
         
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Pilih Tema");
         
-        builder.setItems(themes, new DialogInterface.OnClickListener() {
+        builder.setSingleChoiceItems(themes, selectedIndex, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 prefs.edit().putString(KEY_THEME, themes[which]).apply();
                 TextView tvTheme = (TextView) findViewById(R.id.tvCurrentTheme);
-                tvTheme.setText(themes[which]);
+                tvTheme.setText(themes[which] + " - " + themeDescriptions[which]);
                 Toast.makeText(SettingsActivity.this, "Tema: " + themes[which], Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+                recreate();
             }
         });
         
+        builder.setNegativeButton("Batal", null);
         builder.show();
     }
     

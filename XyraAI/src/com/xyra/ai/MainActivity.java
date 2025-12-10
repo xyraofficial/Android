@@ -90,9 +90,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ThemeManager.applyTheme(this);
         setContentView(R.layout.activity_main);
         
         initViews();
+        applyThemeColors();
         setupListView();
         setupDrawer();
         setupClickListeners();
@@ -100,6 +102,19 @@ public class MainActivity extends Activity {
         initChatHistory();
         
         addWelcomeMessage();
+    }
+    
+    private void applyThemeColors() {
+        ThemeManager.ThemeColors colors = ThemeManager.getThemeColors(this);
+        
+        View mainContent = findViewById(R.id.mainContent);
+        if (mainContent != null) {
+            mainContent.setBackgroundColor(colors.background);
+        }
+        
+        if (drawerLayout != null) {
+            drawerLayout.setBackgroundColor(colors.drawerBackground);
+        }
     }
     
     private void initViews() {
@@ -233,9 +248,21 @@ public class MainActivity extends Activity {
             .setPositiveButton("Hapus", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    boolean isCurrentChat = item.id.equals(chatAdapter.getCurrentChatId());
                     chatHistory.deleteChat(item.id);
                     refreshChatHistoryList();
-                    Toast.makeText(MainActivity.this, "Chat dihapus", Toast.LENGTH_SHORT).show();
+                    
+                    if (isCurrentChat) {
+                        chatAdapter.clearMessages();
+                        chatHistory.startNewChat();
+                        chatAdapter.setCurrentChatId(chatHistory.getCurrentChatId());
+                        clearSelectedImage();
+                        addWelcomeMessage();
+                        closeDrawer();
+                        Toast.makeText(MainActivity.this, "Chat dihapus, chat baru dimulai", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Chat dihapus", Toast.LENGTH_SHORT).show();
+                    }
                 }
             })
             .setNegativeButton("Batal", null)
@@ -514,10 +541,10 @@ public class MainActivity extends Activity {
         
         if (bitmap != null) {
             try {
-                Bitmap scaledBitmap = scaleBitmap(bitmap, 512);
+                Bitmap scaledBitmap = scaleBitmap(bitmap, 1024);
                 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 95, baos);
                 byte[] imageBytes = baos.toByteArray();
                 selectedImageBase64 = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
                 selectedImageBitmap = scaledBitmap;

@@ -7,24 +7,40 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class LoginActivity extends Activity {
+    
+    private static final String TAG = "LoginActivity";
+    private static final int RC_SIGN_IN = 9001;
     
     private static final String PREFS_NAME = "XyraAIProfile";
     private static final String KEY_USER_ID = "userId";
@@ -46,6 +62,13 @@ public class LoginActivity extends Activity {
     private SharedPreferences prefs;
     private Handler handler = new Handler(Looper.getMainLooper());
     
+    // Firebase Auth
+    private FirebaseAuth mAuth;
+    private GoogleSignInClient mGoogleSignInClient;
+    
+    // Web Client ID from google-services.json
+    private static final String WEB_CLIENT_ID = "253516519538-m0vik284rkmvpkuel9dvi5j2tardv4j1.apps.googleusercontent.com";
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +76,22 @@ public class LoginActivity extends Activity {
         
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         
-        if (isLoggedIn()) {
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+        
+        // Configure Google Sign-In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(WEB_CLIENT_ID)
+                .requestEmail()
+                .requestProfile()
+                .build();
+        
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        
+        // Check if user is already signed in
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            updateUserPrefs(currentUser);
             navigateToMain();
             return;
         }
@@ -65,8 +103,15 @@ public class LoginActivity extends Activity {
         startEntranceAnimations();
     }
     
-    private boolean isLoggedIn() {
-        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Check if user is signed in on start
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            updateUserPrefs(currentUser);
+            navigateToMain();
+        }
     }
     
     private void initViews() {
@@ -85,7 +130,7 @@ public class LoginActivity extends Activity {
             @Override
             public void onClick(View v) {
                 animateButtonPress(v);
-                startGoogleSignIn();
+                signInWithGoogle();
             }
         });
     }
@@ -206,36 +251,106 @@ public class LoginActivity extends Activity {
         v.startAnimation(animSet);
     }
     
-    private void startGoogleSignIn() {
-        btnGoogleSignIn.setEnabled(false);
-        progressBar.setVisibility(View.VISIBLE);
+    private void signInWithGoogle() {
+        showLoading(true);
         
-        btnGoogleSignIn.animate()
-            .alpha(0.7f)
-            .setDuration(200)
-            .start();
-        
-        handler.postDelayed(new Runnable() {
+        // Sign out from previous session to show account picker
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
             @Override
-            public void run() {
-                performLogin();
+            public void onComplete(Task<Void> task) {
+                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(signInIntent, RC_SIGN_IN);
             }
-        }, 1500);
+        });
     }
     
-    private void performLogin() {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
+    }
+    
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            Log.d(TAG, "Google Sign-In successful, authenticating with Firebase...");
+            firebaseAuthWithGoogle(account.getIdToken());
+        } catch (ApiException e) {
+            Log.e(TAG, "Google Sign-In failed: " + e.getStatusCode() + " - " + e.getMessage());
+            showLoading(false);
+            
+            String errorMessage;
+            switch (e.getStatusCode()) {
+                case 12501:
+                    errorMessage = "Login dibatalkan";
+                    break;
+                case 12502:
+                    errorMessage = "Google Play Services perlu diperbarui";
+                    break;
+                case 10:
+                    errorMessage = "Konfigurasi Developer Error. Periksa SHA-1 fingerprint di Firebase Console.";
+                    break;
+                case 7:
+                    errorMessage = "Tidak ada koneksi internet";
+                    break;
+                default:
+                    errorMessage = "Login gagal: " + e.getStatusCode();
+            }
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Firebase authentication successful");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null) {
+                                updateUserPrefs(user);
+                                animateLoginSuccess();
+                            }
+                        } else {
+                            Log.e(TAG, "Firebase authentication failed", task.getException());
+                            showLoading(false);
+                            Toast.makeText(LoginActivity.this, 
+                                    "Autentikasi gagal: " + task.getException().getMessage(), 
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+    
+    private void updateUserPrefs(FirebaseUser user) {
         String currentDate = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID")).format(new Date());
         
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putString(KEY_USER_ID, "xyra_user_" + System.currentTimeMillis());
-        editor.putString(KEY_USER_NAME, "XyraAI User");
-        editor.putString(KEY_USER_EMAIL, "user@gmail.com");
+        editor.putString(KEY_USER_ID, user.getUid());
+        editor.putString(KEY_USER_NAME, user.getDisplayName() != null ? user.getDisplayName() : "XyraAI User");
+        editor.putString(KEY_USER_EMAIL, user.getEmail() != null ? user.getEmail() : "");
         editor.putString(KEY_JOIN_DATE, currentDate);
-        editor.putString(KEY_USER_PHOTO, "");
+        editor.putString(KEY_USER_PHOTO, user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : "");
         editor.apply();
-        
-        animateLoginSuccess();
+    }
+    
+    private void showLoading(boolean show) {
+        if (show) {
+            btnGoogleSignIn.setEnabled(false);
+            progressBar.setVisibility(View.VISIBLE);
+            btnGoogleSignIn.animate().alpha(0.7f).setDuration(200).start();
+        } else {
+            btnGoogleSignIn.setEnabled(true);
+            progressBar.setVisibility(View.GONE);
+            btnGoogleSignIn.animate().alpha(1f).setDuration(200).start();
+        }
     }
     
     private void animateLoginSuccess() {
@@ -298,7 +413,14 @@ public class LoginActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(LoginActivity.this, "Selamat datang di XyraAI!", Toast.LENGTH_SHORT).show();
+                FirebaseUser user = mAuth.getCurrentUser();
+                String welcomeMsg = "Selamat datang";
+                if (user != null && user.getDisplayName() != null) {
+                    welcomeMsg += ", " + user.getDisplayName() + "!";
+                } else {
+                    welcomeMsg += " di XyraAI!";
+                }
+                Toast.makeText(LoginActivity.this, welcomeMsg, Toast.LENGTH_SHORT).show();
                 navigateToMain();
             }
         }, 600);

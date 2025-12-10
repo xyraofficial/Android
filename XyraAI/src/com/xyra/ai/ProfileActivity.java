@@ -20,6 +20,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -33,6 +41,9 @@ public class ProfileActivity extends Activity {
     private static final String KEY_USER_PHOTO = "userPhoto";
     private static final String KEY_JOIN_DATE = "joinDate";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
+    
+    // Web Client ID from google-services.json
+    private static final String WEB_CLIENT_ID = "253516519538-m0vik284rkmvpkuel9dvi5j2tardv4j1.apps.googleusercontent.com";
     
     private ImageButton btnBack;
     private ImageView ivProfileAvatar;
@@ -49,12 +60,26 @@ public class ProfileActivity extends Activity {
     private SharedPreferences prefs;
     private Handler handler = new Handler(Looper.getMainLooper());
     
+    // Firebase Auth
+    private FirebaseAuth mAuth;
+    private GoogleSignInClient mGoogleSignInClient;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ThemeManager.applyTheme(this);
         
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+        
+        // Configure Google Sign-In for sign out
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(WEB_CLIENT_ID)
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         
         if (!isLoggedIn()) {
             redirectToLogin();
@@ -255,22 +280,32 @@ public class ProfileActivity extends Activity {
     }
     
     private void signOut() {
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-        editor.apply();
+        // Sign out from Firebase
+        mAuth.signOut();
         
-        Toast.makeText(this, "Berhasil keluar", Toast.LENGTH_SHORT).show();
-        
-        handler.postDelayed(new Runnable() {
+        // Sign out from Google
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
             @Override
-            public void run() {
-                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+            public void onComplete(Task<Void> task) {
+                // Clear local preferences
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.clear();
+                editor.apply();
+                
+                Toast.makeText(ProfileActivity.this, "Berhasil keluar", Toast.LENGTH_SHORT).show();
+                
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                        finish();
+                    }
+                }, 500);
             }
-        }, 500);
+        });
     }
     
     @Override

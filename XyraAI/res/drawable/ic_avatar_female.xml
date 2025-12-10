@@ -28,47 +28,31 @@
         android:fillColor="#1A1A2E"
         android:pathData="M80,40 C80,40 78,55 75,65 C75,65 72,45 75,40 C78,35 80,40 80,40 Z" />
     
-    <circle
+    <path
         android:fillColor="#FFFFFF"
-        android:centerX="40"
-        android:centerY="48"
-        android:radius="6" />
-    <circle
+        android:pathData="M40,48 m-6,0 a6,6 0,1 1,12 0 a6,6 0,1 1,-12 0" />
+    <path
         android:fillColor="#6366F1"
-        android:centerX="40"
-        android:centerY="48"
-        android:radius="4" />
-    <circle
+        android:pathData="M40,48 m-4,0 a4,4 0,1 1,8 0 a4,4 0,1 1,-8 0" />
+    <path
         android:fillColor="#000000"
-        android:centerX="40"
-        android:centerY="48"
-        android:radius="2" />
-    <circle
+        android:pathData="M40,48 m-2,0 a2,2 0,1 1,4 0 a2,2 0,1 1,-4 0" />
+    <path
         android:fillColor="#FFFFFF"
-        android:centerX="42"
-        android:centerY="46"
-        android:radius="1.2" />
+        android:pathData="M42,46 m-1,0 a1,1 0,1 1,2 0 a1,1 0,1 1,-2 0" />
     
-    <circle
+    <path
         android:fillColor="#FFFFFF"
-        android:centerX="60"
-        android:centerY="48"
-        android:radius="6" />
-    <circle
+        android:pathData="M60,48 m-6,0 a6,6 0,1 1,12 0 a6,6 0,1 1,-12 0" />
+    <path
         android:fillColor="#6366F1"
-        android:centerX="60"
-        android:centerY="48"
-        android:radius="4" />
-    <circle
+        android:pathData="M60,48 m-4,0 a4,4 0,1 1,8 0 a4,4 0,1 1,-8 0" />
+    <path
         android:fillColor="#000000"
-        android:centerX="60"
-        android:centerY="48"
-        android:radius="2" />
-    <circle
+        android:pathData="M60,48 m-2,0 a2,2 0,1 1,4 0 a2,2 0,1 1,-4 0" />
+    <path
         android:fillColor="#FFFFFF"
-        android:centerX="62"
-        android:centerY="46"
-        android:radius="1.2" />
+        android:pathData="M62,46 m-1,0 a1,1 0,1 1,2 0 a1,1 0,1 1,-2 0" />
     
     <path
         android:fillColor="#1A1A2E"
@@ -89,13 +73,11 @@
         android:pathData="M60,54 C60,52 62,51 64,53 C66,51 68,52 68,54 C68,57 64,60 64,60 C64,60 60,57 60,54 Z" />
     
     <path
-        android:fillColor="none"
         android:strokeWidth="1.5"
         android:strokeColor="#F5D0C5"
         android:pathData="M48,56 L50,60 L52,56" />
     
     <path
-        android:fillColor="none"
         android:strokeWidth="2"
         android:strokeColor="#E88B8B"
         android:strokeLineCap="round"

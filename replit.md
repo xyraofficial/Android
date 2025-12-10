@@ -50,7 +50,8 @@ The GROQ API key needs to be added to:
 - `src/com/xyra/ai/Config.java` (GROQ_API_KEY constant)
 
 ## Features
-- Beautiful dark theme chat interface
+- **Light Neumorphism/Soft UI theme** with clean white aesthetic
+- Welcome state with XyraAI avatar, greeting, and 4 quick reply buttons
 - Real-time AI responses using GROQ/Llama 3.3 70B
 - Image analysis with actual image preview in messages
 - Fast typing animation (chunk-based with minimal delays)
@@ -60,6 +61,12 @@ The GROQ API key needs to be added to:
 - Settings screen with smooth UI and Exit App button
 - Network status indicator
 - Typing/thinking indicator
+
+## Theme Details
+- **Color Palette**: Clean white backgrounds (#FFFFFF, #F5F7FA) with purple accent (#6C63FF)
+- **Design**: Neumorphic soft shadows, rounded corners, modern iOS/Fluent-like appearance
+- **Welcome State**: Shows avatar with wave animation, greeting text, and quick reply prompts
+- **Quick Replies**: "Bantu coding", "Jelaskan topik", "Tulis teks", "Ide kreatif"
 
 ## Architecture Notes
 - **Multi-chat persistence**: Uses per-chatId JSON storage in SharedPreferences

@@ -276,48 +276,60 @@
             android:id="@+id/inputArea"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/background"
+            android:background="#F5F5F5"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="12dp">
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="16dp">
 
             <ImageButton
                 android:id="@+id/btnImage"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@drawable/bg_neumorphic_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_add_button"
                 android:contentDescription="Attach Image"
-                android:src="@drawable/ic_image"
-                android:padding="10dp"
-                android:elevation="4dp" />
+                android:src="@drawable/ic_plus"
+                android:padding="12dp"
+                android:elevation="2dp" />
 
-            <EditText
-                android:id="@+id/etMessage"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:background="@drawable/bg_input_neumorphic"
-                android:hint="@string/hint_message"
-                android:inputType="textMultiLine|textCapSentences"
-                android:maxLines="5"
-                android:paddingHorizontal="18dp"
-                android:paddingVertical="14dp"
-                android:textColor="@color/textPrimary"
-                android:textColorHint="@color/textSecondary"
-                android:textCursorDrawable="@null"
-                android:textSize="16sp" />
+                android:layout_marginHorizontal="10dp"
+                android:background="@drawable/bg_input_rounded"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="4dp"
+                android:minHeight="56dp">
 
-            <ImageButton
-                android:id="@+id/btnSend"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginLeft="8dp"
-                android:background="@drawable/bg_send_neumorphic"
-                android:contentDescription="@string/send"
-                android:src="@drawable/ic_send"
-                android:padding="12dp"
-                android:elevation="4dp" />
+                <EditText
+                    android:id="@+id/etMessage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="@string/hint_message"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLines="5"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:textColor="@color/textPrimary"
+                    android:textColorHint="#9CA3AF"
+                    android:textCursorDrawable="@null"
+                    android:textSize="16sp" />
+
+                <ImageButton
+                    android:id="@+id/btnSend"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_send_button_green"
+                    android:contentDescription="@string/send"
+                    android:src="@drawable/ic_arrow_up"
+                    android:padding="12dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

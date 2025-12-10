@@ -90,6 +90,11 @@ public class MainActivity extends Activity {
     
     private GestureDetector gestureDetector;
     
+    private FrameLayout avatarSection;
+    private ImageView ivAvatar;
+    private View avatarGlow;
+    private AvatarAnimator avatarAnimator;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -190,6 +195,14 @@ public class MainActivity extends Activity {
         fullscreenImageContainer = (FrameLayout) findViewById(R.id.fullscreenImageContainer);
         ivFullscreenImage = (ImageView) findViewById(R.id.ivFullscreenImage);
         btnCloseFullscreen = (ImageButton) findViewById(R.id.btnCloseFullscreen);
+        
+        avatarSection = (FrameLayout) findViewById(R.id.avatarSection);
+        ivAvatar = (ImageView) findViewById(R.id.ivAvatar);
+        avatarGlow = findViewById(R.id.avatarGlow);
+        
+        if (ivAvatar != null) {
+            avatarAnimator = new AvatarAnimator(ivAvatar);
+        }
     }
     
     private void setupListView() {
@@ -736,6 +749,7 @@ public class MainActivity extends Activity {
         chatHistory.startNewChat();
         chatAdapter.setCurrentChatId(chatHistory.getCurrentChatId());
         clearSelectedImage();
+        showAvatarSection(true);
         addWelcomeMessage();
         Toast.makeText(this, "Chat baru dimulai", Toast.LENGTH_SHORT).show();
     }
@@ -786,8 +800,18 @@ public class MainActivity extends Activity {
     
     private void addWelcomeMessage() {
         if (chatAdapter.getCount() == 0) {
+            showAvatarSection(true);
             String welcome = getString(R.string.welcome_message);
             chatAdapter.addMessage(new Message(welcome, Message.TYPE_AI));
+            if (avatarAnimator != null) {
+                avatarAnimator.startWaveAnimation();
+            }
+        }
+    }
+    
+    private void showAvatarSection(boolean show) {
+        if (avatarSection != null) {
+            avatarSection.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
     
@@ -907,9 +931,19 @@ public class MainActivity extends Activity {
         if (waiting) {
             tvStatus.setVisibility(View.GONE);
             tvTyping.setVisibility(View.VISIBLE);
+            showAvatarSection(true);
+            if (avatarAnimator != null) {
+                avatarAnimator.startThinkingAnimation();
+            }
         } else {
             tvStatus.setVisibility(View.VISIBLE);
             tvTyping.setVisibility(View.GONE);
+            if (avatarAnimator != null) {
+                avatarAnimator.stopAnimation();
+            }
+            if (chatAdapter.getCount() > 1) {
+                showAvatarSection(false);
+            }
         }
     }
     

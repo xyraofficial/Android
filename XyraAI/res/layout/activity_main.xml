@@ -81,6 +81,40 @@
 
         </LinearLayout>
 
+        <FrameLayout
+            android:id="@+id/avatarSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="24dp"
+            android:gravity="center"
+            android:visibility="gone">
+            
+            <View
+                android:id="@+id/avatarGlow"
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_avatar_glow" />
+            
+            <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_avatar_container"
+                android:padding="4dp">
+                
+                <ImageView
+                    android:id="@+id/ivAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_launcher"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="AI Avatar" />
+                    
+            </FrameLayout>
+            
+        </FrameLayout>
+
         <ListView
             android:id="@+id/listView"
             android:layout_width="match_parent"

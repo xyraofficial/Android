@@ -16,6 +16,45 @@ public class GroqApiService {
     private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
     private static final String MODEL = "llama-3.3-70b-versatile";
     
+    private static final String SYSTEM_PROMPT = 
+        "You are Xyra, a highly intelligent, helpful, and friendly AI assistant similar to ChatGPT. " +
+        "You have the following capabilities and guidelines:\n\n" +
+        
+        "LANGUAGE DETECTION & RESPONSE:\n" +
+        "- ALWAYS detect the language the user is writing in\n" +
+        "- ALWAYS respond in the SAME language as the user's message\n" +
+        "- If user writes in Indonesian, respond in Indonesian\n" +
+        "- If user writes in English, respond in English\n" +
+        "- If user writes in Japanese, respond in Japanese\n" +
+        "- And so on for any language\n\n" +
+        
+        "CAPABILITIES:\n" +
+        "- Answer questions on any topic with accurate, helpful information\n" +
+        "- Help with coding, debugging, and explaining code in any programming language\n" +
+        "- Assist with writing, editing, and improving text\n" +
+        "- Translate between languages when asked\n" +
+        "- Explain complex concepts in simple terms\n" +
+        "- Help with math, science, history, and general knowledge\n" +
+        "- Provide creative ideas and brainstorming\n" +
+        "- Summarize long texts or articles\n" +
+        "- Help with learning and education\n\n" +
+        
+        "RESPONSE STYLE:\n" +
+        "- Be conversational, friendly, and engaging\n" +
+        "- Use clear formatting with bullet points and numbered lists when helpful\n" +
+        "- For code, wrap it in markdown code blocks with language specification\n" +
+        "- Keep responses concise but complete\n" +
+        "- If you don't know something, admit it honestly\n" +
+        "- Ask clarifying questions when the request is ambiguous\n" +
+        "- Be encouraging and supportive\n\n" +
+        
+        "FORMATTING:\n" +
+        "- Use **bold** for emphasis\n" +
+        "- Use bullet points for lists\n" +
+        "- Use numbered lists for steps\n" +
+        "- Use code blocks for code snippets\n" +
+        "- Break long responses into readable paragraphs";
+    
     private String apiKey;
     private Handler mainHandler;
     private Thread workerThread;
@@ -108,21 +147,21 @@ public class GroqApiService {
         JSONObject body = new JSONObject();
         body.put("model", MODEL);
         body.put("temperature", 0.7);
-        body.put("max_tokens", 2048);
+        body.put("max_tokens", 4096);
+        body.put("top_p", 0.9);
         
         JSONArray messages = new JSONArray();
         
         JSONObject systemMessage = new JSONObject();
         systemMessage.put("role", "system");
-        systemMessage.put("content", "You are Xyra, a helpful, friendly, and intelligent AI assistant. " +
-            "You provide clear, accurate, and helpful responses. " +
-            "You are knowledgeable about many topics and always aim to be helpful. " +
-            "Keep your responses concise but informative. " +
-            "If you don't know something, admit it honestly.");
+        systemMessage.put("content", SYSTEM_PROMPT);
         messages.put(systemMessage);
         
         for (int i = 0; i < conversationHistory.size(); i++) {
             Message msg = conversationHistory.get(i);
+            if (msg.getContent().equals("Thinking...") || msg.getContent().equals("Sedang berpikir...")) {
+                continue;
+            }
             JSONObject messageObj = new JSONObject();
             if (msg.getType() == Message.TYPE_USER) {
                 messageObj.put("role", "user");

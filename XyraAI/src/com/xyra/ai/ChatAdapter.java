@@ -77,7 +77,13 @@ public class ChatAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         
-        holder.tvMessage.setText(message.getContent());
+        if (viewType == TYPE_AI) {
+            CharSequence formattedText = MarkdownParser.parse(message.getContent());
+            holder.tvMessage.setText(formattedText);
+        } else {
+            holder.tvMessage.setText(message.getContent());
+        }
+        
         holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
         
         return convertView;
@@ -102,6 +108,12 @@ public class ChatAdapter extends BaseAdapter {
     
     public void clearMessages() {
         messages.clear();
+        notifyDataSetChanged();
+    }
+    
+    public void setMessages(List<Message> newMessages) {
+        messages.clear();
+        messages.addAll(newMessages);
         notifyDataSetChanged();
     }
     

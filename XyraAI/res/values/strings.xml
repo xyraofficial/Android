@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">XyraAI</string>
-    <string name="hint_message">Type your message...</string>
+    <string name="hint_message">Ask me anything...</string>
     <string name="send">Send</string>
-    <string name="welcome_message">Hello! I\'m Xyra, your AI assistant. How can I help you today?</string>
+    <string name="welcome_message">Hello! I\'m Xyra, your AI assistant. I can help you with:\n\n• Answering questions in any language\n• Writing and editing text\n• Coding and debugging\n• Explaining complex topics\n• Creative brainstorming\n• And much more!\n\nJust type your message and I\'ll respond in your language. How can I help you today?</string>
     <string name="error_network">Network error. Please check your connection.</string>
-    <string name="error_api">Error getting response. Please try again.</string>
+    <string name="error_api">Sorry, I encountered an error. Please try again.</string>
     <string name="thinking">Thinking...</string>
+    <string name="status_online">Online</string>
+    <string name="typing">Xyra is typing...</string>
+    <string name="new_chat">New Chat</string>
+    <string name="clear_history">Clear History</string>
+    <string name="about">About</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
 </resources>

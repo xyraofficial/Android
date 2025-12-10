@@ -13,7 +13,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
+            android:background="@color/headerBackground"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="12dp">
@@ -181,12 +181,41 @@
         android:background="#80000000"
         android:visibility="gone" />
 
+    <FrameLayout
+        android:id="@+id/fullscreenImageContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#E0000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+        
+        <ImageView
+            android:id="@+id/ivFullscreenImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:contentDescription="Fullscreen Image" />
+        
+        <ImageButton
+            android:id="@+id/btnCloseFullscreen"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="16dp"
+            android:background="@drawable/bg_exit_button"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:padding="12dp"
+            android:contentDescription="Close" />
+        
+    </FrameLayout>
+
     <LinearLayout
         android:id="@+id/drawerLayout"
         android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/colorPrimary"
+        android:background="@color/drawerBackground"
         android:orientation="vertical"
         android:translationX="-280dp"
         android:elevation="8dp">
@@ -194,7 +223,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#1E1E2E"
+            android:background="@color/headerBackground"
             android:orientation="vertical"
             android:padding="20dp">
 
@@ -250,7 +279,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="+"
-                android:textColor="#8B5CF6"
+                android:textColor="@color/colorAccent"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -293,7 +322,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#2A2A40"
+            android:background="@color/divider"
             android:layout_marginVertical="8dp"
             android:layout_marginHorizontal="16dp" />
 
@@ -320,7 +349,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#2A2A40" />
+            android:background="@color/divider" />
 
         <LinearLayout
             android:id="@+id/btnSettings"

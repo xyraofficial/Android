@@ -30,6 +30,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -39,6 +40,7 @@ import android.os.Environment;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -81,6 +83,10 @@ public class MainActivity extends Activity {
     private Bitmap selectedImageBitmap = null;
     private boolean userScrolledUp = false;
     
+    private FrameLayout fullscreenImageContainer;
+    private ImageView ivFullscreenImage;
+    private ImageButton btnCloseFullscreen;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +125,10 @@ public class MainActivity extends Activity {
         btnNewChat = (LinearLayout) findViewById(R.id.btnNewChat);
         btnClearChats = (LinearLayout) findViewById(R.id.btnClearChats);
         btnSettings = (LinearLayout) findViewById(R.id.btnSettings);
+        
+        fullscreenImageContainer = (FrameLayout) findViewById(R.id.fullscreenImageContainer);
+        ivFullscreenImage = (ImageView) findViewById(R.id.ivFullscreenImage);
+        btnCloseFullscreen = (ImageButton) findViewById(R.id.btnCloseFullscreen);
     }
     
     private void setupListView() {
@@ -355,6 +365,24 @@ public class MainActivity extends Activity {
             });
         }
         
+        if (btnCloseFullscreen != null) {
+            btnCloseFullscreen.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeFullscreenImage();
+                }
+            });
+        }
+        
+        if (fullscreenImageContainer != null) {
+            fullscreenImageContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeFullscreenImage();
+                }
+            });
+        }
+        
         btnNewChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -537,6 +565,25 @@ public class MainActivity extends Activity {
         selectedImageBitmap = null;
         if (imagePreviewContainer != null) {
             imagePreviewContainer.setVisibility(View.GONE);
+        }
+    }
+    
+    public void showFullscreenImage(Bitmap bitmap) {
+        if (fullscreenImageContainer != null && ivFullscreenImage != null && bitmap != null) {
+            ivFullscreenImage.setImageBitmap(bitmap);
+            fullscreenImageContainer.setVisibility(View.VISIBLE);
+            fullscreenImageContainer.animate().alpha(1f).setDuration(200).start();
+        }
+    }
+    
+    private void closeFullscreenImage() {
+        if (fullscreenImageContainer != null) {
+            fullscreenImageContainer.animate().alpha(0f).setDuration(200).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    fullscreenImageContainer.setVisibility(View.GONE);
+                }
+            }).start();
         }
     }
     
@@ -794,7 +841,9 @@ public class MainActivity extends Activity {
     
     @Override
     public void onBackPressed() {
-        if (isDrawerOpen) {
+        if (fullscreenImageContainer != null && fullscreenImageContainer.getVisibility() == View.VISIBLE) {
+            closeFullscreenImage();
+        } else if (isDrawerOpen) {
             closeDrawer();
         } else {
             super.onBackPressed();

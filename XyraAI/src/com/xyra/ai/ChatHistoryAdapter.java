@@ -102,6 +102,16 @@ public class ChatHistoryAdapter extends BaseAdapter {
             }
         });
         
+        convertView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (listener != null) {
+                    listener.onChatDelete(item);
+                }
+                return true;
+            }
+        });
+        
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

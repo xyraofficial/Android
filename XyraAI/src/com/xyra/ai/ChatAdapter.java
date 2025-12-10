@@ -89,7 +89,7 @@ public class ChatAdapter extends BaseAdapter {
         }
     }
     
-    private View getUserView(Message message, View convertView, ViewGroup parent) {
+    private View getUserView(final Message message, View convertView, ViewGroup parent) {
         UserViewHolder holder;
         
         if (convertView == null || convertView.getTag() == null || !(convertView.getTag() instanceof UserViewHolder)) {
@@ -118,6 +118,15 @@ public class ChatAdapter extends BaseAdapter {
                     holder.ivUserImage.setVisibility(View.GONE);
                 }
             }
+            
+            holder.ivUserImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (message.getImageBitmap() != null && context instanceof MainActivity) {
+                        ((MainActivity) context).showFullscreenImage(message.getImageBitmap());
+                    }
+                }
+            });
             
             String content = message.getContent();
             if (content.startsWith("[Gambar] ")) {

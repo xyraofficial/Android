@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
     private static final String PREFS_NAME = "XyraAIProfile";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     
-    private static final String API_KEY = "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";
+    // API Key is now loaded from remote config via ConfigLoader
     private static final int PICK_IMAGE_REQUEST = 1;
     private static final int CAMERA_REQUEST = 2;
     private static final int FILE_REQUEST = 3;
@@ -124,10 +124,16 @@ public class MainActivity extends Activity {
         setupDrawer();
         setupClickListeners();
         setupSwipeGesture();
-        initGroqService();
         initChatHistory();
         
-        addWelcomeMessage();
+        // Load remote config then initialize Groq service
+        ConfigLoader.loadConfig(new ConfigLoader.ConfigCallback() {
+            @Override
+            public void onConfigLoaded(boolean success) {
+                initGroqService();
+                addWelcomeMessage();
+            }
+        });
     }
     
     private boolean isLoggedIn() {
@@ -951,7 +957,7 @@ public class MainActivity extends Activity {
     }
     
     private void initGroqService() {
-        groqApiService = new GroqApiService(API_KEY);
+        groqApiService = new GroqApiService(Config.GROQ_API_KEY);
     }
     
     private void initChatHistory() {

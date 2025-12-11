@@ -1,7 +1,9 @@
 package com.xyra.ai;
 
 public class Config {
-    public static final String GROQ_API_KEY = "YOUR_GROQ_API_KEY_HERE"; // Replace with your API key
+    public static final String CONFIG_URL = "https://raw.githubusercontent.com/xyraofficial/Android/refs/heads/main/configurasi/config.json";
+    
+    public static String GROQ_API_KEY = ""; // Will be loaded from remote config
 
     public static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 

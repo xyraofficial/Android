@@ -41,23 +41,24 @@
                         android:src="@drawable/bg_logo_glow"
                         android:alpha="0" />
 
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="140dp"
                         android:layout_height="140dp"
                         android:layout_gravity="center"
                         android:background="@drawable/bg_login_logo_container"
-                        android:gravity="center"
                         android:elevation="12dp">
 
                         <ImageView
                             android:id="@+id/ivLogo"
-                            android:layout_width="100dp"
-                            android:layout_height="100dp"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_gravity="center"
                             android:src="@drawable/ic_xyra_avatar"
-                            android:scaleType="centerInside"
+                            android:scaleType="centerCrop"
+                            android:background="@drawable/bg_avatar_circle"
                             android:contentDescription="XyraAI Logo" />
 
-                    </LinearLayout>
+                    </FrameLayout>
 
                 </FrameLayout>
 

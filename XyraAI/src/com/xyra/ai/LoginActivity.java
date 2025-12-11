@@ -48,9 +48,11 @@ public class LoginActivity extends Activity {
     private static final String KEY_JOIN_DATE = "joinDate";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     
-    // Firebase REST API Key - get from Firebase Console > Project Settings > Web API Key
-    private static final String FIREBASE_API_KEY = "YOUR_FIREBASE_API_KEY_HERE";
     private static final String FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:";
+    
+    private String getFirebaseApiKey() {
+        return getString(R.string.firebase_api_key);
+    }
     
     private ImageView ivLogo;
     private ImageView ivLogoGlow;
@@ -66,6 +68,8 @@ public class LoginActivity extends Activity {
     private LinearLayout loginContainer;
     private LinearLayout formContainer;
     private View gradientOverlay;
+    private ImageView ivTogglePassword;
+    private boolean isPasswordVisible = false;
     
     private SharedPreferences prefs;
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -109,6 +113,7 @@ public class LoginActivity extends Activity {
         tvSwitchMode = (TextView) findViewById(R.id.tvSwitchMode);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         formContainer = (LinearLayout) findViewById(R.id.formContainer);
+        ivTogglePassword = (ImageView) findViewById(R.id.ivTogglePassword);
         
         // Initially hide register fields
         if (etDisplayName != null) {
@@ -142,6 +147,35 @@ public class LoginActivity extends Activity {
                 }
             });
         }
+        
+        if (ivTogglePassword != null) {
+            ivTogglePassword.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    togglePasswordVisibility();
+                }
+            });
+        }
+    }
+    
+    private void togglePasswordVisibility() {
+        if (etPassword == null) return;
+        
+        isPasswordVisible = !isPasswordVisible;
+        
+        if (isPasswordVisible) {
+            etPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            if (ivTogglePassword != null) {
+                ivTogglePassword.setImageResource(R.drawable.ic_visibility_on);
+            }
+        } else {
+            etPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            if (ivTogglePassword != null) {
+                ivTogglePassword.setImageResource(R.drawable.ic_visibility_off);
+            }
+        }
+        
+        etPassword.setSelection(etPassword.getText().length());
     }
     
     private void toggleMode() {
@@ -204,7 +238,7 @@ public class LoginActivity extends Activity {
     
     private void firebaseSignIn(String email, String password) {
         try {
-            URL url = new URL(FIREBASE_AUTH_URL + "signInWithPassword?key=" + FIREBASE_API_KEY);
+            URL url = new URL(FIREBASE_AUTH_URL + "signInWithPassword?key=" + getFirebaseApiKey());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
@@ -277,7 +311,7 @@ public class LoginActivity extends Activity {
     
     private void firebaseSignUp(String email, String password, final String displayName) {
         try {
-            URL url = new URL(FIREBASE_AUTH_URL + "signUp?key=" + FIREBASE_API_KEY);
+            URL url = new URL(FIREBASE_AUTH_URL + "signUp?key=" + getFirebaseApiKey());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");

@@ -55,7 +55,6 @@ public class LoginActivity extends Activity {
     }
     
     private ImageView ivLogo;
-    private ImageView ivLogoGlow;
     private TextView tvAppName;
     private TextView tvTagline;
     private EditText etEmail;
@@ -99,7 +98,6 @@ public class LoginActivity extends Activity {
     
     private void initViews() {
         ivLogo = (ImageView) findViewById(R.id.ivLogo);
-        ivLogoGlow = (ImageView) findViewById(R.id.ivLogoGlow);
         tvAppName = (TextView) findViewById(R.id.tvAppName);
         tvTagline = (TextView) findViewById(R.id.tvTagline);
         loginContainer = (LinearLayout) findViewById(R.id.loginContainer);
@@ -438,12 +436,6 @@ public class LoginActivity extends Activity {
             ivLogo.setScaleY(0.3f);
         }
         
-        if (ivLogoGlow != null) {
-            ivLogoGlow.setAlpha(0f);
-            ivLogoGlow.setScaleX(0.3f);
-            ivLogoGlow.setScaleY(0.3f);
-        }
-        
         if (tvAppName != null) {
             tvAppName.setAlpha(0f);
             tvAppName.setTranslationY(30f);
@@ -468,19 +460,6 @@ public class LoginActivity extends Activity {
                 .setInterpolator(new OvershootInterpolator(1.2f))
                 .setStartDelay(200)
                 .start();
-        }
-        
-        if (ivLogoGlow != null) {
-            ivLogoGlow.animate()
-                .alpha(0.6f)
-                .scaleX(1.2f)
-                .scaleY(1.2f)
-                .setDuration(1000)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .setStartDelay(400)
-                .start();
-            
-            startGlowPulseAnimation();
         }
         
         if (tvAppName != null) {
@@ -512,35 +491,6 @@ public class LoginActivity extends Activity {
                 .setStartDelay(800)
                 .start();
         }
-    }
-    
-    private void startGlowPulseAnimation() {
-        if (ivLogoGlow == null) return;
-        
-        final Runnable pulseRunnable = new Runnable() {
-            boolean expanding = true;
-            
-            @Override
-            public void run() {
-                if (isFinishing()) return;
-                
-                float targetScale = expanding ? 1.4f : 1.1f;
-                float targetAlpha = expanding ? 0.3f : 0.6f;
-                
-                ivLogoGlow.animate()
-                    .scaleX(targetScale)
-                    .scaleY(targetScale)
-                    .alpha(targetAlpha)
-                    .setDuration(2000)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .withEndAction(this)
-                    .start();
-                
-                expanding = !expanding;
-            }
-        };
-        
-        handler.postDelayed(pulseRunnable, 1500);
     }
     
     private void animateButtonPress(final View v) {
@@ -594,15 +544,6 @@ public class LoginActivity extends Activity {
                             .start();
                     }
                 })
-                .start();
-        }
-        
-        if (ivLogoGlow != null) {
-            ivLogoGlow.animate()
-                .scaleX(2f)
-                .scaleY(2f)
-                .alpha(0f)
-                .setDuration(500)
                 .start();
         }
         

@@ -10,17 +10,37 @@ import java.util.UUID;
 
 public class ChatHistory {
     
-    private static final String PREFS_NAME = "xyra_chat_history";
+    private static final String PREFS_NAME_PREFIX = "xyra_chat_history_";
     private static final String KEY_CHATS = "chats";
     private static final String KEY_CURRENT_CHAT = "current_chat";
     private static final String KEY_MESSAGES_PREFIX = "messages_";
+    private static final String USER_PREFS_NAME = "XyraAIProfile";
+    private static final String KEY_USER_ID = "userId";
     
     private SharedPreferences prefs;
     private Context context;
+    private String currentUserId;
     
     public ChatHistory(Context context) {
         this.context = context;
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        this.currentUserId = getUserId(context);
+        String prefsName = PREFS_NAME_PREFIX + currentUserId;
+        this.prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
+    }
+    
+    private String getUserId(Context context) {
+        SharedPreferences userPrefs = context.getSharedPreferences(USER_PREFS_NAME, Context.MODE_PRIVATE);
+        String oderId = userPrefs.getString(KEY_USER_ID, "default_user");
+        return oderId;
+    }
+    
+    public void refreshForUser() {
+        String newUserId = getUserId(context);
+        if (!newUserId.equals(currentUserId)) {
+            currentUserId = newUserId;
+            String prefsName = PREFS_NAME_PREFIX + currentUserId;
+            prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
+        }
     }
     
     public void saveMessages(List<Message> messages) {

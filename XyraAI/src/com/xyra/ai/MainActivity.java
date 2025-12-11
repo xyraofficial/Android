@@ -1162,6 +1162,9 @@ public class MainActivity extends Activity {
         if (chatAdapter != null) {
             chatAdapter.setThemeColors(ThemeManager.getThemeColors(this));
         }
+        if (chatHistory != null) {
+            chatHistory.refreshForUser();
+        }
     }
     
     @Override

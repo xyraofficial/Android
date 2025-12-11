@@ -159,8 +159,8 @@ public class LoginActivity extends Activity {
     }
     
     private void performLogin() {
-        String email = etEmail != null ? etEmail.getText().toString().trim() : "";
-        String password = etPassword != null ? etPassword.getText().toString().trim() : "";
+        final String email = etEmail != null ? etEmail.getText().toString().trim() : "";
+        final String password = etPassword != null ? etPassword.getText().toString().trim() : "";
         
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Email dan password harus diisi", Toast.LENGTH_SHORT).show();
@@ -178,9 +178,9 @@ public class LoginActivity extends Activity {
     }
     
     private void performRegister() {
-        String email = etEmail != null ? etEmail.getText().toString().trim() : "";
-        String password = etPassword != null ? etPassword.getText().toString().trim() : "";
-        String displayName = etDisplayName != null ? etDisplayName.getText().toString().trim() : "";
+        final String email = etEmail != null ? etEmail.getText().toString().trim() : "";
+        final String password = etPassword != null ? etPassword.getText().toString().trim() : "";
+        final String displayName = etDisplayName != null ? etDisplayName.getText().toString().trim() : "";
         
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Email dan password harus diisi", Toast.LENGTH_SHORT).show();

@@ -90,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="User"
-                android:textColor="@color/textPrimary"
+                android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
@@ -100,7 +100,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text=""
-                android:textColor="@color/textSecondary"
+                android:textColor="#E8E8FF"
                 android:textSize="14sp" />
 
             <LinearLayout
@@ -125,7 +125,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:text="Online"
-                    android:textColor="#10B981"
+                    android:textColor="#059669"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
@@ -192,7 +192,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="-"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#6C63FF"
                             android:textSize="14sp"
                             android:layout_marginTop="2dp" />
 
@@ -237,7 +237,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="-"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#6C63FF"
                             android:textSize="14sp"
                             android:layout_marginTop="2dp" />
 
@@ -282,7 +282,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="-"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#6C63FF"
                             android:textSize="14sp"
                             android:layout_marginTop="2dp" />
 
@@ -327,7 +327,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textColor="@color/textPrimary"
+                            android:textColor="#6C63FF"
                             android:textSize="14sp"
                             android:layout_marginTop="2dp" />
 

@@ -10,142 +10,205 @@
         android:layout_height="match_parent"
         android:background="@drawable/bg_login_gradient" />
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:fillViewport="true">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:paddingTop="60dp">
-
-            <FrameLayout
-                android:layout_width="160dp"
-                android:layout_height="160dp"
-                android:layout_gravity="center">
-
-                <ImageView
-                    android:id="@+id/ivLogoGlow"
-                    android:layout_width="180dp"
-                    android:layout_height="180dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/bg_logo_glow"
-                    android:alpha="0" />
-
-                <LinearLayout
-                    android:layout_width="140dp"
-                    android:layout_height="140dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_login_logo_container"
-                    android:gravity="center"
-                    android:elevation="12dp">
-
-                    <ImageView
-                        android:id="@+id/ivLogo"
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:src="@drawable/ic_xyra_avatar"
-                        android:scaleType="centerInside"
-                        android:contentDescription="XyraAI Logo" />
-
-                </LinearLayout>
-
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/tvAppName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="XyraAI"
-                android:textColor="@color/textPrimary"
-                android:textSize="36sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.05" />
-
-            <TextView
-                android:id="@+id/tvTagline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="Asisten AI Cerdas untuk Anda"
-                android:textColor="@color/textSecondary"
-                android:textSize="16sp"
-                android:letterSpacing="0.02" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/loginContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:paddingHorizontal="32dp"
-            android:paddingBottom="80dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Masuk untuk memulai"
-                android:textColor="@color/textSecondary"
-                android:textSize="14sp"
-                android:layout_marginBottom="24dp" />
+            android:gravity="center">
 
             <LinearLayout
-                android:id="@+id/btnGoogleSignIn"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="@drawable/bg_google_button_login"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:clickable="true"
-                android:focusable="true"
-                android:elevation="6dp">
+                android:paddingTop="60dp">
 
-                <ImageView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:src="@drawable/ic_google"
-                    android:contentDescription="Google" />
+                <FrameLayout
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
+                    android:layout_gravity="center">
+
+                    <ImageView
+                        android:id="@+id/ivLogoGlow"
+                        android:layout_width="180dp"
+                        android:layout_height="180dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/bg_logo_glow"
+                        android:alpha="0" />
+
+                    <LinearLayout
+                        android:layout_width="140dp"
+                        android:layout_height="140dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_login_logo_container"
+                        android:gravity="center"
+                        android:elevation="12dp">
+
+                        <ImageView
+                            android:id="@+id/ivLogo"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:src="@drawable/ic_xyra_avatar"
+                            android:scaleType="centerInside"
+                            android:contentDescription="XyraAI Logo" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvAppName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:text="XyraAI"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/tvTagline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Asisten AI Cerdas untuk Anda"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="16sp"
+                    android:letterSpacing="0.02" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/loginContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingHorizontal="32dp"
+                android:paddingTop="40dp"
+                android:paddingBottom="40dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:text="Masuk dengan Google"
-                    android:textColor="#1F1F1F"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
+                    android:text="Masuk untuk memulai"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="24dp" />
+
+                <LinearLayout
+                    android:id="@+id/formContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/etDisplayName"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/bg_input_field"
+                        android:hint="Nama Lengkap"
+                        android:inputType="textPersonName"
+                        android:paddingHorizontal="20dp"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/textSecondary"
+                        android:textSize="16sp"
+                        android:visibility="gone" />
+
+                    <EditText
+                        android:id="@+id/etEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/bg_input_field"
+                        android:hint="Email"
+                        android:inputType="textEmailAddress"
+                        android:paddingHorizontal="20dp"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/textSecondary"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/etPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/bg_input_field"
+                        android:hint="Password"
+                        android:inputType="textPassword"
+                        android:paddingHorizontal="20dp"
+                        android:textColor="@color/textPrimary"
+                        android:textColorHint="@color/textSecondary"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/btnLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_button_primary"
+                        android:text="Masuk"
+                        android:textColor="#FFFFFF"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btnRegister"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_button_secondary"
+                        android:text="Daftar"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="false"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvSwitchMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Belum punya akun? Daftar"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="14sp"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginTop="24dp"
+                    android:indeterminateTint="@color/colorPrimary"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Dengan masuk, Anda menyetujui\nSyarat dan Ketentuan kami"
+                    android:textColor="@color/textSecondary"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:lineSpacingExtra="4dp"
+                    android:alpha="0.7" />
 
             </LinearLayout>
 
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginTop="24dp"
-                android:indeterminateTint="@color/colorPrimary"
-                android:visibility="gone" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="Dengan masuk, Anda menyetujui\nSyarat dan Ketentuan kami"
-                android:textColor="@color/textSecondary"
-                android:textSize="12sp"
-                android:gravity="center"
-                android:lineSpacingExtra="4dp"
-                android:alpha="0.7" />
-
         </LinearLayout>
 
-    </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

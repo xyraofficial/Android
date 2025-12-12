@@ -965,7 +965,7 @@ public class MainActivity extends Activity {
         
         chatHistory.initializeFromCloud(new ChatHistory.InitCallback() {
             @Override
-            public void onComplete(boolean success) {
+            public void onComplete(boolean success, String currentChatId) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

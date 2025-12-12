@@ -143,11 +143,12 @@ public class LoginActivity extends Activity {
             btnGoogleLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100)
+                    final View button = v;
+                    button.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100)
                         .withEndAction(new Runnable() {
                             @Override
                             public void run() {
-                                v.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
+                                button.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
                             }
                         }).start();
                     performGoogleLogin();

@@ -432,7 +432,7 @@ public class SupabaseService {
                     os.write(chatData.toString().getBytes("UTF-8"));
                     os.close();
                     
-                    int responseCode = conn.getResponseCode();
+                    final int responseCode = conn.getResponseCode();
                     conn.disconnect();
                     
                     if (responseCode >= 200 && responseCode < 300) {
@@ -490,7 +490,7 @@ public class SupabaseService {
                     conn.setConnectTimeout(15000);
                     conn.setReadTimeout(15000);
                     
-                    int responseCode = conn.getResponseCode();
+                    final int responseCode = conn.getResponseCode();
                     
                     if (responseCode >= 200 && responseCode < 300) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -570,7 +570,7 @@ public class SupabaseService {
                     conn.setConnectTimeout(15000);
                     conn.setReadTimeout(15000);
                     
-                    int responseCode = conn.getResponseCode();
+                    final int responseCode = conn.getResponseCode();
                     
                     if (responseCode >= 200 && responseCode < 300) {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -660,7 +660,7 @@ public class SupabaseService {
                     conn.setConnectTimeout(15000);
                     conn.setReadTimeout(15000);
                     
-                    int responseCode = conn.getResponseCode();
+                    final int responseCode = conn.getResponseCode();
                     conn.disconnect();
                     
                     if (responseCode >= 200 && responseCode < 300) {

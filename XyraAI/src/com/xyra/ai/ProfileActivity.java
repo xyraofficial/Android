@@ -8,6 +8,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -232,7 +238,9 @@ public class ProfileActivity extends Activity {
                         @Override
                         public void run() {
                             if (bitmap != null) {
-                                ivProfileAvatar.setImageBitmap(bitmap);
+                                Bitmap circularBitmap = getCircularBitmap(bitmap);
+                                ivProfileAvatar.setImageBitmap(circularBitmap);
+                                ivProfileAvatar.setScaleType(ImageView.ScaleType.FIT_CENTER);
                             }
                         }
                     });
@@ -241,6 +249,31 @@ public class ProfileActivity extends Activity {
                 }
             }
         }).start();
+    }
+    
+    private Bitmap getCircularBitmap(Bitmap bitmap) {
+        int size = Math.min(bitmap.getWidth(), bitmap.getHeight());
+        
+        Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, size, size);
+        final RectF rectF = new RectF(rect);
+        
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        canvas.drawOval(rectF, paint);
+        
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        
+        int left = (bitmap.getWidth() - size) / 2;
+        int top = (bitmap.getHeight() - size) / 2;
+        Rect srcRect = new Rect(left, top, left + size, top + size);
+        
+        canvas.drawBitmap(bitmap, srcRect, rect, paint);
+        
+        return output;
     }
     
     private void confirmSignOut() {

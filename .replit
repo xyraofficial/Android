@@ -1,11 +1,11 @@
-modules = ["java-graalvm22.3", "python-3.11"]
+modules = ["java-graalvm22.3", "python-3.12"]
 [agent]
 expertMode = true
 integrations = ["firebase_barebones_flask:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["openssl", "postgresql", "unzip", "zip"]
+packages = ["cargo", "libiconv", "openssl", "postgresql", "rustc", "unzip", "zip"]
 
 [workflows]
 runButton = "Project"

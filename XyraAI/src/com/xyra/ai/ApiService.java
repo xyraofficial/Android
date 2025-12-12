@@ -23,7 +23,7 @@ public class ApiService {
     private static final String KEY_USERNAME = "username";
     private static final String KEY_EMAIL = "email";
     
-    private static String BASE_URL = "https://696f07e8-3343-4cb7-abc8-f11e2cd48555-00-ozmjwlo47659.sisko.replit.dev";
+    private static String BASE_URL = "";
     
     private Context context;
     private SharedPreferences prefs;

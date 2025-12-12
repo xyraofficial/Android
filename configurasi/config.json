@@ -1,6 +1,4 @@
 {
     "firebase_api": "AIzaSyByqMX6odzjnV531WTtHyPbDQUFUXEYm2M",
-    "groq_api": "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",
-    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlrZHluenRmcXlscnN6Z29heHV4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTUzNzk3OCwiZXhwIjoyMDgxMTEzOTc4fQ.UibfTKl5pmxgZpoxLCNQHQGrF01GebXjQW5CItx9YIU",
-    "SUPABASE_URL": "https://ikdynztfqylrszgoaxux.supabase.co"
+    "groq_api": "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"
 }

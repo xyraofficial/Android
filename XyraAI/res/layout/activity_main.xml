@@ -491,61 +491,6 @@
             android:background="@color/divider" />
 
         <LinearLayout
-            android:id="@+id/btnFileManager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_drawer_item"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_folder"
-                android:contentDescription="File Manager" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:text="File Manager"
-                android:textColor="@color/textPrimary"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/btnCodeEditor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_drawer_item"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_file"
-                android:contentDescription="Code Editor" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:text="Code Editor"
-                android:textColor="@color/textPrimary"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/divider" />
-
-        <LinearLayout
             android:id="@+id/btnProfile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

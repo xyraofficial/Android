@@ -584,35 +584,6 @@ public class MainActivity extends Activity {
             });
         }
         
-        LinearLayout btnFileManager = (LinearLayout) findViewById(R.id.btnFileManager);
-        if (btnFileManager != null) {
-            btnFileManager.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    closeDrawer();
-                    Intent intent = new Intent(MainActivity.this, FileManagerActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                }
-            });
-        }
-        
-        LinearLayout btnCodeEditor = (LinearLayout) findViewById(R.id.btnCodeEditor);
-        if (btnCodeEditor != null) {
-            btnCodeEditor.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    closeDrawer();
-                    Intent intent = new Intent(MainActivity.this, CodeEditorActivity.class);
-                    intent.putExtra("file_name", "untitled.py");
-                    intent.putExtra("file_content", "# Start coding here\n\n");
-                    intent.putExtra("file_language", "python");
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                }
-            });
-        }
-        
         setupQuickReplies();
     }
     

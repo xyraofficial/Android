@@ -275,6 +275,44 @@ public class ChatHistory {
         prefs.edit().clear().apply();
     }
     
+    public boolean chatExists(String chatId) {
+        try {
+            JSONArray chats = getChatsArray();
+            for (int i = 0; i < chats.length(); i++) {
+                JSONObject chat = chats.getJSONObject(i);
+                if (chat.getString("id").equals(chatId)) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public void createChatWithId(String chatId, String title, String preview) {
+        try {
+            JSONArray chats = getChatsArray();
+            JSONObject newChat = new JSONObject();
+            newChat.put("id", chatId);
+            newChat.put("preview", preview.isEmpty() ? title : preview);
+            newChat.put("timestamp", System.currentTimeMillis());
+            newChat.put("messageCount", 0);
+            chats.put(newChat);
+            
+            prefs.edit()
+                .putString(KEY_MESSAGES_PREFIX + chatId, "[]")
+                .putString(KEY_CHATS, chats.toString())
+                .apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void saveMessagesForChat(String chatId, List<Message> messages) {
+        saveMessagesToChat(chatId, messages);
+    }
+    
     public static class ChatItem {
         public String id;
         public String preview;

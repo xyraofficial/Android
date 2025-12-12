@@ -971,6 +971,74 @@ public class MainActivity extends Activity {
         } else {
             showWelcomeState();
         }
+        
+        syncChatsFromCloud();
+    }
+    
+    private void syncChatsFromCloud() {
+        final ApiService apiService = new ApiService(this);
+        if (!apiService.isLoggedIn()) {
+            return;
+        }
+        
+        apiService.getChats(new ApiService.ChatsCallback() {
+            @Override
+            public void onSuccess(org.json.JSONArray chats) {
+                try {
+                    for (int i = 0; i < chats.length(); i++) {
+                        org.json.JSONObject chat = chats.getJSONObject(i);
+                        final String chatId = chat.getString("id");
+                        final String title = chat.optString("title", "Chat");
+                        final String preview = chat.optString("preview", "");
+                        
+                        if (!chatHistory.chatExists(chatId)) {
+                            chatHistory.createChatWithId(chatId, title, preview);
+                            
+                            apiService.getMessages(chatId, new ApiService.MessagesCallback() {
+                                @Override
+                                public void onSuccess(org.json.JSONArray messages) {
+                                    try {
+                                        List<Message> msgList = new ArrayList<Message>();
+                                        for (int j = 0; j < messages.length(); j++) {
+                                            org.json.JSONObject msg = messages.getJSONObject(j);
+                                            Message m = new Message(
+                                                msg.getString("content"),
+                                                msg.getInt("type"),
+                                                msg.getLong("timestamp")
+                                            );
+                                            if (msg.has("image_base64") && !msg.isNull("image_base64")) {
+                                                m.setImageBase64(msg.getString("image_base64"));
+                                            }
+                                            msgList.add(m);
+                                        }
+                                        chatHistory.saveMessagesForChat(chatId, msgList);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                
+                                @Override
+                                public void onError(String error) {
+                                }
+                            });
+                        }
+                    }
+                    
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshChatHistoryList();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
+            @Override
+            public void onError(String error) {
+            }
+        });
     }
     
     private void addWelcomeMessage() {

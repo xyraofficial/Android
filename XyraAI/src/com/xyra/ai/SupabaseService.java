@@ -29,6 +29,8 @@ public class SupabaseService {
     private static final String AUTH_URL = SUPABASE_URL + "/auth/v1";
     private static final String REST_URL = SUPABASE_URL + "/rest/v1";
     
+    private static final String REDIRECT_URL = "https://android-rho-five.vercel.app/auth/callback";
+    
     private static final String PREFS_NAME = "XyraAIProfile";
     private static final String KEY_ACCESS_TOKEN = "accessToken";
     private static final String KEY_REFRESH_TOKEN = "refreshToken";
@@ -251,6 +253,94 @@ public class SupabaseService {
                         @Override
                         public void run() {
                             callback.onError("Koneksi error: " + e.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
+    public String getGoogleOAuthUrl() {
+        try {
+            return AUTH_URL + "/authorize?provider=google&redirect_to=" + 
+                   java.net.URLEncoder.encode(REDIRECT_URL, "UTF-8");
+        } catch (Exception e) {
+            return AUTH_URL + "/authorize?provider=google&redirect_to=" + REDIRECT_URL;
+        }
+    }
+    
+    public void handleOAuthCallback(final String accessToken, final String refreshToken, final AuthCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(AUTH_URL + "/user");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("apikey", SUPABASE_ANON_KEY);
+                    conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+                    conn.setConnectTimeout(15000);
+                    conn.setReadTimeout(15000);
+                    
+                    int responseCode = conn.getResponseCode();
+                    
+                    if (responseCode >= 200 && responseCode < 300) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        StringBuilder response = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            response.append(line);
+                        }
+                        reader.close();
+                        conn.disconnect();
+                        
+                        JSONObject user = new JSONObject(response.toString());
+                        final String userId = user.optString("id", "");
+                        final String userEmail = user.optString("email", "");
+                        
+                        JSONObject userMetadata = user.optJSONObject("user_metadata");
+                        String displayName = "XyraAI User";
+                        String photoUrl = "";
+                        
+                        if (userMetadata != null) {
+                            displayName = userMetadata.optString("full_name", 
+                                         userMetadata.optString("name", "XyraAI User"));
+                            photoUrl = userMetadata.optString("avatar_url", "");
+                        }
+                        
+                        final String finalDisplayName = displayName;
+                        final String finalPhotoUrl = photoUrl;
+                        
+                        saveTokens(accessToken, refreshToken, userId, userEmail, displayName);
+                        
+                        SharedPreferences.Editor editor = prefs.edit();
+                        if (!photoUrl.isEmpty()) {
+                            editor.putString("userPhoto", photoUrl);
+                        }
+                        editor.apply();
+                        
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess(userId, userEmail, finalDisplayName);
+                            }
+                        });
+                    } else {
+                        conn.disconnect();
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError("Failed to get user info");
+                            }
+                        });
+                    }
+                    
+                } catch (final Exception e) {
+                    Log.e(TAG, "OAuth callback error", e);
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError("OAuth error: " + e.getMessage());
                         }
                     });
                 }

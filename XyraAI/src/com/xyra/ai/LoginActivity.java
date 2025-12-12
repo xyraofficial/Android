@@ -35,6 +35,8 @@ public class LoginActivity extends Activity {
     private static final String KEY_JOIN_DATE = "joinDate";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     
+    private static final int OAUTH_REQUEST_CODE = 1001;
+    
     private ImageView ivLogo;
     private TextView tvAppName;
     private TextView tvTagline;
@@ -43,6 +45,7 @@ public class LoginActivity extends Activity {
     private EditText etDisplayName;
     private Button btnLogin;
     private Button btnRegister;
+    private Button btnGoogleLogin;
     private TextView tvSwitchMode;
     private ProgressBar progressBar;
     private LinearLayout loginContainer;
@@ -93,6 +96,7 @@ public class LoginActivity extends Activity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         formContainer = (LinearLayout) findViewById(R.id.formContainer);
         ivTogglePassword = (ImageView) findViewById(R.id.ivTogglePassword);
+        btnGoogleLogin = (Button) findViewById(R.id.btnGoogleLogin);
         
         if (etDisplayName != null) {
             etDisplayName.setVisibility(View.GONE);
@@ -133,6 +137,49 @@ public class LoginActivity extends Activity {
                     togglePasswordVisibility();
                 }
             });
+        }
+        
+        if (btnGoogleLogin != null) {
+            btnGoogleLogin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    animateButtonPress(v);
+                    performGoogleLogin();
+                }
+            });
+        }
+    }
+    
+    private void performGoogleLogin() {
+        String oauthUrl = supabaseService.getGoogleOAuthUrl();
+        Intent intent = new Intent(this, OAuthActivity.class);
+        intent.putExtra("oauth_url", oauthUrl);
+        startActivityForResult(intent, OAUTH_REQUEST_CODE);
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == OAUTH_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            String accessToken = data.getStringExtra("access_token");
+            String refreshToken = data.getStringExtra("refresh_token");
+            
+            if (accessToken != null && !accessToken.isEmpty()) {
+                showLoading(true);
+                supabaseService.handleOAuthCallback(accessToken, refreshToken, new SupabaseService.AuthCallback() {
+                    @Override
+                    public void onSuccess(String userId, String email, String displayName) {
+                        onLoginSuccess(userId, email, displayName);
+                    }
+                    
+                    @Override
+                    public void onError(String errorMessage) {
+                        showLoading(false);
+                        Toast.makeText(LoginActivity.this, "Login Google gagal: " + errorMessage, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
         }
     }
     

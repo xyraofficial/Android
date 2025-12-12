@@ -1,78 +1,64 @@
-# XyraAI - AI Chat Application for Android
+# XyraAI - Android AI Chat Application
 
 ## Overview
-XyraAI is an Android AI Chat application built for AIDE (Android IDE) that uses GROQ API with Llama 3.3 70B model. The app now uses **Supabase** for authentication and cloud chat history storage.
+XyraAI is an Android AI Chat application built for AIDE (Android IDE). It uses the GROQ API with Llama 3.3 70B model for AI conversations.
 
-## Recent Changes (December 2025)
-- Added File Manager with hierarchical tree view and CRUD operations
-- Added Code Editor with syntax highlighting for 15+ programming languages
-- Created FileManagerActivity.java, CodeEditorActivity.java
-- Created CodeEditorEngine.java with Monokai, Dracula, One Dark, Light themes
-- Added FileItem.java and FolderItem.java model classes
-- Added File Manager and Code Editor menu items in sidebar drawer
-- Migrated from Firebase to Supabase authentication
-- Added cloud chat history sync - chats persist even after app uninstall
-- Created SupabaseService.java for auth and database operations
-- Updated LoginActivity, ProfileActivity, ChatHistory for Supabase integration
-- Fixed build errors: "variable must be final" in LoginActivity.java and SupabaseService.java
-- Added circular profile avatar transformation in ProfileActivity.java
+## Project Type
+This is an **Android project** (not a web application). It is designed to be:
+1. Copied to an Android device
+2. Opened in AIDE (Android IDE)
+3. Compiled and built into an APK on the device
 
-## Project Architecture
-
-### Directory Structure
+## Project Structure
 ```
 XyraAI/
-├── src/com/xyra/ai/
-│   ├── MainActivity.java         # Main chat activity
-│   ├── LoginActivity.java        # Supabase email auth login/signup
-│   ├── ProfileActivity.java      # User profile with signout
-│   ├── SupabaseService.java      # Supabase auth & database operations
-│   ├── FileManagerActivity.java  # File Manager with tree view
-│   ├── CodeEditorActivity.java   # Code Editor with syntax highlighting
-│   ├── FileManagerAdapter.java   # ListView adapter for file tree
-│   ├── CodeEditorEngine.java     # Syntax highlighting engine
-│   ├── FileItem.java             # File data model
-│   ├── FolderItem.java           # Folder data model
-│   ├── ChatHistory.java          # Local + cloud chat storage
-│   ├── ChatAdapter.java          # RecyclerView adapter
-│   ├── Message.java              # Message model
-│   ├── GroqApiService.java       # GROQ API integration
-│   ├── Config.java               # App configuration
-│   └── ...
-├── res/
-│   ├── layout/
-│   ├── values/
-│   └── drawable/
-├── AndroidManifest.xml
-└── SUPABASE_SETUP.md          # Database setup guide
+├── AndroidManifest.xml      # App configuration & permissions
+├── project.properties       # Android SDK target
+├── README.md               # Setup instructions
+├── SUPABASE_SETUP.md       # Supabase configuration guide
+├── src/com/xyra/ai/        # Java source files
+│   ├── MainActivity.java   # Main chat activity
+│   ├── LoginActivity.java  # User authentication
+│   ├── ChatAdapter.java    # RecyclerView adapter
+│   ├── GroqApiService.java # GROQ API integration
+│   ├── SupabaseService.java # Supabase auth & database
+│   └── ... (other activities and utilities)
+├── res/                    # Android resources
+│   ├── layout/            # XML layouts
+│   ├── values/            # Strings, colors, styles
+│   └── drawable/          # Icons and backgrounds
+├── bin/                   # Pre-compiled .class files
+└── gen/                   # Generated R.java files
 ```
 
-### Key Features
+## Features
 - Modern dark theme UI with gradient accents
 - Real-time AI chat using GROQ API
-- Supabase email authentication (login/signup) + Google/GitHub OAuth
-- Cloud chat history sync
-- Local offline support with sync when online
-- **File Manager**: Hierarchical tree view, create/rename/delete files and folders
-- **Code Editor**: Syntax highlighting for Python, JavaScript, Java, Dart, HTML, CSS, JSON, SQL, PHP, and more
-  - Line numbers with cursor position tracking
-  - Undo/Redo support
-  - Theme switching (Monokai, Dracula, One Dark, Light)
-  - Symbol bar for quick character insertion
-  - Find & Replace, Go to Line features
+- Chat message history with cloud sync (Supabase)
+- User authentication (Email/Password + Google OAuth)
+- Beautiful message bubbles with timestamps
+- Network status indicator
+- Conversation context memory
 
-### Authentication Flow
-1. User signs up/logs in via Supabase email auth
-2. Access token and user data stored in SharedPreferences
-3. Chat history syncs to Supabase database
-4. On reinstall, user logs in and chats are restored from cloud
+## API Configuration
+- **GROQ API**: `https://api.groq.com/openai/v1/chat/completions`
+- **Model**: `llama-3.3-70b-versatile`
+- **Supabase**: Used for authentication and chat history cloud sync
 
-### Supabase Configuration
-- Project ID: figcqxynrcnimagpswqn
-- URL: https://figcqxynrcnimagpswqn.supabase.co
-- See SUPABASE_SETUP.md for database table creation SQL
+## Requirements
+- Android 5.0 (API 21) or higher
+- AIDE - Android IDE app
+- Internet connection
+- GROQ API key (from https://console.groq.com)
+- Supabase project (for cloud features)
 
-## Development Notes
-- This is an Android project meant to be built with AIDE on Android device
-- Cannot be run directly in Replit (requires Android SDK)
-- Java source files follow Android app conventions
+## How to Use
+1. Copy the XyraAI folder to Android device storage
+2. Open in AIDE
+3. Configure API keys in Config.java
+4. Build and run to generate APK
+
+## Notes
+- The Firebase integration installed is for Flask/Python and does not apply to this Android project
+- This project cannot run as a web server on Replit
+- Pre-compiled class files are available in bin/ directory

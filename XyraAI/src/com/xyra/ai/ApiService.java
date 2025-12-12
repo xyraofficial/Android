@@ -23,7 +23,7 @@ public class ApiService {
     private static final String KEY_USERNAME = "username";
     private static final String KEY_EMAIL = "email";
     
-    private static String BASE_URL = "https://authxyra.vercel.app/";
+    private static String BASE_URL = "https://android-opal.vercel.app";
     
     private Context context;
     private SharedPreferences prefs;

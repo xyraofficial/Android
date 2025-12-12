@@ -46,6 +46,7 @@ public class LoginActivity extends Activity {
     private Button btnLogin;
     private Button btnRegister;
     private View btnGoogleLogin;
+    private View btnGitHubLogin;
     private TextView tvSwitchMode;
     private ProgressBar progressBar;
     private LinearLayout loginContainer;
@@ -97,6 +98,7 @@ public class LoginActivity extends Activity {
         formContainer = (LinearLayout) findViewById(R.id.formContainer);
         ivTogglePassword = (ImageView) findViewById(R.id.ivTogglePassword);
         btnGoogleLogin = findViewById(R.id.btnGoogleLogin);
+        btnGitHubLogin = findViewById(R.id.btnGitHubLogin);
         
         if (etDisplayName != null) {
             etDisplayName.setVisibility(View.GONE);
@@ -155,10 +157,34 @@ public class LoginActivity extends Activity {
                 }
             });
         }
+        
+        if (btnGitHubLogin != null) {
+            btnGitHubLogin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final View button = v;
+                    button.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100)
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                button.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
+                            }
+                        }).start();
+                    performGitHubLogin();
+                }
+            });
+        }
     }
     
     private void performGoogleLogin() {
         String oauthUrl = supabaseService.getGoogleOAuthUrl();
+        Intent intent = new Intent(this, OAuthActivity.class);
+        intent.putExtra("oauth_url", oauthUrl);
+        startActivityForResult(intent, OAUTH_REQUEST_CODE);
+    }
+    
+    private void performGitHubLogin() {
+        String oauthUrl = supabaseService.getGitHubOAuthUrl();
         Intent intent = new Intent(this, OAuthActivity.class);
         intent.putExtra("oauth_url", oauthUrl);
         startActivityForResult(intent, OAUTH_REQUEST_CODE);

@@ -269,6 +269,15 @@ public class SupabaseService {
         }
     }
     
+    public String getGitHubOAuthUrl() {
+        try {
+            return AUTH_URL + "/authorize?provider=github&redirect_to=" + 
+                   java.net.URLEncoder.encode(REDIRECT_URL, "UTF-8");
+        } catch (Exception e) {
+            return AUTH_URL + "/authorize?provider=github&redirect_to=" + REDIRECT_URL;
+        }
+    }
+    
     public void handleOAuthCallback(final String accessToken, final String refreshToken, final AuthCallback callback) {
         executor.execute(new Runnable() {
             @Override

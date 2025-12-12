@@ -97,212 +97,376 @@ public class ApiService {
         prefs.edit().clear().apply();
     }
     
-    public void register(String username, String email, String password, AuthCallback callback) {
-        executor.execute(() -> {
-            try {
-                JSONObject body = new JSONObject();
-                body.put("username", username);
-                body.put("email", email);
-                body.put("password", password);
-                
-                JSONObject response = postRequest("/api/auth/register", body, null);
-                
-                if (response.getBoolean("success")) {
-                    JSONObject data = response.getJSONObject("data");
-                    String userId = data.getString("user_id");
-                    String uname = data.getString("username");
-                    String mail = data.getString("email");
-                    String token = data.getString("token");
+    public void register(final String username, final String email, final String password, final AuthCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("username", username);
+                    body.put("email", email);
+                    body.put("password", password);
                     
-                    saveAuth(userId, uname, mail, token);
+                    JSONObject response = postRequest("/api/auth/register", body, null);
                     
-                    mainHandler.post(() -> callback.onSuccess(userId, uname, mail, token));
-                } else {
-                    String error = response.optString("error", "Registration failed");
-                    mainHandler.post(() -> callback.onError(error));
-                }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
-            }
-        });
-    }
-    
-    public void login(String email, String password, AuthCallback callback) {
-        executor.execute(() -> {
-            try {
-                JSONObject body = new JSONObject();
-                body.put("email", email);
-                body.put("password", password);
-                
-                JSONObject response = postRequest("/api/auth/login", body, null);
-                
-                if (response.getBoolean("success")) {
-                    JSONObject data = response.getJSONObject("data");
-                    String userId = data.getString("user_id");
-                    String username = data.getString("username");
-                    String mail = data.getString("email");
-                    String token = data.getString("token");
-                    
-                    saveAuth(userId, username, mail, token);
-                    
-                    mainHandler.post(() -> callback.onSuccess(userId, username, mail, token));
-                } else {
-                    String error = response.optString("error", "Login failed");
-                    mainHandler.post(() -> callback.onError(error));
-                }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
-            }
-        });
-    }
-    
-    public void logout(SyncCallback callback) {
-        executor.execute(() -> {
-            try {
-                String token = getToken();
-                if (token != null) {
-                    postRequest("/api/auth/logout", new JSONObject(), token);
-                }
-                clearAuth();
-                mainHandler.post(() -> callback.onSuccess());
-            } catch (Exception e) {
-                clearAuth();
-                mainHandler.post(() -> callback.onSuccess());
-            }
-        });
-    }
-    
-    public void getChats(ChatsCallback callback) {
-        executor.execute(() -> {
-            try {
-                String token = getToken();
-                if (token == null) {
-                    mainHandler.post(() -> callback.onError("Not logged in"));
-                    return;
-                }
-                
-                JSONObject response = getRequest("/api/chats", token);
-                
-                if (response.getBoolean("success")) {
-                    JSONArray chats = response.getJSONArray("data");
-                    mainHandler.post(() -> callback.onSuccess(chats));
-                } else {
-                    String error = response.optString("error", "Failed to get chats");
-                    mainHandler.post(() -> callback.onError(error));
-                }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
-            }
-        });
-    }
-    
-    public void getMessages(String chatId, MessagesCallback callback) {
-        executor.execute(() -> {
-            try {
-                String token = getToken();
-                if (token == null) {
-                    mainHandler.post(() -> callback.onError("Not logged in"));
-                    return;
-                }
-                
-                JSONObject response = getRequest("/api/chats/" + chatId + "/messages", token);
-                
-                if (response.getBoolean("success")) {
-                    JSONArray messages = response.getJSONArray("data");
-                    mainHandler.post(() -> callback.onSuccess(messages));
-                } else {
-                    String error = response.optString("error", "Failed to get messages");
-                    mainHandler.post(() -> callback.onError(error));
-                }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
-            }
-        });
-    }
-    
-    public void syncMessages(String chatId, List<Message> messages, SyncCallback callback) {
-        executor.execute(() -> {
-            try {
-                String token = getToken();
-                if (token == null) {
-                    mainHandler.post(() -> callback.onError("Not logged in"));
-                    return;
-                }
-                
-                JSONArray msgArray = new JSONArray();
-                for (Message msg : messages) {
-                    JSONObject msgObj = new JSONObject();
-                    msgObj.put("content", msg.getContent());
-                    msgObj.put("type", msg.getType());
-                    msgObj.put("timestamp", msg.getTimestamp());
-                    if (msg.getImageBase64() != null) {
-                        msgObj.put("image_base64", msg.getImageBase64());
+                    if (response.getBoolean("success")) {
+                        JSONObject data = response.getJSONObject("data");
+                        final String usrId = data.getString("user_id");
+                        final String uname = data.getString("username");
+                        final String mail = data.getString("email");
+                        final String tkn = data.getString("token");
+                        
+                        saveAuth(usrId, uname, mail, tkn);
+                        
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess(usrId, uname, mail, tkn);
+                            }
+                        });
+                    } else {
+                        final String error = response.optString("error", "Registration failed");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError(error);
+                            }
+                        });
                     }
-                    msgArray.put(msgObj);
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
                 }
-                
-                JSONObject body = new JSONObject();
-                body.put("messages", msgArray);
-                
-                JSONObject response = postRequest("/api/chats/" + chatId + "/sync", body, token);
-                
-                if (response.getBoolean("success")) {
-                    mainHandler.post(() -> callback.onSuccess());
-                } else {
-                    String error = response.optString("error", "Sync failed");
-                    mainHandler.post(() -> callback.onError(error));
-                }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
             }
         });
     }
     
-    public void createChat(String title, SyncCallback callback) {
-        executor.execute(() -> {
-            try {
-                String token = getToken();
-                if (token == null) {
-                    mainHandler.post(() -> callback.onError("Not logged in"));
-                    return;
+    public void login(final String email, final String password, final AuthCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("email", email);
+                    body.put("password", password);
+                    
+                    JSONObject response = postRequest("/api/auth/login", body, null);
+                    
+                    if (response.getBoolean("success")) {
+                        JSONObject data = response.getJSONObject("data");
+                        final String usrId = data.getString("user_id");
+                        final String uname = data.getString("username");
+                        final String mail = data.getString("email");
+                        final String tkn = data.getString("token");
+                        
+                        saveAuth(usrId, uname, mail, tkn);
+                        
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess(usrId, uname, mail, tkn);
+                            }
+                        });
+                    } else {
+                        final String error = response.optString("error", "Login failed");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError(error);
+                            }
+                        });
+                    }
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
                 }
-                
-                JSONObject body = new JSONObject();
-                body.put("title", title);
-                
-                JSONObject response = postRequest("/api/chats", body, token);
-                
-                if (response.getBoolean("success")) {
-                    mainHandler.post(() -> callback.onSuccess());
-                } else {
-                    String error = response.optString("error", "Failed to create chat");
-                    mainHandler.post(() -> callback.onError(error));
-                }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
             }
         });
     }
     
-    public void deleteChat(String chatId, SyncCallback callback) {
-        executor.execute(() -> {
-            try {
-                String token = getToken();
-                if (token == null) {
-                    mainHandler.post(() -> callback.onError("Not logged in"));
-                    return;
+    public void logout(final SyncCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String token = getToken();
+                    if (token != null) {
+                        postRequest("/api/auth/logout", new JSONObject(), token);
+                    }
+                    clearAuth();
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onSuccess();
+                        }
+                    });
+                } catch (Exception e) {
+                    clearAuth();
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onSuccess();
+                        }
+                    });
                 }
-                
-                JSONObject response = deleteRequest("/api/chats/" + chatId, token);
-                
-                if (response.getBoolean("success")) {
-                    mainHandler.post(() -> callback.onSuccess());
-                } else {
-                    String error = response.optString("error", "Failed to delete chat");
-                    mainHandler.post(() -> callback.onError(error));
+            }
+        });
+    }
+    
+    public void getChats(final ChatsCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String token = getToken();
+                    if (token == null) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError("Not logged in");
+                            }
+                        });
+                        return;
+                    }
+                    
+                    JSONObject response = getRequest("/api/chats", token);
+                    
+                    if (response.getBoolean("success")) {
+                        final JSONArray chats = response.getJSONArray("data");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess(chats);
+                            }
+                        });
+                    } else {
+                        final String error = response.optString("error", "Failed to get chats");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError(error);
+                            }
+                        });
+                    }
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
                 }
-            } catch (Exception e) {
-                mainHandler.post(() -> callback.onError(e.getMessage()));
+            }
+        });
+    }
+    
+    public void getMessages(final String chatId, final MessagesCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String token = getToken();
+                    if (token == null) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError("Not logged in");
+                            }
+                        });
+                        return;
+                    }
+                    
+                    JSONObject response = getRequest("/api/chats/" + chatId + "/messages", token);
+                    
+                    if (response.getBoolean("success")) {
+                        final JSONArray messages = response.getJSONArray("data");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess(messages);
+                            }
+                        });
+                    } else {
+                        final String error = response.optString("error", "Failed to get messages");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError(error);
+                            }
+                        });
+                    }
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
+    public void syncMessages(final String chatId, final List<Message> messages, final SyncCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String token = getToken();
+                    if (token == null) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError("Not logged in");
+                            }
+                        });
+                        return;
+                    }
+                    
+                    JSONArray msgArray = new JSONArray();
+                    for (Message msg : messages) {
+                        JSONObject msgObj = new JSONObject();
+                        msgObj.put("content", msg.getContent());
+                        msgObj.put("type", msg.getType());
+                        msgObj.put("timestamp", msg.getTimestamp());
+                        if (msg.getImageBase64() != null) {
+                            msgObj.put("image_base64", msg.getImageBase64());
+                        }
+                        msgArray.put(msgObj);
+                    }
+                    
+                    JSONObject body = new JSONObject();
+                    body.put("messages", msgArray);
+                    
+                    JSONObject response = postRequest("/api/chats/" + chatId + "/sync", body, token);
+                    
+                    if (response.getBoolean("success")) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess();
+                            }
+                        });
+                    } else {
+                        final String error = response.optString("error", "Sync failed");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError(error);
+                            }
+                        });
+                    }
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
+    public void createChat(final String title, final SyncCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String token = getToken();
+                    if (token == null) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError("Not logged in");
+                            }
+                        });
+                        return;
+                    }
+                    
+                    JSONObject body = new JSONObject();
+                    body.put("title", title);
+                    
+                    JSONObject response = postRequest("/api/chats", body, token);
+                    
+                    if (response.getBoolean("success")) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess();
+                            }
+                        });
+                    } else {
+                        final String error = response.optString("error", "Failed to create chat");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError(error);
+                            }
+                        });
+                    }
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
+    public void deleteChat(final String chatId, final SyncCallback callback) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String token = getToken();
+                    if (token == null) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError("Not logged in");
+                            }
+                        });
+                        return;
+                    }
+                    
+                    JSONObject response = deleteRequest("/api/chats/" + chatId, token);
+                    
+                    if (response.getBoolean("success")) {
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onSuccess();
+                            }
+                        });
+                    } else {
+                        final String error = response.optString("error", "Failed to delete chat");
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onError(error);
+                            }
+                        });
+                    }
+                } catch (final Exception e) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onError(e.getMessage());
+                        }
+                    });
+                }
             }
         });
     }

@@ -3,7 +3,7 @@ package com.xyra.ai;
 public class Config {
     public static final String CONFIG_URL = "https://raw.githubusercontent.com/xyraofficial/Android/refs/heads/main/configurasi/config.json";
     
-    public static String GROQ_API_KEY = "";
+    public static String GROQ_API_KEY = "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";
 
     public static final String GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 

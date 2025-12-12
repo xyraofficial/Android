@@ -652,6 +652,22 @@ public class SupabaseService {
                         return;
                     }
                     
+                    // First, delete messages from messages table (if exists)
+                    try {
+                        URL messagesUrl = new URL(REST_URL + "/messages?chat_id=eq." + chatId + "&user_id=eq." + userId);
+                        HttpURLConnection messagesConn = (HttpURLConnection) messagesUrl.openConnection();
+                        messagesConn.setRequestMethod("DELETE");
+                        messagesConn.setRequestProperty("apikey", SUPABASE_ANON_KEY);
+                        messagesConn.setRequestProperty("Authorization", "Bearer " + accessToken);
+                        messagesConn.setConnectTimeout(15000);
+                        messagesConn.setReadTimeout(15000);
+                        messagesConn.getResponseCode();
+                        messagesConn.disconnect();
+                    } catch (Exception e) {
+                        Log.d(TAG, "No separate messages table or delete failed: " + e.getMessage());
+                    }
+                    
+                    // Then, delete the chat record
                     URL url = new URL(REST_URL + "/chats?id=eq." + chatId + "&user_id=eq." + userId);
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("DELETE");

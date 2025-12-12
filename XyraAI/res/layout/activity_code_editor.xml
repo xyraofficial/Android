@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/editorBackground">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/headerBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:src="@drawable/ic_back"
+            android:padding="8dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvFileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="untitled.py"
+                android:textColor="@color/textPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="middle" />
+
+            <TextView
+                android:id="@+id/tvLanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Python"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnUndo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Undo"
+            android:src="@drawable/ic_undo"
+            android:padding="10dp" />
+
+        <ImageButton
+            android:id="@+id/btnRedo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Redo"
+            android:src="@drawable/ic_redo"
+            android:padding="10dp" />
+
+        <ImageButton
+            android:id="@+id/btnSave"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Save"
+            android:src="@drawable/ic_save"
+            android:padding="10dp" />
+
+        <ImageButton
+            android:id="@+id/btnTheme"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Theme"
+            android:src="@drawable/ic_palette"
+            android:padding="10dp" />
+
+        <ImageButton
+            android:id="@+id/btnMore"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="More"
+            android:src="@drawable/ic_dots"
+            android:padding="10dp" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider" />
+
+    <HorizontalScrollView
+        android:id="@+id/tabsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/backgroundSecondary"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/tabsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" />
+
+    </HorizontalScrollView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/lineNumbersContainer"
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/lineNumberBackground"
+                    android:orientation="vertical"
+                    android:paddingVertical="8dp"
+                    android:gravity="end">
+
+                    <TextView
+                        android:id="@+id/tvLineNumbers"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="1"
+                        android:textColor="@color/lineNumberText"
+                        android:textSize="14sp"
+                        android:fontFamily="monospace"
+                        android:gravity="end"
+                        android:paddingEnd="8dp"
+                        android:lineSpacingExtra="4dp" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/divider" />
+
+                <ScrollView
+                    android:id="@+id/editorScrollView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <EditText
+                        android:id="@+id/etCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:padding="12dp"
+                        android:textColor="@color/codeText"
+                        android:textSize="14sp"
+                        android:fontFamily="monospace"
+                        android:gravity="top|start"
+                        android:inputType="textMultiLine|textNoSuggestions"
+                        android:scrollHorizontally="true"
+                        android:lineSpacingExtra="4dp"
+                        android:hint="// Start coding here..."
+                        android:textColorHint="@color/textSecondary" />
+
+                </ScrollView>
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:id="@+id/statusBar"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:layout_gravity="bottom"
+            android:background="@color/statusBarBackground"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp">
+
+            <TextView
+                android:id="@+id/tvCursorPosition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ln 1, Col 1"
+                android:textColor="@color/statusBarText"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="16dp"
+                android:layout_marginHorizontal="12dp"
+                android:background="@color/divider" />
+
+            <TextView
+                android:id="@+id/tvFileSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 bytes"
+                android:textColor="@color/statusBarText"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvModified"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saved"
+                android:textColor="@color/statusBarText"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/symbolBar"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@color/symbolBarBackground"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="4dp">
+
+                <TextView
+                    android:id="@+id/btnTab"
+                    android:layout_width="44dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="TAB"
+                    android:textColor="@color/symbolText"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnBracket1"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="("
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnBracket2"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text=")"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnBrace1"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="{"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnBrace2"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="}"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnSquare1"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="["
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnSquare2"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="]"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnQuote"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="&quot;"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnSingleQuote"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="&apos;"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnSemicolon"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text=";"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnColon"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text=":"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnEquals"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="="
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnLess"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="&lt;"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnGreater"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="&gt;"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnSlash"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="/"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnBackslash"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="\\"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnHash"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="#"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnDollar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="$"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+                <TextView
+                    android:id="@+id/btnUnderscore"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_symbol_button"
+                    android:text="_"
+                    android:textColor="@color/symbolText"
+                    android:textSize="16sp"
+                    android:gravity="center"
+                    android:layout_margin="2dp" />
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+</LinearLayout>

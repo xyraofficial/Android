@@ -25,4 +25,15 @@
     
     <color name="quickReplyBg">#FFFFFF</color>
     <color name="quickReplyText">#6C63FF</color>
+    
+    <color name="iconColor">#636E72</color>
+    
+    <color name="editorBackground">#272822</color>
+    <color name="lineNumberBackground">#1e1f1c</color>
+    <color name="lineNumberText">#90908a</color>
+    <color name="codeText">#f8f8f2</color>
+    <color name="statusBarBackground">#1e1f1c</color>
+    <color name="statusBarText">#90908a</color>
+    <color name="symbolBarBackground">#272822</color>
+    <color name="symbolText">#f8f8f2</color>
 </resources>

@@ -8,6 +8,8 @@ XyraAI is an Android AI Chat application built for AIDE (Android IDE) that uses 
 - Added cloud chat history sync - chats persist even after app uninstall
 - Created SupabaseService.java for auth and database operations
 - Updated LoginActivity, ProfileActivity, ChatHistory for Supabase integration
+- Fixed build errors: "variable must be final" in LoginActivity.java and SupabaseService.java
+- Added circular profile avatar transformation in ProfileActivity.java
 
 ## Project Architecture
 

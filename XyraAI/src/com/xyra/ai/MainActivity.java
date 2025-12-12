@@ -962,7 +962,42 @@ public class MainActivity extends Activity {
     
     private void initChatHistory() {
         chatHistory = new ChatHistory(this);
+        
+        chatHistory.initializeFromCloud(new ChatHistory.InitCallback() {
+            @Override
+            public void onComplete(boolean success) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loadChatAfterSync();
+                    }
+                });
+            }
+        });
+    }
+    
+    private void loadChatAfterSync() {
         chatAdapter.setCurrentChatId(chatHistory.getCurrentChatId());
+        
+        final String currentChatId = chatHistory.getCurrentChatId();
+        
+        chatHistory.loadMessagesFromCloudAndDisplay(currentChatId, new ChatHistory.MessagesCallback() {
+            @Override
+            public void onComplete(List<Message> messages) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<Message> allMessages = chatHistory.loadMessagesForChat(currentChatId);
+                        if (!allMessages.isEmpty()) {
+                            chatAdapter.setMessages(allMessages, currentChatId);
+                            hideWelcomeState();
+                        } else {
+                            showWelcomeState();
+                        }
+                    }
+                });
+            }
+        });
         
         List<Message> savedMessages = chatHistory.loadMessages();
         if (!savedMessages.isEmpty()) {

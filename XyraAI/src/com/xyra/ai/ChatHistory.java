@@ -180,10 +180,162 @@ public class ChatHistory {
     public String getCurrentChatId() {
         String chatId = prefs.getString(KEY_CURRENT_CHAT, null);
         if (chatId == null) {
-            chatId = UUID.randomUUID().toString();
-            prefs.edit().putString(KEY_CURRENT_CHAT, chatId).apply();
+            List<ChatItem> existingChats = getChatList();
+            if (!existingChats.isEmpty()) {
+                chatId = existingChats.get(0).id;
+                prefs.edit().putString(KEY_CURRENT_CHAT, chatId).apply();
+            } else {
+                chatId = UUID.randomUUID().toString();
+                prefs.edit().putString(KEY_CURRENT_CHAT, chatId).apply();
+            }
         }
         return chatId;
+    }
+    
+    public void initializeFromCloud(final InitCallback callback) {
+        if (!supabaseService.isLoggedIn()) {
+            String localId = getCurrentChatIdInternal();
+            if (callback != null) callback.onComplete(false, localId);
+            return;
+        }
+        
+        supabaseService.loadChatsFromCloud(new SupabaseService.ChatLoadCallback() {
+            @Override
+            public void onSuccess(List<ChatItem> cloudChats) {
+                String resolvedChatId = null;
+                
+                if (cloudChats != null && !cloudChats.isEmpty()) {
+                    for (ChatItem cloudChat : cloudChats) {
+                        if (!chatExists(cloudChat.id)) {
+                            createChatWithId(cloudChat.id, cloudChat.preview, cloudChat.preview);
+                        }
+                    }
+                    
+                    String currentId = prefs.getString(KEY_CURRENT_CHAT, null);
+                    if (currentId == null) {
+                        long mostRecentTime = 0;
+                        String mostRecentId = null;
+                        for (ChatItem chat : cloudChats) {
+                            if (chat.timestamp > mostRecentTime) {
+                                mostRecentTime = chat.timestamp;
+                                mostRecentId = chat.id;
+                            }
+                        }
+                        if (mostRecentId != null) {
+                            prefs.edit().putString(KEY_CURRENT_CHAT, mostRecentId).apply();
+                            resolvedChatId = mostRecentId;
+                        }
+                    } else {
+                        resolvedChatId = currentId;
+                    }
+                    
+                    final String chatIdToLoad = resolvedChatId;
+                    if (chatIdToLoad != null) {
+                        loadMessagesFromCloudForChatSync(chatIdToLoad);
+                    }
+                } else {
+                    resolvedChatId = getCurrentChatIdInternal();
+                }
+                
+                if (callback != null) callback.onComplete(true, resolvedChatId);
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                String localId = getCurrentChatIdInternal();
+                if (callback != null) callback.onComplete(false, localId);
+            }
+        });
+    }
+    
+    private String getCurrentChatIdInternal() {
+        String chatId = prefs.getString(KEY_CURRENT_CHAT, null);
+        if (chatId == null) {
+            List<ChatItem> existingChats = getChatList();
+            if (!existingChats.isEmpty()) {
+                chatId = existingChats.get(0).id;
+                prefs.edit().putString(KEY_CURRENT_CHAT, chatId).apply();
+            } else {
+                chatId = UUID.randomUUID().toString();
+                prefs.edit().putString(KEY_CURRENT_CHAT, chatId).apply();
+            }
+        }
+        return chatId;
+    }
+    
+    private void loadMessagesFromCloudForChatSync(final String chatId) {
+        supabaseService.loadMessagesFromCloud(chatId, new SupabaseService.MessagesLoadCallback() {
+            @Override
+            public void onSuccess(List<Message> messages) {
+                if (messages != null && !messages.isEmpty()) {
+                    try {
+                        JSONArray jsonArray = new JSONArray();
+                        for (Message msg : messages) {
+                            JSONObject jsonMsg = new JSONObject();
+                            jsonMsg.put("content", msg.getContent());
+                            jsonMsg.put("type", msg.getType());
+                            jsonMsg.put("timestamp", msg.getTimestamp());
+                            if (msg.getImageBase64() != null) {
+                                jsonMsg.put("imageBase64", msg.getImageBase64());
+                            }
+                            jsonArray.put(jsonMsg);
+                        }
+                        prefs.edit().putString(KEY_MESSAGES_PREFIX + chatId, jsonArray.toString()).apply();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+            }
+        });
+    }
+    
+    public interface InitCallback {
+        void onComplete(boolean success, String currentChatId);
+    }
+    
+    public interface MessagesCallback {
+        void onComplete(List<Message> messages);
+    }
+    
+    public void loadMessagesFromCloudAndDisplay(final String chatId, final MessagesCallback callback) {
+        if (!supabaseService.isLoggedIn()) {
+            if (callback != null) callback.onComplete(new ArrayList<Message>());
+            return;
+        }
+        
+        supabaseService.loadMessagesFromCloud(chatId, new SupabaseService.MessagesLoadCallback() {
+            @Override
+            public void onSuccess(List<Message> messages) {
+                if (messages != null && !messages.isEmpty()) {
+                    try {
+                        JSONArray jsonArray = new JSONArray();
+                        for (Message msg : messages) {
+                            JSONObject jsonMsg = new JSONObject();
+                            jsonMsg.put("content", msg.getContent());
+                            jsonMsg.put("type", msg.getType());
+                            jsonMsg.put("timestamp", msg.getTimestamp());
+                            if (msg.getImageBase64() != null) {
+                                jsonMsg.put("imageBase64", msg.getImageBase64());
+                            }
+                            jsonArray.put(jsonMsg);
+                        }
+                        prefs.edit().putString(KEY_MESSAGES_PREFIX + chatId, jsonArray.toString()).apply();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (callback != null) callback.onComplete(messages != null ? messages : new ArrayList<Message>());
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                if (callback != null) callback.onComplete(new ArrayList<Message>());
+            }
+        });
     }
     
     public void startNewChat() {

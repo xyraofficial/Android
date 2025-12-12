@@ -23,6 +23,15 @@ public class Message {
         this.chatId = null;
     }
     
+    public Message(String content, int type, long timestamp) {
+        this.content = content;
+        this.type = type;
+        this.timestamp = timestamp;
+        this.imageBase64 = null;
+        this.imageBitmap = null;
+        this.chatId = null;
+    }
+    
     public String getContent() {
         return content;
     }

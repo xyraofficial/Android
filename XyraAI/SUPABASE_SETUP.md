@@ -77,10 +77,39 @@ Kredensial Supabase sudah dikonfigurasi di aplikasi:
 - Email atau password salah
 - Pastikan user sudah mendaftar terlebih dahulu
 
+### Chat history kosong setelah reinstall
+- Pastikan login dengan akun yang SAMA (email yang sama)
+- Gunakan tombol "Masuk", BUKAN "Daftar"
+- Jika tetap kosong, cek di Supabase Dashboard > Authentication > Users
+  apakah ada duplicate user dengan email yang sama
+- User ID di Supabase selalu tetap sama selama menggunakan email yang sama
+
+### User ID berbeda setelah reinstall
+- Ini seharusnya TIDAK terjadi jika login dengan email yang sama
+- Kemungkinan penyebab:
+  1. User klik "Daftar" bukan "Masuk"
+  2. Email confirmation belum selesai saat pertama daftar
+- Solusi: Hapus user duplicate di Supabase Dashboard, lalu daftar ulang
+
 ### Chat tidak sinkron
 - Pastikan user sudah login
 - Periksa koneksi internet
 - Pastikan tabel `chats` sudah dibuat di database
+
+## Login dengan Google
+
+1. Setup Google OAuth di Supabase Dashboard:
+   - Authentication > Providers > Google
+   - Enable Sign in with Google
+   - Tambahkan Client ID dan Client Secret dari Google Cloud Console
+
+2. URL Configuration:
+   - Site URL: `https://android-rho-five.vercel.app`
+   - Redirect URLs: `https://android-rho-five.vercel.app/**`
+
+3. File terkait:
+   - `OAuthActivity.java` - WebView untuk Google OAuth
+   - `activity_oauth.xml` - Layout WebView
 
 ## Struktur File yang Diperbarui
 

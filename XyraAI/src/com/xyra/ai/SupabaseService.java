@@ -299,17 +299,18 @@ public class SupabaseService {
                         final String userEmail = user.optString("email", "");
                         
                         JSONObject userMetadata = user.optJSONObject("user_metadata");
-                        String displayName = "XyraAI User";
-                        String photoUrl = "";
+                        final String displayName;
+                        final String photoUrl;
                         
                         if (userMetadata != null) {
-                            displayName = userMetadata.optString("full_name", 
+                            String name = userMetadata.optString("full_name", 
                                          userMetadata.optString("name", "XyraAI User"));
+                            displayName = name.isEmpty() ? "XyraAI User" : name;
                             photoUrl = userMetadata.optString("avatar_url", "");
+                        } else {
+                            displayName = "XyraAI User";
+                            photoUrl = "";
                         }
-                        
-                        final String finalDisplayName = displayName;
-                        final String finalPhotoUrl = photoUrl;
                         
                         saveTokens(accessToken, refreshToken, userId, userEmail, displayName);
                         
@@ -322,7 +323,7 @@ public class SupabaseService {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                callback.onSuccess(userId, userEmail, finalDisplayName);
+                                callback.onSuccess(userId, userEmail, displayName);
                             }
                         });
                     } else {

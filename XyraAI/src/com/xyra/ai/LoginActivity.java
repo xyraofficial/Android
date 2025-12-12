@@ -45,7 +45,7 @@ public class LoginActivity extends Activity {
     private EditText etDisplayName;
     private Button btnLogin;
     private Button btnRegister;
-    private Button btnGoogleLogin;
+    private View btnGoogleLogin;
     private TextView tvSwitchMode;
     private ProgressBar progressBar;
     private LinearLayout loginContainer;
@@ -96,7 +96,7 @@ public class LoginActivity extends Activity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         formContainer = (LinearLayout) findViewById(R.id.formContainer);
         ivTogglePassword = (ImageView) findViewById(R.id.ivTogglePassword);
-        btnGoogleLogin = (Button) findViewById(R.id.btnGoogleLogin);
+        btnGoogleLogin = findViewById(R.id.btnGoogleLogin);
         
         if (etDisplayName != null) {
             etDisplayName.setVisibility(View.GONE);
@@ -143,7 +143,13 @@ public class LoginActivity extends Activity {
             btnGoogleLogin.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    animateButtonPress(v);
+                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100)
+                        .withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                v.animate().scaleX(1f).scaleY(1f).setDuration(100).start();
+                            }
+                        }).start();
                     performGoogleLogin();
                 }
             });

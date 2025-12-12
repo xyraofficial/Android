@@ -14,8 +14,12 @@ SUPABASE_URL = os.environ.get('SUPABASE_URL')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 
 supabase: Client = None
+supabase_error = None
 if SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        supabase_error = str(e)
 
 def hash_password(password):
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -405,10 +409,15 @@ def download():
 
 @app.route('/api/health')
 def health():
-    return jsonify({
+    status_info = {
         "status": "ok",
-        "supabase": "connected" if supabase else "not configured"
-    })
+        "supabase": "connected" if supabase else "not configured",
+        "supabase_url_set": bool(SUPABASE_URL),
+        "supabase_key_set": bool(SUPABASE_KEY)
+    }
+    if supabase_error:
+        status_info["supabase_error"] = supabase_error
+    return jsonify(status_info)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

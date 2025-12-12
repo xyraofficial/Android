@@ -100,7 +100,7 @@ public class FileManagerAdapter extends BaseAdapter {
         Object item = items.get(position);
         
         if (item instanceof FolderItem) {
-            FolderItem folder = (FolderItem) item;
+            final FolderItem folder = (FolderItem) item;
             holder.name.setText(folder.getName());
             holder.icon.setImageResource(R.drawable.ic_folder);
             holder.info.setText(folder.getTotalItems() + " items");
@@ -113,26 +113,35 @@ public class FileManagerAdapter extends BaseAdapter {
             } catch (Exception e) {}
             holder.container.setPadding(level * 32 + 16, 8, 16, 8);
             
-            holder.container.setOnClickListener(v -> {
-                if (listener != null) listener.onFolderClick(folder);
+            holder.container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) listener.onFolderClick(folder);
+                }
             });
         } else if (item instanceof FileItem) {
-            FileItem file = (FileItem) item;
+            final FileItem file = (FileItem) item;
             holder.name.setText(file.getFullName());
             holder.icon.setImageResource(getFileIcon(file.getExtension()));
             holder.info.setText(formatSize(file.getSize()));
             holder.expandIcon.setVisibility(View.GONE);
             holder.container.setPadding(48, 8, 16, 8);
             
-            holder.container.setOnClickListener(v -> {
-                if (listener != null) listener.onFileClick(file);
+            holder.container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) listener.onFileClick(file);
+                }
             });
         }
         
         final Object finalItem = item;
-        holder.container.setOnLongClickListener(v -> {
-            if (listener != null) listener.onItemLongClick(finalItem, v);
-            return true;
+        holder.container.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (listener != null) listener.onItemLongClick(finalItem, v);
+                return true;
+            }
         });
         
         return convertView;

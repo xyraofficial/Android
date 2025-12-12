@@ -71,12 +71,13 @@ The GROQ API key needs to be added to:
 - Search functionality for finding old chats
 
 ## Recent Changes (December 2025)
-- Created Flask backend API for chat synchronization
-- Added user authentication (register, login, logout)
-- Added cloud sync for chat history - survives logout/reinstall
-- Database models: User, AuthToken, Chat, Message
-- Updated Android ApiService.java to use Flask backend
+- Removed Vercel/Supabase cloud sync - app now uses local-only storage
+- Chat history is saved locally on device via SharedPreferences
+- Firebase authentication still works for login/register
+- Fixed Message.java constructor to support 3 parameters (content, type, timestamp)
+- Deleted ApiService.java (no longer needed)
+- Cleaned config.json (removed Supabase credentials)
 
-## Environment Variables
-- `DATABASE_URL` - PostgreSQL connection string
-- `SESSION_SECRET` - Flask session secret key
+## Storage
+- Chat history: Local SharedPreferences (per device)
+- User auth: Firebase Authentication

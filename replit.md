@@ -1,48 +1,57 @@
-# XyraAI - Android AI Chat Application
+# XyraAI - AI Chat Application for Android
 
 ## Overview
-XyraAI is an Android application built for AIDE (Android IDE) that provides AI chat functionality using the GROQ API with Llama 3.3 70B model.
+XyraAI is an Android AI Chat application built for AIDE (Android IDE) that uses GROQ API with Llama 3.3 70B model. The app now uses **Supabase** for authentication and cloud chat history storage.
 
-**Important:** This is an Android project with Java source code. It cannot be run directly in Replit as it requires compilation via AIDE or Android Studio and installation on an Android device.
+## Recent Changes (December 2025)
+- Migrated from Firebase to Supabase authentication
+- Added cloud chat history sync - chats persist even after app uninstall
+- Created SupabaseService.java for auth and database operations
+- Updated LoginActivity, ProfileActivity, ChatHistory for Supabase integration
 
-## Project Structure
+## Project Architecture
+
+### Directory Structure
 ```
 XyraAI/
-├── src/com/xyra/ai/       # Java source files
-│   ├── MainActivity.java   # Main chat activity
-│   ├── LoginActivity.java  # Firebase Google Sign-In
-│   ├── ProfileActivity.java
-│   ├── ChatAdapter.java    # RecyclerView adapter
-│   ├── Message.java        # Message model
-│   ├── GroqApiService.java # GROQ API integration
-│   ├── Config.java         # App configuration
+├── src/com/xyra/ai/
+│   ├── MainActivity.java      # Main chat activity
+│   ├── LoginActivity.java     # Supabase email auth login/signup
+│   ├── ProfileActivity.java   # User profile with signout
+│   ├── SupabaseService.java   # Supabase auth & database operations
+│   ├── ChatHistory.java       # Local + cloud chat storage
+│   ├── ChatAdapter.java       # RecyclerView adapter
+│   ├── Message.java           # Message model
+│   ├── GroqApiService.java    # GROQ API integration
+│   ├── Config.java            # App configuration
 │   └── ...
-├── res/                    # Android resources (layouts, drawables, values)
-├── bin/                    # Compiled class files
-├── gen/                    # Generated files (R.java, BuildConfig.java)
-├── AndroidManifest.xml     # App manifest
-├── google-services.json    # Firebase configuration
-└── FIREBASE_SETUP.md       # Firebase setup guide (Indonesian)
+├── res/
+│   ├── layout/
+│   ├── values/
+│   └── drawable/
+├── AndroidManifest.xml
+└── SUPABASE_SETUP.md          # Database setup guide
 ```
 
-## Key Features
-- AI chat using GROQ API with Llama 3.3 70B model
-- Firebase Google Sign-In authentication
-- Dark theme UI with gradient accents
-- Chat history persistence
-- Network status indicator
+### Key Features
+- Modern dark theme UI with gradient accents
+- Real-time AI chat using GROQ API
+- Supabase email authentication (login/signup)
+- Cloud chat history sync
+- Local offline support with sync when online
 
-## Configuration
-- **Package Name:** com.xyra.ai
-- **Firebase Project:** authaixyra
-- **API:** GROQ API (https://api.groq.com/openai/v1/chat/completions)
+### Authentication Flow
+1. User signs up/logs in via Supabase email auth
+2. Access token and user data stored in SharedPreferences
+3. Chat history syncs to Supabase database
+4. On reinstall, user logs in and chats are restored from cloud
 
-## How to Build
-1. Copy the XyraAI folder to an Android device
-2. Open in AIDE or Android Studio
-3. Add your GROQ API key in Config.java
-4. Configure Firebase (see FIREBASE_SETUP.md)
-5. Build and install the APK
+### Supabase Configuration
+- Project ID: figcqxynrcnimagpswqn
+- URL: https://figcqxynrcnimagpswqn.supabase.co
+- See SUPABASE_SETUP.md for database table creation SQL
 
-## Recent Changes
-- December 2025: Project imported to Replit for version control and collaboration
+## Development Notes
+- This is an Android project meant to be built with AIDE on Android device
+- Cannot be run directly in Replit (requires Android SDK)
+- Java source files follow Android app conventions

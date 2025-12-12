@@ -23,19 +23,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class LoginActivity extends Activity {
     
     private static final String TAG = "LoginActivity";
@@ -47,12 +34,6 @@ public class LoginActivity extends Activity {
     private static final String KEY_USER_PHOTO = "userPhoto";
     private static final String KEY_JOIN_DATE = "joinDate";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
-    
-    private static final String FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts:";
-    
-    private String getFirebaseApiKey() {
-        return getString(R.string.firebase_api_key);
-    }
     
     private ImageView ivLogo;
     private TextView tvAppName;
@@ -72,7 +53,7 @@ public class LoginActivity extends Activity {
     
     private SharedPreferences prefs;
     private Handler handler = new Handler(Looper.getMainLooper());
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private SupabaseService supabaseService;
     
     private boolean isRegisterMode = false;
     
@@ -82,8 +63,8 @@ public class LoginActivity extends Activity {
         ThemeManager.applyTheme(this);
         
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        supabaseService = new SupabaseService(this);
         
-        // Check if user is already logged in
         if (prefs.getBoolean(KEY_IS_LOGGED_IN, false)) {
             navigateToMain();
             return;
@@ -113,7 +94,6 @@ public class LoginActivity extends Activity {
         formContainer = (LinearLayout) findViewById(R.id.formContainer);
         ivTogglePassword = (ImageView) findViewById(R.id.ivTogglePassword);
         
-        // Initially hide register fields
         if (etDisplayName != null) {
             etDisplayName.setVisibility(View.GONE);
         }
@@ -201,10 +181,16 @@ public class LoginActivity extends Activity {
         
         showLoading(true);
         
-        executor.execute(new Runnable() {
+        supabaseService.signIn(email, password, new SupabaseService.AuthCallback() {
             @Override
-            public void run() {
-                firebaseSignIn(email, password);
+            public void onSuccess(String userId, String email, String displayName) {
+                onLoginSuccess(userId, email, displayName);
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                showLoading(false);
+                Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -226,206 +212,23 @@ public class LoginActivity extends Activity {
         
         showLoading(true);
         
-        executor.execute(new Runnable() {
+        final String name = TextUtils.isEmpty(displayName) ? "XyraAI User" : displayName;
+        
+        supabaseService.signUp(email, password, name, new SupabaseService.AuthCallback() {
             @Override
-            public void run() {
-                firebaseSignUp(email, password, displayName);
+            public void onSuccess(String userId, String email, String displayName) {
+                onLoginSuccess(userId, email, displayName);
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                showLoading(false);
+                Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
             }
         });
     }
     
-    private void firebaseSignIn(String email, String password) {
-        try {
-            URL url = new URL(FIREBASE_AUTH_URL + "signInWithPassword?key=" + getFirebaseApiKey());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true);
-            conn.setConnectTimeout(15000);
-            conn.setReadTimeout(15000);
-            
-            JSONObject requestBody = new JSONObject();
-            requestBody.put("email", email);
-            requestBody.put("password", password);
-            requestBody.put("returnSecureToken", true);
-            
-            OutputStream os = conn.getOutputStream();
-            os.write(requestBody.toString().getBytes("UTF-8"));
-            os.close();
-            
-            int responseCode = conn.getResponseCode();
-            
-            BufferedReader reader;
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            } else {
-                reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-            }
-            
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            reader.close();
-            
-            final JSONObject jsonResponse = new JSONObject(response.toString());
-            
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                final String userId = jsonResponse.optString("localId", "");
-                final String userEmail = jsonResponse.optString("email", email);
-                final String displayName = jsonResponse.optString("displayName", "XyraAI User");
-                
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onLoginSuccess(userId, userEmail, displayName);
-                    }
-                });
-            } else {
-                final String errorMessage = parseFirebaseError(jsonResponse);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        showLoading(false);
-                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-            
-            conn.disconnect();
-            
-        } catch (final Exception e) {
-            Log.e(TAG, "Login error", e);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    showLoading(false);
-                    Toast.makeText(LoginActivity.this, "Koneksi error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    }
-    
-    private void firebaseSignUp(String email, String password, final String displayName) {
-        try {
-            URL url = new URL(FIREBASE_AUTH_URL + "signUp?key=" + getFirebaseApiKey());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setDoOutput(true);
-            conn.setConnectTimeout(15000);
-            conn.setReadTimeout(15000);
-            
-            JSONObject requestBody = new JSONObject();
-            requestBody.put("email", email);
-            requestBody.put("password", password);
-            requestBody.put("returnSecureToken", true);
-            
-            OutputStream os = conn.getOutputStream();
-            os.write(requestBody.toString().getBytes("UTF-8"));
-            os.close();
-            
-            int responseCode = conn.getResponseCode();
-            
-            BufferedReader reader;
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            } else {
-                reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-            }
-            
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                response.append(line);
-            }
-            reader.close();
-            
-            final JSONObject jsonResponse = new JSONObject(response.toString());
-            
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                final String userId = jsonResponse.optString("localId", "");
-                final String userEmail = jsonResponse.optString("email", email);
-                final String name = TextUtils.isEmpty(displayName) ? "XyraAI User" : displayName;
-                
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onLoginSuccess(userId, userEmail, name);
-                    }
-                });
-            } else {
-                final String errorMessage = parseFirebaseError(jsonResponse);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        showLoading(false);
-                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-            
-            conn.disconnect();
-            
-        } catch (final Exception e) {
-            Log.e(TAG, "Register error", e);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    showLoading(false);
-                    Toast.makeText(LoginActivity.this, "Koneksi error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            });
-        }
-    }
-    
-    private String parseFirebaseError(JSONObject response) {
-        try {
-            JSONObject error = response.optJSONObject("error");
-            if (error != null) {
-                String message = error.optString("message", "Terjadi kesalahan");
-                
-                switch (message) {
-                    case "EMAIL_NOT_FOUND":
-                        return "Email tidak ditemukan";
-                    case "INVALID_PASSWORD":
-                        return "Password salah";
-                    case "USER_DISABLED":
-                        return "Akun dinonaktifkan";
-                    case "EMAIL_EXISTS":
-                        return "Email sudah terdaftar";
-                    case "WEAK_PASSWORD":
-                        return "Password terlalu lemah (min 6 karakter)";
-                    case "INVALID_EMAIL":
-                        return "Format email tidak valid";
-                    case "TOO_MANY_ATTEMPTS_TRY_LATER":
-                        return "Terlalu banyak percobaan. Coba lagi nanti";
-                    default:
-                        if (message.contains("INVALID_LOGIN_CREDENTIALS")) {
-                            return "Email atau password salah";
-                        }
-                        return "Error: " + message;
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error parsing firebase error", e);
-        }
-        return "Terjadi kesalahan";
-    }
-    
     private void onLoginSuccess(String userId, String email, String displayName) {
-        String currentDate = new SimpleDateFormat("dd MMMM yyyy", new Locale("id", "ID")).format(new Date());
-        
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putString(KEY_USER_ID, userId);
-        editor.putString(KEY_USER_NAME, displayName);
-        editor.putString(KEY_USER_EMAIL, email);
-        editor.putString(KEY_JOIN_DATE, currentDate);
-        editor.putString(KEY_USER_PHOTO, "");
-        editor.apply();
-        
         animateLoginSuccess();
     }
     
@@ -613,8 +416,8 @@ public class LoginActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
+        if (supabaseService != null) {
+            supabaseService.shutdown();
         }
     }
 }

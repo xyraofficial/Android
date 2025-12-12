@@ -33,9 +33,6 @@
     <string name="guest_user">Guest User</string>
     <string name="not_logged_in">Belum login</string>
     
-    <!-- Firebase API Key -->
-    <string name="firebase_api_key">AIzaSyByqMX6odzjnV531WTtHyPbDQUFUXEYm2M</string>
-    
     <!-- Remote Config URL -->
     <string name="config_url">https://raw.githubusercontent.com/xyraofficial/Android/refs/heads/main/configurasi/config.json</string>
 </resources>

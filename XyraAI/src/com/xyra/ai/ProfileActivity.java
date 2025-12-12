@@ -49,6 +49,7 @@ public class ProfileActivity extends Activity {
     
     private SharedPreferences prefs;
     private Handler handler = new Handler(Looper.getMainLooper());
+    private SupabaseService supabaseService;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +57,7 @@ public class ProfileActivity extends Activity {
         ThemeManager.applyTheme(this);
         
         prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        supabaseService = new SupabaseService(this);
         
         if (!isLoggedIn()) {
             redirectToLogin();
@@ -256,10 +258,7 @@ public class ProfileActivity extends Activity {
     }
     
     private void signOut() {
-        // Clear local preferences
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-        editor.apply();
+        supabaseService.signOut();
         
         Toast.makeText(ProfileActivity.this, "Berhasil keluar", Toast.LENGTH_SHORT).show();
         
@@ -278,5 +277,13 @@ public class ProfileActivity extends Activity {
     @Override
     public void onBackPressed() {
         animateExit();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (supabaseService != null) {
+            supabaseService.shutdown();
+        }
     }
 }

@@ -20,12 +20,14 @@ public class ChatHistory {
     private SharedPreferences prefs;
     private Context context;
     private String currentUserId;
+    private SupabaseService supabaseService;
     
     public ChatHistory(Context context) {
         this.context = context;
         this.currentUserId = getUserId(context);
         String prefsName = PREFS_NAME_PREFIX + currentUserId;
         this.prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
+        this.supabaseService = new SupabaseService(context);
     }
     
     private String getUserId(Context context) {
@@ -68,19 +70,27 @@ public class ChatHistory {
             editor.putString(KEY_MESSAGES_PREFIX + chatId, jsonArray.toString());
             editor.apply();
             
-            saveChatPreview(chatId, messages);
+            String preview = saveChatPreview(chatId, messages);
+            
+            syncToCloud(chatId, preview, messages);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     
-    private void saveChatPreview(String chatId, List<Message> messages) {
-        if (messages.isEmpty()) return;
+    private void syncToCloud(String chatId, String preview, List<Message> messages) {
+        if (supabaseService.isLoggedIn()) {
+            supabaseService.syncChatToCloud(chatId, preview, System.currentTimeMillis(), messages.size(), messages, null);
+        }
+    }
+    
+    private String saveChatPreview(String chatId, List<Message> messages) {
+        if (messages.isEmpty()) return "";
         
+        String preview = "";
         try {
             JSONArray chats = getChatsArray();
             
-            String preview = "";
             for (int i = messages.size() - 1; i >= 0; i--) {
                 Message msg = messages.get(i);
                 if (msg.getType() == Message.TYPE_USER) {
@@ -125,6 +135,7 @@ public class ChatHistory {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return preview;
     }
     
     public List<Message> loadMessages() {
@@ -222,6 +233,62 @@ public class ChatHistory {
         return chatList;
     }
     
+    public void syncFromCloud(final SyncCallback callback) {
+        if (!supabaseService.isLoggedIn()) {
+            if (callback != null) callback.onComplete(false);
+            return;
+        }
+        
+        supabaseService.loadChatsFromCloud(new SupabaseService.ChatLoadCallback() {
+            @Override
+            public void onSuccess(List<ChatItem> cloudChats) {
+                for (ChatItem cloudChat : cloudChats) {
+                    if (!chatExists(cloudChat.id)) {
+                        createChatWithId(cloudChat.id, cloudChat.preview, cloudChat.preview);
+                        
+                        loadMessagesFromCloudForChat(cloudChat.id);
+                    }
+                }
+                if (callback != null) callback.onComplete(true);
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+                if (callback != null) callback.onComplete(false);
+            }
+        });
+    }
+    
+    private void loadMessagesFromCloudForChat(final String chatId) {
+        supabaseService.loadMessagesFromCloud(chatId, new SupabaseService.MessagesLoadCallback() {
+            @Override
+            public void onSuccess(List<Message> messages) {
+                if (!messages.isEmpty()) {
+                    try {
+                        JSONArray jsonArray = new JSONArray();
+                        for (Message msg : messages) {
+                            JSONObject jsonMsg = new JSONObject();
+                            jsonMsg.put("content", msg.getContent());
+                            jsonMsg.put("type", msg.getType());
+                            jsonMsg.put("timestamp", msg.getTimestamp());
+                            if (msg.getImageBase64() != null) {
+                                jsonMsg.put("imageBase64", msg.getImageBase64());
+                            }
+                            jsonArray.put(jsonMsg);
+                        }
+                        prefs.edit().putString(KEY_MESSAGES_PREFIX + chatId, jsonArray.toString()).apply();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            
+            @Override
+            public void onError(String errorMessage) {
+            }
+        });
+    }
+    
     public void deleteChat(String chatId) {
         try {
             JSONArray chats = getChatsArray();
@@ -238,6 +305,10 @@ public class ChatHistory {
             editor.putString(KEY_CHATS, newChats.toString());
             editor.remove(KEY_MESSAGES_PREFIX + chatId);
             editor.apply();
+            
+            if (supabaseService.isLoggedIn()) {
+                supabaseService.deleteChatFromCloud(chatId, null);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -311,6 +382,10 @@ public class ChatHistory {
     
     public void saveMessagesForChat(String chatId, List<Message> messages) {
         saveMessagesToChat(chatId, messages);
+    }
+    
+    public interface SyncCallback {
+        void onComplete(boolean success);
     }
     
     public static class ChatItem {

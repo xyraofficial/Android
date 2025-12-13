@@ -2,6 +2,8 @@ package com.xyra.ai;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,9 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +48,21 @@ public class ChatAdapter extends BaseAdapter {
     
     private ThemeManager.ThemeColors themeColors;
     
+    private TTSService ttsService;
+    private BookmarkManager bookmarkManager;
+    private ShareService shareService;
+    private CodeExecutor codeExecutor;
+    
+    private ActionButtonCallback actionCallback;
+    
+    public interface ActionButtonCallback {
+        void onTTSClick(Message message);
+        void onBookmarkClick(Message message, boolean isNowBookmarked);
+        void onShareClick(Message message);
+        void onCopyClick(Message message);
+        void onRunCodeClick(Message message, String code, String language);
+    }
+    
     public ChatAdapter(Context context) {
         this.context = context;
         this.messages = new ArrayList<Message>();
@@ -54,6 +73,18 @@ public class ChatAdapter extends BaseAdapter {
         this.handler = new Handler(Looper.getMainLooper());
         this.currentChatId = null;
         this.themeColors = ThemeManager.getThemeColors(context);
+    }
+    
+    public void setServices(TTSService ttsService, BookmarkManager bookmarkManager, 
+                           ShareService shareService, CodeExecutor codeExecutor) {
+        this.ttsService = ttsService;
+        this.bookmarkManager = bookmarkManager;
+        this.shareService = shareService;
+        this.codeExecutor = codeExecutor;
+    }
+    
+    public void setActionCallback(ActionButtonCallback callback) {
+        this.actionCallback = callback;
     }
     
     public void setThemeColors(ThemeManager.ThemeColors colors) {
@@ -94,7 +125,7 @@ public class ChatAdapter extends BaseAdapter {
         if (viewType == TYPE_USER) {
             return getUserView(message, convertView, parent);
         } else {
-            return getAIView(message, convertView, parent);
+            return getAIView(message, convertView, parent, position);
         }
     }
     
@@ -171,7 +202,7 @@ public class ChatAdapter extends BaseAdapter {
         return convertView;
     }
     
-    private View getAIView(Message message, View convertView, ViewGroup parent) {
+    private View getAIView(final Message message, View convertView, ViewGroup parent, final int position) {
         AIViewHolder holder;
         
         if (convertView == null || convertView.getTag() == null || !(convertView.getTag() instanceof AIViewHolder)) {
@@ -179,6 +210,12 @@ public class ChatAdapter extends BaseAdapter {
             holder = new AIViewHolder();
             holder.messageContainer = (LinearLayout) convertView.findViewById(R.id.messageContainer);
             holder.tvTime = (TextView) convertView.findViewById(R.id.tvTime);
+            holder.actionButtonsContainer = (LinearLayout) convertView.findViewById(R.id.actionButtonsContainer);
+            holder.btnTTS = (ImageButton) convertView.findViewById(R.id.btnTTS);
+            holder.btnBookmark = (ImageButton) convertView.findViewById(R.id.btnBookmark);
+            holder.btnShare = (ImageButton) convertView.findViewById(R.id.btnShare);
+            holder.btnCopy = (ImageButton) convertView.findViewById(R.id.btnCopy);
+            holder.btnRunCode = (ImageButton) convertView.findViewById(R.id.btnRunCode);
             convertView.setTag(holder);
         } else {
             holder = (AIViewHolder) convertView.getTag();
@@ -188,8 +225,15 @@ public class ChatAdapter extends BaseAdapter {
         
         if (isThinkingMessage(content)) {
             showThinkingAnimation(holder.messageContainer);
+            if (holder.actionButtonsContainer != null) {
+                holder.actionButtonsContainer.setVisibility(View.GONE);
+            }
         } else {
             messageRenderer.renderMessage(content, holder.messageContainer);
+            if (holder.actionButtonsContainer != null) {
+                holder.actionButtonsContainer.setVisibility(View.VISIBLE);
+            }
+            setupActionButtons(holder, message, position);
         }
         
         holder.tvTime.setText(timeFormat.format(new Date(message.getTimestamp())));
@@ -207,6 +251,112 @@ public class ChatAdapter extends BaseAdapter {
         }
         
         return convertView;
+    }
+    
+    private void setupActionButtons(final AIViewHolder holder, final Message message, final int position) {
+        final String content = message.getContent();
+        
+        if (holder.btnTTS != null) {
+            holder.btnTTS.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (ttsService != null) {
+                        if (ttsService.isSpeaking()) {
+                            ttsService.stop();
+                            holder.btnTTS.setAlpha(0.7f);
+                        } else {
+                            ttsService.autoDetectLanguage(content);
+                            ttsService.speak(content);
+                            holder.btnTTS.setAlpha(1.0f);
+                        }
+                    }
+                    if (actionCallback != null) {
+                        actionCallback.onTTSClick(message);
+                    }
+                }
+            });
+        }
+        
+        if (holder.btnBookmark != null) {
+            final boolean isBookmarked = bookmarkManager != null && 
+                                         bookmarkManager.isBookmarked(message, currentChatId);
+            holder.btnBookmark.setImageResource(isBookmarked ? 
+                R.drawable.ic_bookmark_filled : R.drawable.ic_bookmark);
+            holder.btnBookmark.setAlpha(isBookmarked ? 1.0f : 0.7f);
+            
+            holder.btnBookmark.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (bookmarkManager != null) {
+                        bookmarkManager.toggleBookmark(message, currentChatId);
+                        boolean nowBookmarked = bookmarkManager.isBookmarked(message, currentChatId);
+                        holder.btnBookmark.setImageResource(nowBookmarked ? 
+                            R.drawable.ic_bookmark_filled : R.drawable.ic_bookmark);
+                        holder.btnBookmark.setAlpha(nowBookmarked ? 1.0f : 0.7f);
+                        
+                        Toast.makeText(context, 
+                            nowBookmarked ? "Pesan ditandai" : "Tanda dihapus", 
+                            Toast.LENGTH_SHORT).show();
+                        
+                        if (actionCallback != null) {
+                            actionCallback.onBookmarkClick(message, nowBookmarked);
+                        }
+                    }
+                }
+            });
+        }
+        
+        if (holder.btnShare != null) {
+            holder.btnShare.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (shareService != null) {
+                        shareService.shareText(content);
+                    }
+                    if (actionCallback != null) {
+                        actionCallback.onShareClick(message);
+                    }
+                }
+            });
+        }
+        
+        if (holder.btnCopy != null) {
+            holder.btnCopy.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) 
+                        context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("XyraAI", content);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(context, "Disalin ke clipboard", Toast.LENGTH_SHORT).show();
+                    
+                    if (actionCallback != null) {
+                        actionCallback.onCopyClick(message);
+                    }
+                }
+            });
+        }
+        
+        if (holder.btnRunCode != null) {
+            boolean hasCode = codeExecutor != null && codeExecutor.containsExecutableCode(content);
+            holder.btnRunCode.setVisibility(hasCode ? View.VISIBLE : View.GONE);
+            
+            if (hasCode) {
+                holder.btnRunCode.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (codeExecutor != null) {
+                            String code = codeExecutor.extractCodeFromMessage(content);
+                            String language = codeExecutor.extractLanguageFromMessage(content);
+                            
+                            if (code != null && actionCallback != null) {
+                                actionCallback.onRunCodeClick(message, code, language);
+                            }
+                        }
+                    }
+                });
+            }
+        }
     }
     
     private boolean isThinkingMessage(String content) {
@@ -408,5 +558,11 @@ public class ChatAdapter extends BaseAdapter {
     static class AIViewHolder {
         LinearLayout messageContainer;
         TextView tvTime;
+        LinearLayout actionButtonsContainer;
+        ImageButton btnTTS;
+        ImageButton btnBookmark;
+        ImageButton btnShare;
+        ImageButton btnCopy;
+        ImageButton btnRunCode;
     }
 }

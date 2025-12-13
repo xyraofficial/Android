@@ -92,6 +92,7 @@ public class GroqApiService {
     private String apiKey;
     private Handler mainHandler;
     private Thread workerThread;
+    private PersonaManager personaManager;
     
     public interface ChatCallback {
         void onSuccess(String response);
@@ -101,6 +102,10 @@ public class GroqApiService {
     public GroqApiService(String apiKey) {
         this.apiKey = apiKey;
         this.mainHandler = new Handler(Looper.getMainLooper());
+    }
+    
+    public void setPersonaManager(PersonaManager pm) {
+        this.personaManager = pm;
     }
     
     public void sendMessage(final List<Message> conversationHistory, final ChatCallback callback) {
@@ -216,9 +221,17 @@ public class GroqApiService {
         
         JSONArray messages = new JSONArray();
         
+        String fullSystemPrompt = SYSTEM_PROMPT;
+        if (personaManager != null) {
+            String personaPrompt = personaManager.getActiveSystemPrompt();
+            if (personaPrompt != null && !personaPrompt.isEmpty()) {
+                fullSystemPrompt = SYSTEM_PROMPT + "\n\n" + "PERSONA INSTRUCTIONS:\n" + personaPrompt;
+            }
+        }
+        
         JSONObject systemMessage = new JSONObject();
         systemMessage.put("role", "system");
-        systemMessage.put("content", SYSTEM_PROMPT);
+        systemMessage.put("content", fullSystemPrompt);
         messages.put(systemMessage);
         
         for (int i = 0; i < conversationHistory.size(); i++) {

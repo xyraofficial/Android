@@ -101,6 +101,17 @@ public class MainActivity extends Activity {
     private View avatarSection;
     
     private LinearLayout welcomeState;
+    
+    private TTSService ttsService;
+    private BookmarkManager bookmarkManager;
+    private ShareService shareService;
+    private CodeExecutor codeExecutor;
+    private PersonaManager personaManager;
+    private STTService sttService;
+    
+    private ImageButton btnMic;
+    private ImageButton btnPersonas;
+    private ImageButton btnBookmarks;
     private TextView quickReply1;
     private TextView quickReply2;
     private TextView quickReply3;
@@ -119,6 +130,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         initViews();
+        initServices();
         applyThemeColors();
         setupListView();
         setupDrawer();
@@ -241,6 +253,29 @@ public class MainActivity extends Activity {
     
     private void setupListView() {
         chatAdapter = new ChatAdapter(this);
+        chatAdapter.setServices(ttsService, bookmarkManager, shareService, codeExecutor);
+        chatAdapter.setActionCallback(new ChatAdapter.ActionButtonCallback() {
+            @Override
+            public void onTTSClick(Message message) {
+            }
+            
+            @Override
+            public void onBookmarkClick(Message message, boolean isNowBookmarked) {
+            }
+            
+            @Override
+            public void onShareClick(Message message) {
+            }
+            
+            @Override
+            public void onCopyClick(Message message) {
+            }
+            
+            @Override
+            public void onRunCodeClick(Message message, String code, String language) {
+                executeCode(code, language);
+            }
+        });
         listView.setAdapter(chatAdapter);
         listView.setDivider(null);
         listView.setDividerHeight(0);
@@ -956,8 +991,38 @@ public class MainActivity extends Activity {
         }
     }
     
+    private void initServices() {
+        ttsService = new TTSService(this);
+        bookmarkManager = new BookmarkManager(this);
+        shareService = new ShareService(this);
+        codeExecutor = new CodeExecutor(this);
+        personaManager = new PersonaManager(this);
+        sttService = new STTService(this);
+        
+        sttService.setCallback(new STTService.STTCallback() {
+            @Override
+            public void onReadyForSpeech() {
+                Toast.makeText(MainActivity.this, "Mulai bicara...", Toast.LENGTH_SHORT).show();
+            }
+            
+            @Override
+            public void onResult(String text) {
+                if (text != null && !text.isEmpty()) {
+                    etMessage.setText(text);
+                    etMessage.setSelection(text.length());
+                }
+            }
+            
+            @Override
+            public void onError(String error) {
+                Toast.makeText(MainActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
     private void initGroqService() {
         groqApiService = new GroqApiService(Config.GROQ_API_KEY);
+        groqApiService.setPersonaManager(personaManager);
     }
     
     private void initChatHistory() {
@@ -1225,5 +1290,51 @@ public class MainActivity extends Activity {
         if (groqApiService != null) {
             groqApiService.shutdown();
         }
+        if (ttsService != null) {
+            ttsService.shutdown();
+        }
+        if (codeExecutor != null) {
+            codeExecutor.shutdown();
+        }
+        if (sttService != null) {
+            sttService.shutdown();
+        }
+    }
+    
+    private void executeCode(String code, String language) {
+        Toast.makeText(this, "Menjalankan kode " + language + "...", Toast.LENGTH_SHORT).show();
+        
+        codeExecutor.executeCode(code, language, new CodeExecutor.ExecutionCallback() {
+            @Override
+            public void onSuccess(CodeExecutor.ExecutionResult result) {
+                String output = result.getFormattedOutput();
+                chatAdapter.addMessage(new Message(output, Message.TYPE_AI));
+                forceScrollToBottom();
+            }
+            
+            @Override
+            public void onError(String error) {
+                chatAdapter.addMessage(new Message("**Error eksekusi:**\n" + error, Message.TYPE_AI));
+                forceScrollToBottom();
+            }
+        });
+    }
+    
+    public void startVoiceInput() {
+        if (sttService != null) {
+            sttService.startListening();
+        }
+    }
+    
+    public void openPersonasActivity() {
+        Intent intent = new Intent(this, PersonasActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+    
+    public void openBookmarksActivity() {
+        Intent intent = new Intent(this, BookmarksActivity.class);
+        startActivity(intent);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

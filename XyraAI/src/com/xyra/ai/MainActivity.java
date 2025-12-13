@@ -110,8 +110,8 @@ public class MainActivity extends Activity {
     private STTService sttService;
     
     private ImageButton btnMic;
-    private ImageButton btnPersonas;
-    private ImageButton btnBookmarks;
+    private LinearLayout btnPersonas;
+    private LinearLayout btnBookmarks;
     private TextView quickReply1;
     private TextView quickReply2;
     private TextView quickReply3;
@@ -249,6 +249,10 @@ public class MainActivity extends Activity {
         quickReply2 = (TextView) findViewById(R.id.quickReply2);
         quickReply3 = (TextView) findViewById(R.id.quickReply3);
         quickReply4 = (TextView) findViewById(R.id.quickReply4);
+        
+        btnMic = (ImageButton) findViewById(R.id.btnMic);
+        btnPersonas = (LinearLayout) findViewById(R.id.btnPersonas);
+        btnBookmarks = (LinearLayout) findViewById(R.id.btnBookmarks);
     }
     
     private void setupListView() {
@@ -613,6 +617,39 @@ public class MainActivity extends Activity {
                 public void onClick(View v) {
                     closeDrawer();
                     Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            });
+        }
+        
+        if (btnMic != null) {
+            btnMic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleVoiceInput();
+                }
+            });
+        }
+        
+        if (btnPersonas != null) {
+            btnPersonas.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeDrawer();
+                    Intent intent = new Intent(MainActivity.this, PersonasActivity.class);
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            });
+        }
+        
+        if (btnBookmarks != null) {
+            btnBookmarks.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeDrawer();
+                    Intent intent = new Intent(MainActivity.this, BookmarksActivity.class);
                     startActivity(intent);
                     overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
@@ -1002,22 +1039,96 @@ public class MainActivity extends Activity {
         sttService.setCallback(new STTService.STTCallback() {
             @Override
             public void onReadyForSpeech() {
-                Toast.makeText(MainActivity.this, "Mulai bicara...", Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "Mulai bicara...", Toast.LENGTH_SHORT).show();
+                        if (btnMic != null) {
+                            btnMic.setColorFilter(0xFFFF5722);
+                        }
+                    }
+                });
             }
             
             @Override
-            public void onResult(String text) {
-                if (text != null && !text.isEmpty()) {
-                    etMessage.setText(text);
-                    etMessage.setSelection(text.length());
-                }
+            public void onBeginningOfSpeech() {
+            }
+            
+            @Override
+            public void onEndOfSpeech() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (btnMic != null) {
+                            btnMic.setColorFilter(null);
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            public void onResults(String text) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (text != null && !text.isEmpty()) {
+                            etMessage.setText(text);
+                            etMessage.setSelection(text.length());
+                        }
+                        if (btnMic != null) {
+                            btnMic.setColorFilter(null);
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            public void onPartialResults(String partialText) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (partialText != null && !partialText.isEmpty()) {
+                            etMessage.setText(partialText);
+                        }
+                    }
+                });
             }
             
             @Override
             public void onError(String error) {
-                Toast.makeText(MainActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                        if (btnMic != null) {
+                            btnMic.setColorFilter(null);
+                        }
+                    }
+                });
+            }
+            
+            @Override
+            public void onRmsChanged(float rmsDb) {
             }
         });
+    }
+    
+    private void toggleVoiceInput() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSION_REQUEST);
+                return;
+            }
+        }
+        
+        if (sttService != null) {
+            if (sttService.isListening()) {
+                sttService.stopListening();
+                Toast.makeText(this, "Berhenti mendengarkan", Toast.LENGTH_SHORT).show();
+            } else {
+                sttService.startListening();
+            }
+        }
     }
     
     private void initGroqService() {

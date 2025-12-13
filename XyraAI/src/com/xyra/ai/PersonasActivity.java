@@ -191,14 +191,14 @@ public class PersonasActivity extends Activity {
             TextView tvIcon = (TextView) convertView.findViewById(R.id.tvIcon);
             TextView tvName = (TextView) convertView.findViewById(R.id.tvName);
             TextView tvDescription = (TextView) convertView.findViewById(R.id.tvDescription);
-            ImageView ivCheck = (ImageView) convertView.findViewById(R.id.ivCheck);
+            ImageView ivSelected = (ImageView) convertView.findViewById(R.id.ivSelected);
             
             tvIcon.setText(persona.icon);
             tvName.setText(persona.name);
             tvDescription.setText(persona.description);
             
-            if (ivCheck != null) {
-                ivCheck.setVisibility(isActive ? View.VISIBLE : View.GONE);
+            if (ivSelected != null) {
+                ivSelected.setVisibility(isActive ? View.VISIBLE : View.GONE);
             }
             
             return convertView;

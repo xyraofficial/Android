@@ -39,6 +39,16 @@ XyraAI/
 - Beautiful message bubbles with timestamps
 - Network status indicator
 - Conversation context memory
+- **Voice Input (STT)**: Talk to AI using voice with multi-language support
+- **Voice Output (TTS)**: AI reads answers aloud with 11 languages
+- **Share to WhatsApp**: Share conversations easily
+- **Bookmarks**: Save important messages
+- **AI Personas**: Customize AI personality
+- **Code Execution**: Run code directly in app
+- **Document Analysis**: Analyze uploaded documents
+- **Web Search**: AI searches current internet info
+- **Daily Reminders**: Get AI tips via notifications
+- **Quick Reply Templates**: Pre-made prompts for common tasks
 
 ## API Configuration
 - **GROQ API**: `https://api.groq.com/openai/v1/chat/completions`

@@ -23,8 +23,7 @@ public class BookmarksActivity extends Activity {
     
     private ListView listBookmarks;
     private ImageButton btnBack;
-    private TextView tvTitle;
-    private TextView tvEmpty;
+    private LinearLayout emptyState;
     
     private BookmarkManager bookmarkManager;
     private BookmarkAdapter adapter;
@@ -45,10 +44,9 @@ public class BookmarksActivity extends Activity {
     }
     
     private void initViews() {
-        listBookmarks = (ListView) findViewById(R.id.listBookmarks);
+        listBookmarks = (ListView) findViewById(R.id.bookmarkList);
         btnBack = (ImageButton) findViewById(R.id.btnBack);
-        tvTitle = (TextView) findViewById(R.id.tvTitle);
-        tvEmpty = (TextView) findViewById(R.id.tvEmpty);
+        emptyState = (LinearLayout) findViewById(R.id.emptyState);
     }
     
     private void setupListeners() {
@@ -85,13 +83,13 @@ public class BookmarksActivity extends Activity {
         
         if (bookmarks.isEmpty()) {
             listBookmarks.setVisibility(View.GONE);
-            if (tvEmpty != null) {
-                tvEmpty.setVisibility(View.VISIBLE);
+            if (emptyState != null) {
+                emptyState.setVisibility(View.VISIBLE);
             }
         } else {
             listBookmarks.setVisibility(View.VISIBLE);
-            if (tvEmpty != null) {
-                tvEmpty.setVisibility(View.GONE);
+            if (emptyState != null) {
+                emptyState.setVisibility(View.GONE);
             }
             adapter = new BookmarkAdapter(bookmarks);
             listBookmarks.setAdapter(adapter);
@@ -177,7 +175,7 @@ public class BookmarksActivity extends Activity {
             BookmarkManager.BookmarkItem item = getItem(position);
             
             TextView tvContent = (TextView) convertView.findViewById(R.id.tvContent);
-            TextView tvDate = (TextView) convertView.findViewById(R.id.tvDate);
+            TextView tvTime = (TextView) convertView.findViewById(R.id.tvTime);
             TextView tvNote = (TextView) convertView.findViewById(R.id.tvNote);
             ImageButton btnDelete = (ImageButton) convertView.findViewById(R.id.btnDelete);
             
@@ -186,7 +184,9 @@ public class BookmarksActivity extends Activity {
                 preview = preview.substring(0, 100) + "...";
             }
             tvContent.setText(preview);
-            tvDate.setText(dateFormat.format(new Date(item.bookmarkedAt)));
+            if (tvTime != null) {
+                tvTime.setText(dateFormat.format(new Date(item.bookmarkedAt)));
+            }
             
             if (tvNote != null) {
                 if (item.note != null && !item.note.isEmpty()) {

@@ -258,4 +258,8 @@ public class STTService {
         }
         isListening = false;
     }
+    
+    public void shutdown() {
+        destroy();
+    }
 }

@@ -23,8 +23,7 @@ public class PersonasActivity extends Activity {
     
     private ListView listPersonas;
     private ImageButton btnBack;
-    private LinearLayout btnAddPersona;
-    private TextView tvTitle;
+    private View btnAddPersona;
     
     private PersonaManager personaManager;
     private PersonaAdapter adapter;
@@ -43,10 +42,9 @@ public class PersonasActivity extends Activity {
     }
     
     private void initViews() {
-        listPersonas = (ListView) findViewById(R.id.listPersonas);
+        listPersonas = (ListView) findViewById(R.id.personaList);
         btnBack = (ImageButton) findViewById(R.id.btnBack);
-        btnAddPersona = (LinearLayout) findViewById(R.id.btnAddPersona);
-        tvTitle = (TextView) findViewById(R.id.tvTitle);
+        btnAddPersona = findViewById(R.id.btnAddPersona);
     }
     
     private void setupListeners() {

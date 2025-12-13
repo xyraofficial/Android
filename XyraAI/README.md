@@ -6,45 +6,84 @@ An Android AI Chat application built for AIDE (Android IDE) that uses GROQ API w
 
 - Modern dark theme UI with gradient accents
 - Real-time AI chat using GROQ API
-- Chat message history
+- Chat message history with cloud sync
+- Voice input (Speech-to-Text)
+- Text-to-Speech
+- Markdown rendering
+- Code syntax highlighting
+- User authentication with Supabase
+- Multiple AI personas
+- Bookmarks
 - Beautiful message bubbles with timestamps
 - Network status indicator
 - Conversation context memory
+
+## Quick Fix for Build Errors
+
+Jika Anda mendapat error saat build, ikuti langkah berikut:
+
+### 1. Error "Unknown entity 'R'" atau "No resource found"
+
+Pastikan semua file drawable ada:
+- `bg_persona_icon.xml`
+- `bg_dialog.xml`
+- `bg_pulse_circle.xml`
+- `bg_mic_button.xml`
+
+### 2. Error "Unknown entity 'NotificationCompat'" atau "Unknown type or package 'core'"
+
+Anda perlu menambahkan AndroidX Core library:
+
+1. Download AndroidX Core library dari:
+   - https://mvnrepository.com/artifact/androidx.core/core
+   - Pilih versi terbaru, download file `.aar`
+
+2. Extract file `.aar` dan ambil `classes.jar`
+
+3. Rename menjadi `androidx-core.jar`
+
+4. Copy ke folder `XyraAI/libs/`
+
+5. Di AIDE, tambahkan library:
+   - Menu → Project → Add Library
+   - Pilih file `androidx-core.jar`
+
+### 3. Error "This variable must be final to be used in local class"
+
+Ini sudah diperbaiki di kode. Jika masih muncul, pastikan Anda menggunakan versi terbaru file.
 
 ## Project Structure
 
 ```
 XyraAI/
 ├── AndroidManifest.xml          # App configuration & permissions
-├── .classpath                   # Eclipse/AIDE project file
-├── .project                     # Project metadata
 ├── project.properties           # Android SDK target
-├── libs/                        # External JAR libraries (if needed)
+├── libs/                        # External JAR libraries
 ├── src/
 │   └── com/xyra/ai/
+│       ├── LoginActivity.java   # Login/Register screen
 │       ├── MainActivity.java    # Main chat activity
+│       ├── SettingsActivity.java # Settings screen
+│       ├── InfoActivity.java    # App info
+│       ├── ProfileActivity.java # User profile
+│       ├── PersonasActivity.java # AI personas
+│       ├── BookmarksActivity.java # Bookmarks
 │       ├── ChatAdapter.java     # RecyclerView adapter
 │       ├── Message.java         # Message model
 │       ├── GroqApiService.java  # GROQ API integration
+│       ├── SupabaseService.java # Supabase auth & sync
+│       ├── STTService.java      # Speech-to-Text
+│       ├── TTSService.java      # Text-to-Speech
+│       ├── NotificationService.java # Daily notifications
 │       ├── Config.java          # App configuration
 │       ├── NetworkUtils.java    # Network utilities
-│       └── ChatHistory.java     # Chat persistence
+│       ├── ChatHistory.java     # Chat persistence
+│       ├── ThemeManager.java    # Theme management
+│       └── ...
 └── res/
-    ├── layout/
-    │   ├── activity_main.xml    # Main layout
-    │   ├── item_message_user.xml
-    │   └── item_message_ai.xml
-    ├── values/
-    │   ├── strings.xml          # String resources
-    │   ├── colors.xml           # Color definitions
-    │   └── styles.xml           # App theme
-    └── drawable/
-        ├── ic_launcher.xml      # App icon
-        ├── ic_send.xml          # Send button icon
-        ├── bg_input.xml         # Input field background
-        ├── bg_send_button.xml   # Send button background
-        ├── bg_bubble_user.xml   # User message bubble
-        └── bg_bubble_ai.xml     # AI message bubble
+    ├── layout/                  # All layout files
+    ├── values/                  # Strings, colors, styles
+    └── drawable/                # Icons and backgrounds
 ```
 
 ## Setup Instructions
@@ -62,17 +101,10 @@ Copy the entire `XyraAI` folder to your Android device's storage:
 
 ### 3. Add Your API Key
 
-Edit `src/com/xyra/ai/MainActivity.java` and replace:
+Edit `src/com/xyra/ai/Config.java` and add your GROQ API key:
 ```java
-private static final String API_KEY = "YOUR_GROQ_API_KEY_HERE";
+public static final String GROQ_API_KEY = "gsk_your_actual_key_here";
 ```
-
-With your actual GROQ API key:
-```java
-private static final String API_KEY = "gsk_your_actual_key_here";
-```
-
-Also update `src/com/xyra/ai/Config.java` with your key.
 
 ### 4. Build and Run
 
@@ -86,9 +118,11 @@ Also update `src/com/xyra/ai/Config.java` with your key.
 This app uses the GROQ API with the following configuration:
 
 - **Endpoint**: `https://api.groq.com/openai/v1/chat/completions`
-- **Model**: `llama-3.3-70b-versatile`
-- **Temperature**: 0.7
-- **Max Tokens**: 2048
+- **Model**: `llama-3.3-70b-versatile` (default)
+- **Available Models**:
+  - Llama 3.3 70B
+  - Llama 4 Scout (Vision)
+  - Mixtral 8x7B
 
 ## Requirements
 
@@ -101,29 +135,10 @@ This app uses the GROQ API with the following configuration:
 
 - `INTERNET` - For API calls
 - `ACCESS_NETWORK_STATE` - For network status checking
-
-## Customization
-
-### Change Colors
-Edit `res/values/colors.xml` to customize the app theme.
-
-### Change AI Personality
-Edit the system prompt in `GroqApiService.java`:
-```java
-systemMessage.put("content", "You are Xyra, a helpful...");
-```
-
-### Change AI Model
-Edit `GroqApiService.java` or `Config.java`:
-```java
-private static final String MODEL = "llama-3.3-70b-versatile";
-```
-
-Available models:
-- `llama-3.3-70b-versatile`
-- `llama3-70b-8192`
-- `mixtral-8x7b-32768`
-- `llama-3.1-8b-instant`
+- `CAMERA` - For image analysis
+- `RECORD_AUDIO` - For voice input
+- `READ/WRITE_EXTERNAL_STORAGE` - For file operations
+- `VIBRATE` - For haptic feedback
 
 ## Troubleshooting
 
@@ -136,6 +151,12 @@ Available models:
 - Ensure all files are in correct locations
 - Check for syntax errors in Java files
 - Verify AndroidManifest.xml is valid
+- Add AndroidX Core library if NotificationCompat errors appear
+
+### "Unknown entity 'R'"
+- This usually means a resource file is missing or has errors
+- Check all drawable XML files for syntax errors
+- Rebuild the project (Clean & Build)
 
 ## License
 
@@ -145,4 +166,5 @@ MIT License - Feel free to use and modify!
 
 - GROQ API for AI inference
 - Llama 3.3 model by Meta
+- Supabase for authentication
 - Built with AIDE for Android

@@ -1067,7 +1067,7 @@ public class MainActivity extends Activity {
             }
             
             @Override
-            public void onResults(String text) {
+            public void onResults(final String text) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -1083,7 +1083,7 @@ public class MainActivity extends Activity {
             }
             
             @Override
-            public void onPartialResults(String partialText) {
+            public void onPartialResults(final String partialText) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -1095,7 +1095,7 @@ public class MainActivity extends Activity {
             }
             
             @Override
-            public void onError(String error) {
+            public void onError(final String error) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

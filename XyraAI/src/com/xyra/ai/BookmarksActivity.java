@@ -97,7 +97,7 @@ public class BookmarksActivity extends Activity {
         }
     }
     
-    private void showBookmarkDetail(BookmarkManager.BookmarkItem item) {
+    private void showBookmarkDetail(final BookmarkManager.BookmarkItem item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Bookmark");
         
@@ -107,6 +107,7 @@ public class BookmarksActivity extends Activity {
         }
         message += "\n\n--- Ditandai ---\n" + dateFormat.format(new Date(item.bookmarkedAt));
         
+        final String contentToCopy = item.content;
         builder.setMessage(message);
         builder.setPositiveButton("OK", null);
         builder.setNeutralButton("Salin", new DialogInterface.OnClickListener() {
@@ -114,7 +115,7 @@ public class BookmarksActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager) 
                     getSystemService(CLIPBOARD_SERVICE);
-                android.content.ClipData clip = android.content.ClipData.newPlainText("Bookmark", item.content);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Bookmark", contentToCopy);
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(BookmarksActivity.this, "Disalin ke clipboard", Toast.LENGTH_SHORT).show();
             }

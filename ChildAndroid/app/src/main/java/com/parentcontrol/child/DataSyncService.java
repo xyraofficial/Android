@@ -133,8 +133,65 @@ public class DataSyncService extends Service {
             @Override
             public void run() {
                 if (isRunning) {
-                    performSync();
+                    if (apiToken == null || apiToken.isEmpty()) {
+                        registerDevice();
+                    } else {
+                        performSync();
+                    }
                     handler.postDelayed(this, SYNC_INTERVAL);
+                }
+            }
+        });
+    }
+    
+    private void registerDevice() {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(apiUrl + "/api/auth/register");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setDoOutput(true);
+                    
+                    JSONObject data = new JSONObject();
+                    data.put("device_name", Build.MODEL);
+                    data.put("model", Build.MODEL);
+                    data.put("android_version", Build.VERSION.RELEASE);
+                    
+                    byte[] input = data.toString().getBytes("UTF-8");
+                    OutputStream os = conn.getOutputStream();
+                    os.write(input, 0, input.length);
+                    os.close();
+                    
+                    int responseCode = conn.getResponseCode();
+                    if (responseCode == 201) {
+                        java.io.BufferedReader reader = new java.io.BufferedReader(
+                            new java.io.InputStreamReader(conn.getInputStream()));
+                        StringBuilder response = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            response.append(line);
+                        }
+                        reader.close();
+                        
+                        JSONObject result = new JSONObject(response.toString());
+                        String token = result.getString("api_token");
+                        String deviceId = result.getString("device_id");
+                        
+                        Config.setApiToken(DataSyncService.this, token);
+                        Config.setDeviceId(DataSyncService.this, deviceId);
+                        apiToken = token;
+                        
+                        Log.d(TAG, "Device registered successfully. Token: " + token.substring(0, 8) + "...");
+                    } else {
+                        Log.e(TAG, "Registration failed with code: " + responseCode);
+                    }
+                    
+                    conn.disconnect();
+                } catch (Exception e) {
+                    Log.e(TAG, "Registration failed", e);
                 }
             }
         });

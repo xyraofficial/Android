@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">XyraAI Admin</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="user_management">User Management</string>
+    <string name="ai_config">AI Configuration</string>
+    <string name="supabase_settings">Supabase Settings</string>
+    <string name="activity_logs">Activity Logs</string>
+    <string name="logout">Logout</string>
+    <string name="total_users">Total Users</string>
+    <string name="active_users">Active Users</string>
+    <string name="banned_users">Banned Users</string>
+    <string name="api_requests_today">API Requests Today</string>
+    <string name="search_user">Search user...</string>
+    <string name="ban">Ban</string>
+    <string name="unban">Unban</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="api_key">API Key</string>
+    <string name="model_name">Model Name</string>
+    <string name="enable">Enable</string>
+    <string name="disable">Disable</string>
+    <string name="supabase_url">Supabase URL</string>
+    <string name="supabase_anon_key">Supabase Anon Key</string>
+    <string name="loading">Loading...</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="admin_login">Admin Login</string>
+    <string name="welcome_admin">Welcome, Admin</string>
+</resources>

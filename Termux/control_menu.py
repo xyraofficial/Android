@@ -5,8 +5,8 @@ import os
 import sys
 from datetime import datetime
 
-API_BASE_URL = os.environ.get("API_URL", "http://localhost:5000")
-API_TOKEN = os.environ.get("API_TOKEN", "")
+API_BASE_URL = os.environ.get("API_URL", "https://termux-control.vercel.app")
+API_TOKEN = os.environ.get("SECRET_KEY", "Admin")
 
 
 class TermuxController:

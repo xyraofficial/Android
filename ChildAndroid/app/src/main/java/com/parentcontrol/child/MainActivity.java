@@ -2,10 +2,12 @@ package com.parentcontrol.child;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,15 +21,19 @@ public class MainActivity extends AppCompatActivity {
     
     private static final int PERMISSION_REQUEST_CODE = 1001;
     
+    private TextView statusText;
+    private Button startServiceBtn;
+    private Button stopServiceBtn;
+    
     private String[] getRequiredPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= 33) {
             return new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.READ_CONTACTS,
                 Manifest.permission.READ_SMS,
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.POST_NOTIFICATIONS
+                "android.permission.READ_MEDIA_IMAGES",
+                "android.permission.POST_NOTIFICATIONS"
             };
         } else {
             return new String[]{
@@ -40,21 +46,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     
-    private TextView statusText;
-    private Button startServiceBtn;
-    private Button stopServiceBtn;
-    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        statusText = findViewById(R.id.statusText);
-        startServiceBtn = findViewById(R.id.startServiceBtn);
-        stopServiceBtn = findViewById(R.id.stopServiceBtn);
+        statusText = (TextView) findViewById(R.id.statusText);
+        startServiceBtn = (Button) findViewById(R.id.startServiceBtn);
+        stopServiceBtn = (Button) findViewById(R.id.stopServiceBtn);
         
-        startServiceBtn.setOnClickListener(v -> showConsentDialog());
-        stopServiceBtn.setOnClickListener(v -> stopDataService());
+        startServiceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showConsentDialog();
+            }
+        });
+        
+        stopServiceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopDataService();
+            }
+        });
         
         updateStatus();
     }
@@ -64,10 +77,10 @@ public class MainActivity extends AppCompatActivity {
             .setTitle("Parent Control Consent")
             .setMessage(
                 "This app will collect and transmit the following data:\n\n" +
-                "• Location data\n" +
-                "• Contact list\n" +
-                "• SMS messages\n" +
-                "• Gallery metadata\n\n" +
+                "- Location data\n" +
+                "- Contact list\n" +
+                "- SMS messages\n" +
+                "- Gallery metadata\n\n" +
                 "This data will be sent securely to the parent monitoring server.\n\n" +
                 "By proceeding, you confirm that:\n" +
                 "1. You are the device owner or have consent\n" +
@@ -75,7 +88,12 @@ public class MainActivity extends AppCompatActivity {
                 "3. You agree to the data collection\n\n" +
                 "Do you consent to proceed?"
             )
-            .setPositiveButton("I Consent", (dialog, which) -> checkAndRequestPermissions())
+            .setPositiveButton("I Consent", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    checkAndRequestPermissions();
+                }
+            })
             .setNegativeButton("Cancel", null)
             .setCancelable(false)
             .show();
@@ -85,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
         String[] permissions = getRequiredPermissions();
         boolean allGranted = true;
         
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) 
+        for (int i = 0; i < permissions.length; i++) {
+            if (ContextCompat.checkSelfPermission(this, permissions[i]) 
                     != PackageManager.PERMISSION_GRANTED) {
                 allGranted = false;
                 break;
@@ -107,8 +125,8 @@ public class MainActivity extends AppCompatActivity {
         
         if (requestCode == PERMISSION_REQUEST_CODE) {
             boolean allGranted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                     allGranted = false;
                     break;
                 }
@@ -125,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
     
     private void startDataService() {
         Intent intent = new Intent(this, DataSyncService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= 26) {
             startForegroundService(intent);
         } else {
             startService(intent);
@@ -144,10 +162,10 @@ public class MainActivity extends AppCompatActivity {
     private void updateStatus() {
         if (DataSyncService.isRunning) {
             statusText.setText("Status: Running");
-            statusText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+            statusText.setTextColor(0xFF00AA00);
         } else {
             statusText.setText("Status: Stopped");
-            statusText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+            statusText.setTextColor(0xFFAA0000);
         }
     }
 }

@@ -19,7 +19,9 @@ public class Config {
     
     public static void setApiUrl(Context context, String url) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_API_URL, url).apply();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_API_URL, url);
+        editor.apply();
     }
     
     public static String getApiToken(Context context) {
@@ -29,7 +31,9 @@ public class Config {
     
     public static void setApiToken(Context context, String token) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_API_TOKEN, token).apply();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_API_TOKEN, token);
+        editor.apply();
     }
     
     public static String getDeviceId(Context context) {
@@ -39,6 +43,8 @@ public class Config {
     
     public static void setDeviceId(Context context, String deviceId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(KEY_DEVICE_ID, deviceId).apply();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_DEVICE_ID, deviceId);
+        editor.apply();
     }
 }

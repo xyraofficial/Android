@@ -10,7 +10,7 @@ public class Config {
     private static final String KEY_API_TOKEN = "api_token";
     private static final String KEY_DEVICE_ID = "device_id";
     
-    private static final String DEFAULT_API_URL = "https://your-api-url.com";
+    private static final String DEFAULT_API_URL = "https://11062d13-279d-4d6e-8ef4-b2748c6b52df-00-1zhsh1ehrfued.riker.replit.dev";
     
     public static String getApiUrl(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

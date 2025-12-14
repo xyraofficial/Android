@@ -1,6 +1,7 @@
 package com.parentcontrol.child;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,12 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     
     private static final int PERMISSION_REQUEST_CODE = 1001;
     
@@ -100,27 +96,29 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void checkAndRequestPermissions() {
-        String[] permissions = getRequiredPermissions();
-        boolean allGranted = true;
-        
-        for (int i = 0; i < permissions.length; i++) {
-            if (ContextCompat.checkSelfPermission(this, permissions[i]) 
-                    != PackageManager.PERMISSION_GRANTED) {
-                allGranted = false;
-                break;
+        if (Build.VERSION.SDK_INT >= 23) {
+            String[] permissions = getRequiredPermissions();
+            boolean allGranted = true;
+            
+            for (int i = 0; i < permissions.length; i++) {
+                if (checkSelfPermission(permissions[i]) != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
             }
-        }
-        
-        if (allGranted) {
-            startDataService();
+            
+            if (allGranted) {
+                startDataService();
+            } else {
+                requestPermissions(permissions, PERMISSION_REQUEST_CODE);
+            }
         } else {
-            ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
+            startDataService();
         }
     }
     
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, 
-            @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         
         if (requestCode == PERMISSION_REQUEST_CODE) {
@@ -135,8 +133,7 @@ public class MainActivity extends AppCompatActivity {
             if (allGranted) {
                 startDataService();
             } else {
-                Toast.makeText(this, "Permissions required for monitoring", 
-                    Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Permissions required for monitoring", Toast.LENGTH_LONG).show();
             }
         }
     }

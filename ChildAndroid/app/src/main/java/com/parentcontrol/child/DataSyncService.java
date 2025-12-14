@@ -19,10 +19,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.provider.Telephony;
 import android.util.Log;
-
-import androidx.core.app.NotificationCompat;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,7 +27,6 @@ import org.json.JSONObject;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -83,12 +79,20 @@ public class DataSyncService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         isRunning = true;
         
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Parent Control Active")
-            .setContentText("Monitoring service is running")
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build();
+        Notification notification;
+        if (Build.VERSION.SDK_INT >= 26) {
+            notification = new Notification.Builder(this, CHANNEL_ID)
+                .setContentTitle("Parent Control Active")
+                .setContentText("Monitoring service is running")
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .build();
+        } else {
+            notification = new Notification.Builder(this)
+                .setContentTitle("Parent Control Active")
+                .setContentText("Monitoring service is running")
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .build();
+        }
         
         startForeground(NOTIFICATION_ID, notification);
         
@@ -271,7 +275,7 @@ public class DataSyncService extends Service {
         }
     }
     
-    private void sendToApi(final String endpoint, final JSONObject data) {
+    private void sendToApi(String endpoint, JSONObject data) {
         try {
             URL url = new URL(apiUrl + endpoint);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();

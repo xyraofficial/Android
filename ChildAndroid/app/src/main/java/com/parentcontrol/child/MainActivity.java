@@ -122,18 +122,24 @@ public class MainActivity extends Activity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            boolean allGranted = true;
+            int grantedCount = 0;
+            int deniedCount = 0;
+            
             for (int i = 0; i < grantResults.length; i++) {
-                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    grantedCount++;
+                } else {
+                    deniedCount++;
                 }
             }
             
-            if (allGranted) {
+            if (grantedCount >= 2) {
                 startDataService();
+                if (deniedCount > 0) {
+                    Toast.makeText(this, "Some features may be limited (" + deniedCount + " permissions denied)", Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, "Permissions required for monitoring", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "At least location permission is required", Toast.LENGTH_LONG).show();
             }
         }
     }

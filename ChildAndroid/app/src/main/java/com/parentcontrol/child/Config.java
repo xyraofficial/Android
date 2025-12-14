@@ -10,7 +10,7 @@ public class Config {
     private static final String KEY_API_TOKEN = "api_token";
     private static final String KEY_DEVICE_ID = "device_id";
     
-    private static final String DEFAULT_API_URL = "https://YOUR-VERCEL-APP.vercel.app";
+    private static final String DEFAULT_API_URL = "https://termux-control.vercel.app";
     
     public static String getApiUrl(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

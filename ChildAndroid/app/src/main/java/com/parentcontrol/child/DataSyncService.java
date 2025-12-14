@@ -85,6 +85,7 @@ public class DataSyncService extends Service {
                 .setContentTitle("Parent Control Active")
                 .setContentText("Monitoring service is running")
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .setOngoing(true)
                 .build();
         } else {
             notification = new Notification.Builder(this)
@@ -94,7 +95,15 @@ public class DataSyncService extends Service {
                 .build();
         }
         
-        startForeground(NOTIFICATION_ID, notification);
+        try {
+            if (Build.VERSION.SDK_INT >= 34) {
+                startForeground(NOTIFICATION_ID, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+            } else {
+                startForeground(NOTIFICATION_ID, notification);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start foreground service", e);
+        }
         
         try {
             locationManager.requestLocationUpdates(

@@ -146,13 +146,23 @@ public class MainActivity extends Activity {
     
     private void startDataService() {
         Intent intent = new Intent(this, DataSyncService.class);
-        if (Build.VERSION.SDK_INT >= 26) {
-            startForegroundService(intent);
-        } else {
-            startService(intent);
+        try {
+            if (Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
+            }
+            Toast.makeText(this, "Monitoring service started", Toast.LENGTH_SHORT).show();
+            
+            statusText.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    updateStatus();
+                }
+            }, 1000);
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to start service: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
-        Toast.makeText(this, "Monitoring service started", Toast.LENGTH_SHORT).show();
-        updateStatus();
     }
     
     private void stopDataService() {

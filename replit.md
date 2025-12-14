@@ -72,3 +72,59 @@ XyraAI/
 - The Firebase integration installed is for Flask/Python and does not apply to this Android project
 - This project cannot run as a web server on Replit
 - Pre-compiled class files are available in bin/ directory
+
+---
+
+# XyraAdmin - Android Admin Panel
+
+## Overview
+XyraAdmin is the companion admin panel app for XyraAI. It allows administrators to manage users, configure AI settings, and monitor the system.
+
+## Package Info
+- **Package**: `com.xyra.admin`
+- **Min SDK**: 21 (Android 5.0)
+- **Target SDK**: 34
+
+## Project Structure
+```
+XyraAdmin/
+├── AndroidManifest.xml
+├── src/com/xyra/admin/
+│   ├── LoginActivity.java      # Admin login with JWT
+│   ├── DashboardActivity.java  # Stats overview & navigation
+│   ├── UserManagementActivity.java  # User CRUD operations
+│   ├── AIConfigActivity.java   # AI/API configuration
+│   ├── SupabaseSettingsActivity.java  # Database settings
+│   ├── ActivityLogsActivity.java  # Activity logs viewer
+│   ├── AdminApiService.java    # HTTP client with auth
+│   ├── AdminConfig.java        # Session management
+│   └── UserAdapter.java        # User list adapter
+├── res/
+│   ├── layout/                 # UI layouts
+│   ├── drawable/               # Icons & backgrounds
+│   └── values/                 # Strings, colors, styles
+```
+
+## Features
+- Admin authentication with JWT + refresh tokens
+- Dashboard with user statistics
+- User management (list, search, ban/unban, delete)
+- AI configuration (API key, model, rate limits)
+- Supabase settings management
+- Activity logs viewer
+- Dark theme matching XyraAI
+
+## Backend Requirements
+Requires a backend API (Vercel + Supabase Edge Functions) with endpoints:
+- `/api/admin/login` - Admin authentication
+- `/api/admin/refresh` - Token refresh
+- `/api/admin/dashboard/stats` - Dashboard statistics
+- `/api/admin/users` - User management
+- `/api/admin/config/ai` - AI configuration
+- `/api/admin/config/supabase` - Database settings
+- `/api/admin/logs` - Activity logs
+
+## How to Build
+1. Copy XyraAdmin folder to Android Studio
+2. Open as Android project
+3. Sync Gradle and build APK

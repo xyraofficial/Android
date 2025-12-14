@@ -1,74 +1,71 @@
-# XyraAI - Android AI Chat Application
+# Parent Control System
 
 ## Overview
-XyraAI is an Android AI Chat application built for AIDE (Android IDE). It uses the GROQ API with Llama 3.3 70B model for AI conversations.
-
-## Project Type
-This is an **Android project** (not a web application). It is designed to be:
-1. Copied to an Android device
-2. Opened in AIDE (Android IDE)
-3. Compiled and built into an APK on the device
+A parental monitoring system with three components:
+1. **Api/** - Flask backend API for data synchronization
+2. **ChildAndroid/** - Android app for data collection from child devices
+3. **Termux/** - Python CLI script for viewing collected data
 
 ## Project Structure
 ```
-XyraAI/
-├── AndroidManifest.xml      # App configuration & permissions
-├── project.properties       # Android SDK target
-├── README.md               # Setup instructions
-├── SUPABASE_SETUP.md       # Supabase configuration guide
-├── src/com/xyra/ai/        # Java source files
-│   ├── MainActivity.java   # Main chat activity
-│   ├── LoginActivity.java  # User authentication
-│   ├── ChatAdapter.java    # RecyclerView adapter
-│   ├── GroqApiService.java # GROQ API integration
-│   ├── SupabaseService.java # Supabase auth & database
-│   └── ... (other activities and utilities)
-├── res/                    # Android resources
-│   ├── layout/            # XML layouts
-│   ├── values/            # Strings, colors, styles
-│   └── drawable/          # Icons and backgrounds
-├── bin/                   # Pre-compiled .class files
-└── gen/                   # Generated R.java files
+├── Api/                    # Flask Backend API (Vercel deployable)
+│   ├── app.py             # Main API application
+│   ├── requirements.txt   # Python dependencies
+│   ├── vercel.json        # Vercel deployment config
+│   └── README.md          # API documentation
+│
+├── ChildAndroid/          # Android Application
+│   ├── app/
+│   │   └── src/main/
+│   │       ├── java/com/parentcontrol/child/
+│   │       │   ├── MainActivity.java
+│   │       │   ├── DataSyncService.java
+│   │       │   ├── Config.java
+│   │       │   └── BootReceiver.java
+│   │       ├── res/
+│   │       └── AndroidManifest.xml
+│   ├── build.gradle
+│   └── README.md
+│
+├── Termux/                # CLI Control Script
+│   ├── control_menu.py   # Main menu application
+│   ├── requirements.txt  # Python dependencies
+│   └── README.md
+│
+└── server.py             # Local test server (Firebase auth)
 ```
 
-## Features
-- Modern dark theme UI with gradient accents
-- Real-time AI chat using GROQ API
-- Chat message history with cloud sync (Supabase)
-- User authentication (Email/Password + Google OAuth)
-- Beautiful message bubbles with timestamps
-- Network status indicator
-- Conversation context memory
-- **Voice Input (STT)**: Talk to AI using voice with multi-language support
-- **Voice Output (TTS)**: AI reads answers aloud with 11 languages
-- **Share to WhatsApp**: Share conversations easily
-- **Bookmarks**: Save important messages
-- **AI Personas**: Customize AI personality
-- **Code Execution**: Run code directly in app
-- **Document Analysis**: Analyze uploaded documents
-- **Web Search**: AI searches current internet info
-- **Daily Reminders**: Get AI tips via notifications
-- **Quick Reply Templates**: Pre-made prompts for common tasks
+## API Endpoints
+- `POST /api/auth/register` - Register device
+- `POST /api/data/location` - Upload location
+- `POST /api/data/contacts` - Upload contacts
+- `POST /api/data/sms` - Upload SMS
+- `POST /api/data/gallery` - Upload gallery metadata
+- `GET /api/fetch/all` - Fetch all data
 
-## API Configuration
-- **GROQ API**: `https://api.groq.com/openai/v1/chat/completions`
-- **Model**: `llama-3.3-70b-versatile`
-- **Supabase**: Used for authentication and chat history cloud sync
+## Setup Instructions
 
-## Requirements
-- Android 5.0 (API 21) or higher
-- AIDE - Android IDE app
-- Internet connection
-- GROQ API key (from https://console.groq.com)
-- Supabase project (for cloud features)
+### API (Vercel)
+1. Push Api/ folder to GitHub
+2. Import in Vercel dashboard
+3. Deploy
 
-## How to Use
-1. Copy the XyraAI folder to Android device storage
-2. Open in AIDE
-3. Configure API keys in Config.java
-4. Build and run to generate APK
+### Android App
+1. Open ChildAndroid/ in Android Studio
+2. Update Config.java with API URL
+3. Build APK
 
-## Notes
-- The Firebase integration installed is for Flask/Python and does not apply to this Android project
-- This project cannot run as a web server on Replit
-- Pre-compiled class files are available in bin/ directory
+### Termux Client
+```bash
+cd Termux
+pip install -r requirements.txt
+export API_URL="https://your-api.vercel.app"
+export API_TOKEN="your-token"
+python control_menu.py
+```
+
+## Security Features
+- API token authentication
+- Explicit user consent in Android app
+- Encrypted HTTPS transmission
+- Foreground service notifications

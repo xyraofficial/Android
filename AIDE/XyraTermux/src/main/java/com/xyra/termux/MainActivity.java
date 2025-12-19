@@ -1,12 +1,14 @@
 package com.xyra.termux;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.Window;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -46,6 +48,7 @@ public class MainActivity extends Activity {
                 if (webView != null && !isRefreshing) {
                     isRefreshing = true;
                     floatingButton.startRotationAnimation();
+                    floatingButton.vibrate();
                     webView.reload();
                     handler.postDelayed(new Runnable() {
                         public void run() {
@@ -83,6 +86,7 @@ public class MainActivity extends Activity {
                 if (deltaY > 100 && !isRefreshing && isWebViewAtTop()) {
                     isRefreshing = true;
                     floatingButton.startRotationAnimation();
+                    floatingButton.vibrate();
                     webView.reload();
                     
                     handler.postDelayed(new Runnable() {
@@ -122,14 +126,13 @@ class FloatingRefreshButton extends View {
     private int screenHeight = 0;
     private RefreshListener refreshListener;
     private Handler handler = new Handler();
-    private int lastX = 0;
-    private int lastY = 0;
     private static final int PADDING = 20;
     private static final int HIDE_OFFSET = 40;
-    private static final int DRAG_THRESHOLD = 15;
+    private static final int DRAG_THRESHOLD = 10;
     private int buttonSize = 70;
     private float rotation = 0f;
     private boolean isAnimating = false;
+    private Vibrator vibrator;
 
     public interface RefreshListener {
         void onRefresh();
@@ -141,10 +144,22 @@ class FloatingRefreshButton extends View {
         
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
         screenHeight = context.getResources().getDisplayMetrics().heightPixels;
+        vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
     public void setRefreshListener(RefreshListener listener) {
         this.refreshListener = listener;
+    }
+
+    public void vibrate() {
+        if (vibrator == null) return;
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            VibrationEffect effect = VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE);
+            vibrator.vibrate(effect);
+        } else {
+            vibrator.vibrate(50);
+        }
     }
 
     public void startRotationAnimation() {
@@ -238,10 +253,6 @@ class FloatingRefreshButton extends View {
                 isDragging = false;
                 downX = eventX;
                 downY = eventY;
-                touchOffsetX = eventX - getX();
-                touchOffsetY = eventY - getY();
-                lastX = (int) getX();
-                lastY = (int) getY();
                 return true;
                 
             case MotionEvent.ACTION_MOVE:
@@ -254,8 +265,8 @@ class FloatingRefreshButton extends View {
                 }
                 
                 if (isDragging) {
-                    float newX = lastX + deltaX;
-                    float newY = lastY + deltaY;
+                    float newX = getX() + deltaX;
+                    float newY = getY() + deltaY;
                     
                     if (newX < -HIDE_OFFSET) {
                         newX = -HIDE_OFFSET;
@@ -272,10 +283,11 @@ class FloatingRefreshButton extends View {
                         newY = screenHeight - buttonSize;
                     }
                     
+                    downX = eventX;
+                    downY = eventY;
+                    
                     setX(newX);
                     setY(newY);
-                    lastX = (int) newX;
-                    lastY = (int) newY;
                 }
                 return true;
                 

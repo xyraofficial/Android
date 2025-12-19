@@ -2,17 +2,18 @@ package com.xyra.termux;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Window;
 import android.view.MotionEvent;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
 
 public class MainActivity extends Activity {
     private WebView webView;
     private float touchStartY = 0;
     private boolean isRefreshing = false;
+    private Handler handler = new Handler();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,9 +35,10 @@ public class MainActivity extends Activity {
         setContentView(container);
     }
 
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (webView == null) return super.onTouchEvent(event);
+        if (webView == null) {
+            return super.onTouchEvent(event);
+        }
         
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -47,12 +49,15 @@ public class MainActivity extends Activity {
                 float touchEndY = event.getY();
                 float deltaY = touchEndY - touchStartY;
                 
-                // If swiped down more than 100px and not already refreshing
                 if (deltaY > 100 && !isRefreshing && isWebViewAtTop()) {
                     isRefreshing = true;
                     webView.reload();
-                    // Reset after 2 seconds
-                    webView.postDelayed(() -> isRefreshing = false, 2000);
+                    
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            isRefreshing = false;
+                        }
+                    }, 2000);
                 }
                 break;
         }

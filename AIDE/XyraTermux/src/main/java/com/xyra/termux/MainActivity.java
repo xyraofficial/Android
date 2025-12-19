@@ -6,27 +6,17 @@ import android.webkit.WebViewClient;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-
     private WebView webView;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        webView = findViewById(R.id.webview);
-        
-        // Enable JavaScript
+        webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
-        
-        // Set WebViewClient to handle page navigation
         webView.setWebViewClient(new WebViewClient());
-        
-        // Load the remote URL
         webView.loadUrl("https://xyra-termux.vercel.app/");
+        setContentView(webView);
     }
 
-    @Override
     public void onBackPressed() {
         if (webView != null && webView.canGoBack()) {
             webView.goBack();

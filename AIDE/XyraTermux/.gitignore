@@ -1,0 +1,12 @@
+*.class
+*.apk
+*.ap_
+*.dex
+*.so
+*.egg-info/
+dist/
+build/
+.gradle/
+.idea/
+*.iml
+local.properties

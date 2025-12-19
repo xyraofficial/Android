@@ -18,14 +18,16 @@ public class MainActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
         FrameLayout mainContainer = new FrameLayout(this);
+        mainContainer.setBackgroundColor(0xFF1a1a2e);
         
         webView = new WebView(this);
+        webView.setBackgroundColor(0xFF1a1a2e);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if (loadingScreen != null) {
+                if (loadingScreen != null && loadingScreen.getVisibility() == View.VISIBLE) {
                     loadingScreen.setVisibility(View.GONE);
                 }
             }

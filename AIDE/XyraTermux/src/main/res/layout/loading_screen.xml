@@ -12,18 +12,9 @@
         
         <ProgressBar
             android:id="@+id/loading_spinner"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:indeterminate="true"
-            android:indeterminateTint="#00d9ff"
-            android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal" />
-        
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Loading..."
-            android:textColor="#00d9ff"
-            android:textSize="16sp"
-            android:layout_marginTop="20dp" />
+            android:progressDrawable="@drawable/circular_loader" />
     </LinearLayout>
 </FrameLayout>

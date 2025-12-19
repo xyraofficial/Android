@@ -45,10 +45,12 @@ public class MainActivity extends Activity {
             public void onRefresh() {
                 if (webView != null && !isRefreshing) {
                     isRefreshing = true;
+                    floatingButton.startRotationAnimation();
                     webView.reload();
                     handler.postDelayed(new Runnable() {
                         public void run() {
                             isRefreshing = false;
+                            floatingButton.stopRotationAnimation();
                         }
                     }, 2000);
                 }
@@ -80,11 +82,13 @@ public class MainActivity extends Activity {
                 
                 if (deltaY > 100 && !isRefreshing && isWebViewAtTop()) {
                     isRefreshing = true;
+                    floatingButton.startRotationAnimation();
                     webView.reload();
                     
                     handler.postDelayed(new Runnable() {
                         public void run() {
                             isRefreshing = false;
+                            floatingButton.stopRotationAnimation();
                         }
                     }, 2000);
                 }
@@ -110,6 +114,8 @@ public class MainActivity extends Activity {
 class FloatingRefreshButton extends View {
     private float touchOffsetX = 0;
     private float touchOffsetY = 0;
+    private float downX = 0;
+    private float downY = 0;
     private boolean isDragging = false;
     private boolean isHidden = false;
     private int screenWidth = 0;
@@ -120,7 +126,10 @@ class FloatingRefreshButton extends View {
     private int lastY = 0;
     private static final int PADDING = 20;
     private static final int HIDE_OFFSET = 40;
+    private static final int DRAG_THRESHOLD = 15;
     private int buttonSize = 70;
+    private float rotation = 0f;
+    private boolean isAnimating = false;
 
     public interface RefreshListener {
         void onRefresh();
@@ -136,6 +145,35 @@ class FloatingRefreshButton extends View {
 
     public void setRefreshListener(RefreshListener listener) {
         this.refreshListener = listener;
+    }
+
+    public void startRotationAnimation() {
+        isAnimating = true;
+        rotation = 0f;
+        animateRotation();
+    }
+
+    public void stopRotationAnimation() {
+        isAnimating = false;
+        rotation = 0f;
+        invalidate();
+    }
+
+    private void animateRotation() {
+        if (!isAnimating) return;
+        
+        rotation += 15f;
+        if (rotation >= 360f) {
+            rotation = 0f;
+        }
+        
+        invalidate();
+        
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                animateRotation();
+            }
+        }, 30);
     }
 
     protected void onDraw(Canvas canvas) {
@@ -156,6 +194,9 @@ class FloatingRefreshButton extends View {
         bgPaint.setAntiAlias(true);
         RectF bgRect = new RectF(0, 0, getWidth(), getHeight());
         canvas.drawRoundRect(bgRect, getWidth() / 2, getHeight() / 2, bgPaint);
+        
+        canvas.save();
+        canvas.rotate(rotation, centerX, centerY);
         
         Paint iconPaint = new Paint();
         iconPaint.setColor(Color.WHITE);
@@ -184,6 +225,8 @@ class FloatingRefreshButton extends View {
         float bottomArrowY = centerY + arrowRadius + 2;
         canvas.drawLine(bottomArrowX, bottomArrowY, bottomArrowX + 6, bottomArrowY - 5, iconPaint);
         canvas.drawLine(bottomArrowX, bottomArrowY, bottomArrowX - 1, bottomArrowY - 6, iconPaint);
+        
+        canvas.restore();
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -193,6 +236,8 @@ class FloatingRefreshButton extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 isDragging = false;
+                downX = eventX;
+                downY = eventY;
                 touchOffsetX = eventX - getX();
                 touchOffsetY = eventY - getY();
                 lastX = (int) getX();
@@ -200,30 +245,38 @@ class FloatingRefreshButton extends View {
                 return true;
                 
             case MotionEvent.ACTION_MOVE:
-                float newX = eventX - touchOffsetX;
-                float newY = eventY - touchOffsetY;
+                float deltaX = eventX - downX;
+                float deltaY = eventY - downY;
+                float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
                 
-                isDragging = true;
-                
-                if (newX < -HIDE_OFFSET) {
-                    newX = -HIDE_OFFSET;
-                    isHidden = true;
-                } else if (newX > screenWidth - buttonSize + HIDE_OFFSET) {
-                    newX = screenWidth - buttonSize + HIDE_OFFSET;
-                    isHidden = true;
-                } else {
-                    isHidden = false;
+                if (distance > DRAG_THRESHOLD) {
+                    isDragging = true;
                 }
                 
-                if (newY < 0) newY = 0;
-                if (newY > screenHeight - buttonSize) {
-                    newY = screenHeight - buttonSize;
+                if (isDragging) {
+                    float newX = lastX + deltaX;
+                    float newY = lastY + deltaY;
+                    
+                    if (newX < -HIDE_OFFSET) {
+                        newX = -HIDE_OFFSET;
+                        isHidden = true;
+                    } else if (newX > screenWidth - buttonSize + HIDE_OFFSET) {
+                        newX = screenWidth - buttonSize + HIDE_OFFSET;
+                        isHidden = true;
+                    } else {
+                        isHidden = false;
+                    }
+                    
+                    if (newY < 0) newY = 0;
+                    if (newY > screenHeight - buttonSize) {
+                        newY = screenHeight - buttonSize;
+                    }
+                    
+                    setX(newX);
+                    setY(newY);
+                    lastX = (int) newX;
+                    lastY = (int) newY;
                 }
-                
-                setX(newX);
-                setY(newY);
-                lastX = (int) newX;
-                lastY = (int) newY;
                 return true;
                 
             case MotionEvent.ACTION_UP:

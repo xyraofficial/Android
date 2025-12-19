@@ -2,71 +2,61 @@ package com.xyra.termux;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.Window;
-import android.view.MotionEvent;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
+import android.view.Window;
 
 public class MainActivity extends Activity {
     private WebView webView;
-    private float touchStartY = 0;
-    private boolean isRefreshing = false;
-    private Handler handler = new Handler();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
-        FrameLayout container = new FrameLayout(this);
-        
         webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setDatabaseEnabled(true);
+        
         webView.setWebViewClient(new WebViewClient());
+        
+        injectRefreshScript();
         webView.loadUrl("https://xyra-termux.vercel.app/");
         
-        container.addView(webView, new FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        ));
-        
-        setContentView(container);
+        setContentView(webView);
     }
 
-    public boolean onTouchEvent(MotionEvent event) {
-        if (webView == null) {
-            return super.onTouchEvent(event);
-        }
-        
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                touchStartY = event.getY();
-                break;
+    private void injectRefreshScript() {
+        webView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
                 
-            case MotionEvent.ACTION_UP:
-                float touchEndY = event.getY();
-                float deltaY = touchEndY - touchStartY;
+                String script = "javascript:" +
+                    "(function() {" +
+                    "  let touchStartY = 0;" +
+                    "  let lastRefreshTime = 0;" +
+                    "  " +
+                    "  document.addEventListener('touchstart', function(e) {" +
+                    "    touchStartY = e.touches[0].clientY;" +
+                    "  }, false);" +
+                    "  " +
+                    "  document.addEventListener('touchmove', function(e) {" +
+                    "    if (window.scrollY === 0) {" +
+                    "      let currentY = e.touches[0].clientY;" +
+                    "      let delta = currentY - touchStartY;" +
+                    "      " +
+                    "      if (delta > 80 && (Date.now() - lastRefreshTime) > 2000) {" +
+                    "        lastRefreshTime = Date.now();" +
+                    "        window.location.reload();" +
+                    "      }" +
+                    "    }" +
+                    "  }, false);" +
+                    "})();";
                 
-                if (deltaY > 100 && !isRefreshing && isWebViewAtTop()) {
-                    isRefreshing = true;
-                    webView.reload();
-                    
-                    handler.postDelayed(new Runnable() {
-                        public void run() {
-                            isRefreshing = false;
-                        }
-                    }, 2000);
-                }
-                break;
-        }
-        
-        return super.onTouchEvent(event);
-    }
-
-    private boolean isWebViewAtTop() {
-        return webView.getScrollY() == 0;
+                view.loadUrl(script);
+            }
+        });
     }
 
     public void onBackPressed() {

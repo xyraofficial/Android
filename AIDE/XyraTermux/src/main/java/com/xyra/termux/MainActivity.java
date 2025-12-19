@@ -22,14 +22,13 @@ public class MainActivity extends Activity {
     private boolean isRefreshing = false;
     private Handler handler = new Handler();
     private FloatingRefreshButton floatingButton;
-    private FrameLayout container;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
-        container = new FrameLayout(this);
+        FrameLayout container = new FrameLayout(this);
         
         webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -41,10 +40,9 @@ public class MainActivity extends Activity {
             FrameLayout.LayoutParams.MATCH_PARENT
         ));
         
-        floatingButton = new FloatingRefreshButton(this, container);
-        floatingButton.setWebView(webView);
+        floatingButton = new FloatingRefreshButton(this);
         floatingButton.setRefreshListener(new FloatingRefreshButton.RefreshListener() {
-            public void run() {
+            public void onRefresh() {
                 if (webView != null && !isRefreshing) {
                     isRefreshing = true;
                     webView.reload();
@@ -57,10 +55,10 @@ public class MainActivity extends Activity {
             }
         });
         
-        FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(80, 80);
+        FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(70, 70);
         buttonParams.gravity = android.view.Gravity.BOTTOM | android.view.Gravity.RIGHT;
-        buttonParams.rightMargin = 16;
-        buttonParams.bottomMargin = 120;
+        buttonParams.rightMargin = 20;
+        buttonParams.bottomMargin = 100;
         container.addView(floatingButton, buttonParams);
         
         setContentView(container);
@@ -110,38 +108,30 @@ public class MainActivity extends Activity {
 }
 
 class FloatingRefreshButton extends View {
-    private float lastX = 0;
-    private float lastY = 0;
-    private float downX = 0;
-    private float downY = 0;
-    private int screenWidth = 0;
-    private int screenHeight = 0;
+    private float touchOffsetX = 0;
+    private float touchOffsetY = 0;
     private boolean isDragging = false;
     private boolean isHidden = false;
-    private WebView webView;
+    private int screenWidth = 0;
+    private int screenHeight = 0;
     private RefreshListener refreshListener;
     private Handler handler = new Handler();
-    private FrameLayout parentContainer;
-    private int buttonSize = 80;
-    private static final int PADDING = 16;
-    private static final int HIDE_THRESHOLD = 25;
+    private int lastX = 0;
+    private int lastY = 0;
+    private static final int PADDING = 20;
+    private static final int HIDE_OFFSET = 40;
+    private int buttonSize = 70;
 
     public interface RefreshListener {
-        void run();
+        void onRefresh();
     }
 
-    public FloatingRefreshButton(Context context, FrameLayout parent) {
+    public FloatingRefreshButton(Context context) {
         super(context);
         setClickable(true);
-        setFocusable(true);
-        parentContainer = parent;
         
         screenWidth = context.getResources().getDisplayMetrics().widthPixels;
         screenHeight = context.getResources().getDisplayMetrics().heightPixels;
-    }
-
-    public void setWebView(WebView webView) {
-        this.webView = webView;
     }
 
     public void setRefreshListener(RefreshListener listener) {
@@ -155,17 +145,17 @@ class FloatingRefreshButton extends View {
         float centerY = getHeight() / 2f;
         
         Paint shadowPaint = new Paint();
-        shadowPaint.setColor(Color.argb(50, 0, 0, 0));
+        shadowPaint.setColor(Color.argb(60, 0, 0, 0));
         shadowPaint.setStyle(Paint.Style.FILL);
-        RectF shadowRect = new RectF(3, 3, getWidth() - 3, getHeight() - 3);
-        canvas.drawRoundRect(shadowRect, 20, 20, shadowPaint);
+        RectF shadowRect = new RectF(2, 2, getWidth() - 2, getHeight() - 2);
+        canvas.drawRoundRect(shadowRect, getWidth() / 2, getHeight() / 2, shadowPaint);
         
         Paint bgPaint = new Paint();
         bgPaint.setColor(Color.parseColor("#00D9FF"));
         bgPaint.setStyle(Paint.Style.FILL);
         bgPaint.setAntiAlias(true);
         RectF bgRect = new RectF(0, 0, getWidth(), getHeight());
-        canvas.drawRoundRect(bgRect, 20, 20, bgPaint);
+        canvas.drawRoundRect(bgRect, getWidth() / 2, getHeight() / 2, bgPaint);
         
         Paint iconPaint = new Paint();
         iconPaint.setColor(Color.WHITE);
@@ -175,10 +165,17 @@ class FloatingRefreshButton extends View {
         iconPaint.setStrokeJoin(Paint.Join.ROUND);
         iconPaint.setAntiAlias(true);
         
-        canvas.drawCircle(centerX, centerY - 8, 10, iconPaint);
-        canvas.drawLine(centerX, centerY + 5, centerX, centerY + 16, iconPaint);
-        canvas.drawLine(centerX - 5, centerY + 10, centerX, centerY + 16, iconPaint);
-        canvas.drawLine(centerX + 5, centerY + 10, centerX, centerY + 16, iconPaint);
+        float radius = 10;
+        float startAngle = 45;
+        float sweepAngle = 270;
+        RectF circleRect = new RectF(centerX - radius, centerY - radius - 4, centerX + radius, centerY + radius - 4);
+        canvas.drawArc(circleRect, startAngle, sweepAngle, false, iconPaint);
+        
+        canvas.drawLine(centerX + radius - 2, centerY - radius - 4 + 2, centerX + radius + 5, centerY - radius - 4 - 5, iconPaint);
+        canvas.drawLine(centerX + radius - 2, centerY - radius - 4 + 2, centerX + radius + 5, centerY - radius - 4 + 5, iconPaint);
+        
+        canvas.drawLine(centerX - radius + 2, centerY + radius - 4 - 2, centerX - radius - 5, centerY + radius - 4 + 5, iconPaint);
+        canvas.drawLine(centerX - radius + 2, centerY + radius - 4 - 2, centerX - radius - 5, centerY + radius - 4 - 5, iconPaint);
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -187,56 +184,45 @@ class FloatingRefreshButton extends View {
         
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                downX = eventX;
-                downY = eventY;
-                lastX = getX();
-                lastY = getY();
                 isDragging = false;
+                touchOffsetX = eventX - getX();
+                touchOffsetY = eventY - getY();
+                lastX = (int) getX();
+                lastY = (int) getY();
                 return true;
                 
             case MotionEvent.ACTION_MOVE:
-                float deltaX = eventX - downX;
-                float deltaY = eventY - downY;
+                float newX = eventX - touchOffsetX;
+                float newY = eventY - touchOffsetY;
                 
-                if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
-                    isDragging = true;
+                isDragging = true;
+                
+                if (newX < -HIDE_OFFSET) {
+                    newX = -HIDE_OFFSET;
+                    isHidden = true;
+                } else if (newX > screenWidth - buttonSize + HIDE_OFFSET) {
+                    newX = screenWidth - buttonSize + HIDE_OFFSET;
+                    isHidden = true;
+                } else {
+                    isHidden = false;
                 }
                 
-                if (isDragging) {
-                    float newX = lastX + deltaX;
-                    float newY = lastY + deltaY;
-                    
-                    if (newX < -HIDE_THRESHOLD) {
-                        newX = -HIDE_THRESHOLD;
-                        isHidden = true;
-                    } else if (newX > screenWidth - buttonSize + HIDE_THRESHOLD) {
-                        newX = screenWidth - buttonSize + HIDE_THRESHOLD;
-                    } else {
-                        isHidden = false;
-                    }
-                    
-                    if (newY < 0) newY = 0;
-                    if (newY > screenHeight - buttonSize) {
-                        newY = screenHeight - buttonSize;
-                    }
-                    
-                    ViewGroup.LayoutParams params = getLayoutParams();
-                    if (params instanceof FrameLayout.LayoutParams) {
-                        FrameLayout.LayoutParams flp = (FrameLayout.LayoutParams) params;
-                        flp.leftMargin = (int) newX;
-                        flp.topMargin = (int) newY;
-                        flp.rightMargin = 0;
-                        flp.bottomMargin = 0;
-                        setLayoutParams(flp);
-                    }
+                if (newY < 0) newY = 0;
+                if (newY > screenHeight - buttonSize) {
+                    newY = screenHeight - buttonSize;
                 }
+                
+                setX(newX);
+                setY(newY);
+                lastX = (int) newX;
+                lastY = (int) newY;
                 return true;
                 
             case MotionEvent.ACTION_UP:
-                if (isDragging) {
-                    snapToEdge();
-                } else {
+                if (!isDragging) {
                     handleClick();
+                } else {
+                    snapToEdge();
                 }
                 isDragging = false;
                 return true;
@@ -247,29 +233,26 @@ class FloatingRefreshButton extends View {
 
     private void handleClick() {
         if (refreshListener != null) {
-            refreshListener.run();
+            refreshListener.onRefresh();
         }
     }
 
     private void snapToEdge() {
-        ViewGroup.LayoutParams params = getLayoutParams();
-        if (!(params instanceof FrameLayout.LayoutParams)) return;
-        
-        FrameLayout.LayoutParams flp = (FrameLayout.LayoutParams) params;
-        float currentX = flp.leftMargin;
+        float currentX = getX();
         float targetX;
+        float currentY = getY();
         
         if (currentX < screenWidth / 2) {
-            if (currentX < -HIDE_THRESHOLD / 2) {
-                targetX = -HIDE_THRESHOLD;
+            if (currentX < -HIDE_OFFSET / 2) {
+                targetX = -HIDE_OFFSET;
                 isHidden = true;
             } else {
                 targetX = PADDING;
                 isHidden = false;
             }
         } else {
-            if (currentX > screenWidth - buttonSize - HIDE_THRESHOLD / 2) {
-                targetX = screenWidth - buttonSize + HIDE_THRESHOLD;
+            if (currentX > screenWidth - buttonSize + HIDE_OFFSET / 2) {
+                targetX = screenWidth - buttonSize + HIDE_OFFSET;
                 isHidden = true;
             } else {
                 targetX = screenWidth - buttonSize - PADDING;
@@ -277,33 +260,25 @@ class FloatingRefreshButton extends View {
             }
         }
         
-        animateToX((int) targetX, flp.topMargin);
+        animateTo(targetX, currentY);
     }
 
-    private void animateToX(final int targetX, final int currentY) {
-        final ViewGroup.LayoutParams params = getLayoutParams();
-        if (!(params instanceof FrameLayout.LayoutParams)) return;
-        
-        FrameLayout.LayoutParams flp = (FrameLayout.LayoutParams) params;
-        final int startX = flp.leftMargin;
-        final int steps = 12;
+    private void animateTo(float targetX, float targetY) {
+        float currentX = getX();
+        float currentY = getY();
+        int steps = 10;
         
         for (int i = 0; i <= steps; i++) {
-            final int step = i;
+            final float interpX = currentX + (targetX - currentX) * i / steps;
+            final float interpY = currentY + (targetY - currentY) * i / steps;
+            final int index = i;
+            
             handler.postDelayed(new Runnable() {
                 public void run() {
-                    int newX = startX + (int) ((targetX - startX) * step / (float) steps);
-                    ViewGroup.LayoutParams p = getLayoutParams();
-                    if (p instanceof FrameLayout.LayoutParams) {
-                        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) p;
-                        lp.leftMargin = newX;
-                        lp.topMargin = currentY;
-                        lp.rightMargin = 0;
-                        lp.bottomMargin = 0;
-                        setLayoutParams(lp);
-                    }
+                    setX(interpX);
+                    setY(interpY);
                 }
-            }, i * 15);
+            }, index * 20);
         }
     }
 }

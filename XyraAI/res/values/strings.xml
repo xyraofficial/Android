@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">XyraAI</string>
+    <string name="hint_message">Ask me anything...</string>
+    <string name="send">Send</string>
+    <string name="welcome_message">Hello! I\'m Xyra, your AI assistant. I can help you with:\n\n• Answering questions in any language\n• Writing and editing text\n• Coding and debugging\n• Explaining complex topics\n• Creative brainstorming\n• And much more!\n\nJust type your message and I\'ll respond in your language. How can I help you today?</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_api">Sorry, I encountered an error. Please try again.</string>
+    <string name="thinking">Thinking...</string>
+    <string name="status_online">Online</string>
+    <string name="typing">Xyra is typing...</string>
+    <string name="new_chat">New Chat</string>
+    <string name="clear_history">Clear History</string>
+    <string name="about">Tentang</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
+    
+    <string name="help_center">Pusat bantuan</string>
+    <string name="terms_of_use">Ketentuan penggunaan</string>
+    <string name="privacy_policy">Kebijakan privasi</string>
+    <string name="license">Lisensi</string>
+    <string name="app_for_android">XyraAI untuk Android</string>
+    <string name="app_version">1.2025.322 (23)</string>
+    
+    <string name="icon_help">i</string>
+    <string name="icon_terms">T</string>
+    <string name="icon_privacy">P</string>
+    <string name="icon_license">L</string>
+    
+    <string name="profile">Profil Saya</string>
+    <string name="login_google">Masuk dengan Google</string>
+    <string name="logout">Keluar</string>
+    <string name="guest_user">Guest User</string>
+    <string name="not_logged_in">Belum login</string>
+    
+    <!-- Remote Config URL -->
+    <string name="config_url">https://raw.githubusercontent.com/xyraofficial/Android/refs/heads/main/configurasi/config.json</string>
+</resources>

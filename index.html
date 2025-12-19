@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XyraAI - Konfirmasi Email</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 400px;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .message {
+            font-size: 16px;
+            color: #a0aec0;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        .status {
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        .status.loading {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid #667eea;
+        }
+        .status.success {
+            background: rgba(72, 187, 120, 0.2);
+            border: 1px solid #48bb78;
+        }
+        .status.error {
+            background: rgba(245, 101, 101, 0.2);
+            border: 1px solid #f56565;
+        }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">X</div>
+        <h1>XyraAI</h1>
+        
+        <div id="loading" class="status loading">
+            <div class="spinner"></div>
+            <p>Memverifikasi email...</p>
+        </div>
+        
+        <div id="success" class="status success" style="display: none;">
+            <div class="icon">✓</div>
+            <p><strong>Email Berhasil Dikonfirmasi!</strong></p>
+        </div>
+        
+        <div id="error" class="status error" style="display: none;">
+            <div class="icon">✕</div>
+            <p id="error-message">Terjadi kesalahan</p>
+        </div>
+        
+        <p id="instruction" class="message" style="display: none;">
+            Silakan buka aplikasi XyraAI dan login dengan email kamu.
+        </p>
+        
+        <div class="footer">
+            Powered by XyraAI
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+        
+        const SUPABASE_URL = 'https://figcqxynrcnimagpswqn.supabase.co'
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpZ2NxeHlucmNuaW1hZ3Bzd3FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU1Mzk3NDYsImV4cCI6MjA4MTExNTc0Nn0.uGVsFxsbLrSjtrli80UDrg96y1JRQyuMc7chQMVDG1A'
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        
+        async function handleEmailConfirmation() {
+            const loadingEl = document.getElementById('loading')
+            const successEl = document.getElementById('success')
+            const errorEl = document.getElementById('error')
+            const errorMsgEl = document.getElementById('error-message')
+            const instructionEl = document.getElementById('instruction')
+            
+            try {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1))
+                const queryParams = new URLSearchParams(window.location.search)
+                
+                const accessToken = hashParams.get('access_token')
+                const refreshToken = hashParams.get('refresh_token')
+                const tokenHash = queryParams.get('token_hash')
+                const type = queryParams.get('type') || hashParams.get('type')
+                
+                if (accessToken && refreshToken) {
+                    const { error } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken
+                    })
+                    
+                    if (error) throw error
+                    
+                    loadingEl.style.display = 'none'
+                    successEl.style.display = 'block'
+                    instructionEl.style.display = 'block'
+                    return
+                }
+                
+                if (tokenHash && type) {
+                    const { error } = await supabase.auth.verifyOtp({
+                        token_hash: tokenHash,
+                        type: type
+                    })
+                    
+                    if (error) throw error
+                    
+                    loadingEl.style.display = 'none'
+                    successEl.style.display = 'block'
+                    instructionEl.style.display = 'block'
+                    return
+                }
+                
+                loadingEl.style.display = 'none'
+                successEl.style.display = 'block'
+                instructionEl.style.display = 'block'
+                
+            } catch (err) {
+                console.error('Error:', err)
+                loadingEl.style.display = 'none'
+                errorEl.style.display = 'block'
+                errorMsgEl.textContent = err.message || 'Terjadi kesalahan saat verifikasi'
+                instructionEl.style.display = 'block'
+                instructionEl.textContent = 'Coba klik link konfirmasi lagi atau daftar ulang.'
+            }
+        }
+        
+        handleEmailConfirmation()
+    </script>
+</body>
+</html>

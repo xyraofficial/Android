@@ -160,22 +160,30 @@ class FloatingRefreshButton extends View {
         Paint iconPaint = new Paint();
         iconPaint.setColor(Color.WHITE);
         iconPaint.setStyle(Paint.Style.STROKE);
-        iconPaint.setStrokeWidth(2);
+        iconPaint.setStrokeWidth(2.2f);
         iconPaint.setStrokeCap(Paint.Cap.ROUND);
         iconPaint.setStrokeJoin(Paint.Join.ROUND);
         iconPaint.setAntiAlias(true);
         
-        float radius = 10;
-        float startAngle = 45;
-        float sweepAngle = 270;
-        RectF circleRect = new RectF(centerX - radius, centerY - radius - 4, centerX + radius, centerY + radius - 4);
-        canvas.drawArc(circleRect, startAngle, sweepAngle, false, iconPaint);
+        float arrowRadius = 11;
+        RectF arcRect = new RectF(
+            centerX - arrowRadius, 
+            centerY - arrowRadius, 
+            centerX + arrowRadius, 
+            centerY + arrowRadius
+        );
         
-        canvas.drawLine(centerX + radius - 2, centerY - radius - 4 + 2, centerX + radius + 5, centerY - radius - 4 - 5, iconPaint);
-        canvas.drawLine(centerX + radius - 2, centerY - radius - 4 + 2, centerX + radius + 5, centerY - radius - 4 + 5, iconPaint);
+        canvas.drawArc(arcRect, 45, 270, false, iconPaint);
         
-        canvas.drawLine(centerX - radius + 2, centerY + radius - 4 - 2, centerX - radius - 5, centerY + radius - 4 + 5, iconPaint);
-        canvas.drawLine(centerX - radius + 2, centerY + radius - 4 - 2, centerX - radius - 5, centerY + radius - 4 - 5, iconPaint);
+        float arrowX = centerX + arrowRadius + 2;
+        float arrowY = centerY - arrowRadius - 2;
+        canvas.drawLine(arrowX, arrowY, arrowX - 6, arrowY + 5, iconPaint);
+        canvas.drawLine(arrowX, arrowY, arrowX + 1, arrowY + 6, iconPaint);
+        
+        float bottomArrowX = centerX - arrowRadius - 2;
+        float bottomArrowY = centerY + arrowRadius + 2;
+        canvas.drawLine(bottomArrowX, bottomArrowY, bottomArrowX + 6, bottomArrowY - 5, iconPaint);
+        canvas.drawLine(bottomArrowX, bottomArrowY, bottomArrowX - 1, bottomArrowY - 6, iconPaint);
     }
 
     public boolean onTouchEvent(MotionEvent event) {

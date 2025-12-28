@@ -22,7 +22,7 @@
     "iosUserAgentAdd": "median",
     "iosForceUserAgent": "",
     "androidUserAgentAdd": "median",
-    "androidForceUserAgent": "",
+    "androidForceUserAgent": "default",
     "iosBundleId": "co.median.ios.dyyprea",
     "androidSigningKey": "release",
     "injectMedianJS": true,
@@ -32,7 +32,7 @@
     "version": 3
   },
   "navigation": {
-    "androidPullToRefresh": false,
+    "androidPullToRefresh": true,
     "iosPullToRefresh": true,
     "androidShowOfflinePage": true,
     "iosShowOfflinePage": true,
@@ -338,7 +338,7 @@
   },
   "permissions": {
     "usesGeolocation": false,
-    "androidDownloadToPublicStorage": false,
+    "androidDownloadToPublicStorage": true,
     "enableWebRTCamera": false,
     "enableWebRTCMicrophone": false,
     "iosLocationUsageDescription": "",

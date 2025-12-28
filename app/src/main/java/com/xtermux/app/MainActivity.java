@@ -317,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
         this.fullScreenLayout = findViewById(R.id.fullscreen);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
-        swipeRefreshLayout.setEnabled(appConfig.pullToRefresh);
+        swipeRefreshLayout.setEnabled(false);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setCanChildScrollUpCallback(() -> mWebview.getWebViewScrollY() > 10);
 

@@ -677,22 +677,31 @@ public class GoNativeSwipeRefreshLayout extends ViewGroup implements NestedScrol
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         ensureTarget();
-        
+
         final int action = ev.getActionMasked();
         int pointerIndex;
-        
+
         if (mReturningToStart && action == MotionEvent.ACTION_DOWN) {
             mReturningToStart = false;
         }
-        
+
         if (!isEnabled() || mReturningToStart || mRefreshing || mNestedScrollInProgress || ev.getPointerCount() > 1) {
             // Fail fast if we're not in a state where a swipe is possible
             return false;
         }
-        
+
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if (canChildScrollUp()) return false;
+
+                if (ev.getY() > getHeight() * 0.15f) {
+                    return false;
+                }
+                
+                // Only allow swipe to refresh if it starts in the top 15% of the view
+                if (ev.getY() > getHeight() * 0.15f) {
+                    return false;
+                }
 
                 setTargetOffsetTopAndBottom(mOriginalOffsetTop - mCircleView.getTop());
                 mActivePointerId = ev.getPointerId(0);

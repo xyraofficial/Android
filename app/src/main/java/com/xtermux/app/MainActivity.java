@@ -317,8 +317,17 @@ public class MainActivity extends AppCompatActivity implements Observer,
 
         this.fullScreenLayout = findViewById(R.id.fullscreen);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
-        swipeRefreshLayout.setEnabled(false);
+        swipeRefreshLayout.setEnabled(true);
         swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.post(() -> {
+            int height = swipeRefreshLayout.getHeight();
+            if (height > 0) {
+                swipeRefreshLayout.setDistanceToTriggerSync((int) (height * 0.15));
+            } else {
+                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                swipeRefreshLayout.setDistanceToTriggerSync((int) (metrics.heightPixels * 0.15));
+            }
+        });
         swipeRefreshLayout.setCanChildScrollUpCallback(() -> mWebview.getWebViewScrollY() > 10);
 
         if (appConfig.isAndroidGestureEnabled()) {

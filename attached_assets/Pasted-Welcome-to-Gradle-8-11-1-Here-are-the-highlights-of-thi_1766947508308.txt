@@ -1,0 +1,72 @@
+Welcome to Gradle 8.11.1!
+Here are the highlights of this release:
+ - Parallel load and store for Configuration Cache
+ - Java compilation errors at the end of the build output
+ - Consolidated report for warnings and deprecations
+For more details see https://docs.gradle.org/8.11.1/release-notes.html
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :app:generatePackageList
+> Task :app:preBuild
+> Task :app:preNormalDebugBuild
+> Task :app:mergeNormalDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:dataBindingMergeDependencyArtifactsNormalDebug
+> Task :app:generateNormalDebugResValues
+> Task :app:generateNormalDebugResources
+> Task :app:generateNormalDebugBuildConfig
+> Task :app:checkNormalDebugAarMetadata
+> Task :app:mapNormalDebugSourceSetPaths
+> Task :app:createNormalDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksNormalDebug
+> Task :app:processNormalDebugMainManifest
+/home/runner/work/Android/Android/app/src/main/AndroidManifest.xml:16:5-102 Warning:
+	uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE was tagged at AndroidManifest.xml:16 to remove other declarations but no other declaration present
+> Task :app:mergeNormalDebugResources
+> Task :app:processNormalDebugManifest
+> Task :app:dataBindingGenBaseClassesNormalDebug
+> Task :app:processNormalDebugManifestForPackage
+> Task :app:javaPreCompileNormalDebug
+> Task :app:mergeNormalDebugShaders
+> Task :app:compileNormalDebugShaders NO-SOURCE
+> Task :app:generateNormalDebugAssets UP-TO-DATE
+> Task :app:mergeNormalDebugAssets
+> Task :app:compressNormalDebugAssets
+> Task :app:checkNormalDebugDuplicateClasses
+> Task :app:processNormalDebugResources
+> Task :app:desugarNormalDebugFileDependencies
+> Task :app:mergeNormalDebugJniLibFolders
+> Task :app:mergeNormalDebugNativeLibs NO-SOURCE
+> Task :app:mergeLibDexNormalDebug
+> Task :app:stripNormalDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningNormalDebug
+> Task :app:writeNormalDebugAppMetadata
+> Task :app:writeNormalDebugSigningConfigVersions
+> Task :app:mergeExtDexNormalDebug
+> Task :app:compileNormalDebugKotlin FAILED
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/ActionManager.kt:26:24 Unresolved reference 'icons'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/ActionManager.kt:213:28 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/ActionManager.kt:217:14 Unresolved reference 'setShowAsActionFlags'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/ActionManager.kt:246:28 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/ActionManager.kt:250:14 Unresolved reference 'setShowAsActionFlags'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/ActionManager.kt:291:28 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/ActionManager.kt:623:40 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/IconUtils.kt:10:24 Unresolved reference 'icons'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/IconUtils.kt:24:34 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/IconUtils.kt:26:13 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/IconUtils.kt:44:34 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/IconUtils.kt:47:13 Unresolved reference 'Icon'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/SideNavManager.kt:15:24 Unresolved reference 'icons'.
+e: file:///home/runner/work/Android/Android/app/src/main/java/com/xtermux/app/SideNavManager.kt:165:36 Unresolved reference 'Icon'.
+FAILURE: Build failed with an exception.
+* What went wrong:
+Execution failed for task ':app:compileNormalDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+BUILD FAILED in 34s
+28 actionable tasks: 28 executed
+Error: Process completed with exit code 1.

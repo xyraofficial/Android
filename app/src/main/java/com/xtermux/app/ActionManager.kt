@@ -23,7 +23,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
-import com.xtermux.app.icons.Icon
+import co.median.android.icons.Icon
 import co.median.median_core.AppConfig
 import com.google.android.material.appbar.MaterialToolbar
 import org.json.JSONArray

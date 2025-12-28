@@ -12,7 +12,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.xtermux.app.icons.Icon
+import co.median.android.icons.Icon
 import com.xtermux.app.widget.GoNativeDrawerLayout
 import co.median.median_core.AppConfig
 import co.median.median_core.ConfigListenerManager

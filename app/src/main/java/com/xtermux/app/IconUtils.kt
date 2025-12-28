@@ -7,7 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.appcompat.graphics.drawable.StateListDrawableCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.xtermux.app.icons.Icon
+import co.median.android.icons.Icon
 
 object IconUtils {
 

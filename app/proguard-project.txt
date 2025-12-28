@@ -21,10 +21,10 @@
 
 # webview interfaces
 
--keepclassmembers class co.median.android.ProfilePicker$ProfileJsBridge {
+-keepclassmembers class com.xtermux.app.ProfilePicker$ProfileJsBridge {
     <methods>;
 }
--keepclassmembers class co.median.android.MainActivity$StatusCheckerBridge {
+-keepclassmembers class com.xtermux.app.MainActivity$StatusCheckerBridge {
     <methods>;
 }
 -keepattributes JavascriptInterface

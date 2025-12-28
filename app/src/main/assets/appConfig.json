@@ -17,7 +17,7 @@
     },
     "nativeBridgeUrls": [],
     "languages": [],
-    "androidPackageName": "co.median.android.dyyprea",
+    "androidPackageName": "com.xtermux.app.dyyprea",
     "keepScreenOn": null,
     "iosUserAgentAdd": "median",
     "iosForceUserAgent": "",

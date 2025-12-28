@@ -3,7 +3,7 @@ import org.gradle.initialization.DefaultSettings
 import java.util.zip.ZipFile
 
 def generatedFileName = "PackageList.java"
-def generatedFilePackage = "co.median.android"
+def generatedFilePackage = "com.xtermux.app"
 def generatedFileContentsTemplate = """
 package $generatedFilePackage;
 
@@ -50,7 +50,7 @@ class GoNativeModules {
     private ArrayList<HashMap<String, String>> compiledPluginsMetadata
     private ArrayList<HashMap<String, String>> allPluginsMetadata
 
-    private packageName = "co.median.android"
+    private packageName = "com.xtermux.app"
 
     GoNativeModules(Logger logger) {
         this.logger = logger
@@ -84,7 +84,7 @@ class GoNativeModules {
         
         try {
             def matchingArtifacts = project.configurations.medianPlugin.resolvedConfiguration.resolvedArtifacts.findAll { artifact ->
-                artifact.moduleVersion.id.group == 'co.median.android.plugins'
+                artifact.moduleVersion.id.group == 'com.xtermux.app.plugins'
             }
 
             matchingArtifacts.each {artifact ->
@@ -211,8 +211,8 @@ class GoNativeModules {
             if (plugins) {
                 project.dependencies {
                     plugins.each { key, value ->
-                        implementation "co.median.android.plugins:${key}:${value}"
-                        logger.info("Added plugin dependency: co.median.android.plugins:${key}:${value}")
+                        implementation "com.xtermux.app.plugins:${key}:${value}"
+                        logger.info("Added plugin dependency: com.xtermux.app.plugins:${key}:${value}")
                     }
                 }
             }

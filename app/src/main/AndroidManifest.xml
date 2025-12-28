@@ -147,7 +147,7 @@
         <service android:name=".DownloadService"/>
 
         <receiver
-            android:name="co.median.android.AppUpgradeReceiver"
+            android:name="com.xtermux.app.AppUpgradeReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />

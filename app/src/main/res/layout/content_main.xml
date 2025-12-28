@@ -7,13 +7,13 @@
     tools:showIn="@layout/app_bar_main"
     android:layout_height="match_parent">
 
-    <co.median.android.MySwipeRefreshLayout
+    <com.xtermux.app.MySwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/pluginView">
 
-        <co.median.android.widget.SwipeHistoryNavigationLayout
+        <com.xtermux.app.widget.SwipeHistoryNavigationLayout
             android:id="@+id/swipe_history_nav"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -22,7 +22,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent">
 
-                <co.median.android.widget.WebViewContainerView
+                <com.xtermux.app.widget.WebViewContainerView
                     android:id="@+id/webviewContainer"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
@@ -35,8 +35,8 @@
                     android:background="?android:attr/colorBackground" />
 
             </RelativeLayout>
-        </co.median.android.widget.SwipeHistoryNavigationLayout>
-    </co.median.android.MySwipeRefreshLayout>
+        </com.xtermux.app.widget.SwipeHistoryNavigationLayout>
+    </com.xtermux.app.MySwipeRefreshLayout>
 
     <RelativeLayout
         android:id="@+id/pluginView"
@@ -47,7 +47,7 @@
         android:background="?android:attr/colorBackground"
         android:visibility="gone"/>
 
-    <co.median.android.widget.MedianProgressView
+    <com.xtermux.app.widget.MedianProgressView
         android:id="@+id/progress"
         android:background="@android:color/transparent"
         android:layout_width="@dimen/progress_indicator_size"

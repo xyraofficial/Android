@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1019621784884",
+    "project_id": "xyratermux",
+    "storage_bucket": "xyratermux.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019621784884:android:f4f2ab74149b1f6eff3961",
+        "android_client_info": {
+          "package_name": "com.xtermux.app.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1019621784884-s7mq8tt3c0i0tm15esahpa890qf1717j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4CNFbtqdsUjOWZVEGmionUqzUYrmCNZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1019621784884-s7mq8tt3c0i0tm15esahpa890qf1717j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

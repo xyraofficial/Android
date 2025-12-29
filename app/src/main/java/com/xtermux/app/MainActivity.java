@@ -443,6 +443,18 @@ public class MainActivity extends AppCompatActivity implements Observer,
         this.mWebviewContainer.setupWebview(this, isRoot);
         setupWebviewTheme(appTheme);
 
+        // Fix Firebase Auth/SessionStorage issues in WebView
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setAcceptThirdPartyCookies((WebView) mWebview, true);
+        mWebview.getSettings().setDomStorageEnabled(true);
+        mWebview.getSettings().setDatabaseEnabled(true);
+        mWebview.getSettings().setAllowFileAccess(true);
+        mWebview.getSettings().setAllowContentAccess(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            cookieManager.setAcceptThirdPartyCookies((WebView) mWebview, true);
+        }
+
         boolean isWebViewStateRestored = false;
         if (savedInstanceState != null) {
             Bundle webViewStateBundle = savedInstanceState.getBundle(SAVED_STATE_WEBVIEW_STATE);

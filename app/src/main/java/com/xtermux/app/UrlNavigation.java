@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.browser.customtabs.CustomTabsIntent;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -188,7 +189,7 @@ public class UrlNavigation {
     // noAction to skip stuff like opening url in external browser, higher nav levels, etc.
     public boolean shouldOverrideUrlLoadingNoIntercept(final GoNativeWebviewInterface view, final String url,
                                                         @SuppressWarnings("SameParameterValue") final boolean noAction) {
-//		Log.d(TAG, "shouldOverrideUrl: " + url);
+//              Log.d(TAG, "shouldOverrideUrl: " + url);
 
         // return if url is null (can happen if clicking refresh when there is no page loaded)
         if (url == null)
@@ -276,6 +277,13 @@ public class UrlNavigation {
                         intent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME);
                         mainActivity.startActivity(intent);
                     } else if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
+                        // Use Chrome Custom Tabs for Firebase Auth and related stable session handling
+                        if (url.contains("firebaseapp.com") || url.contains("googleapis.com/identitytoolkit") || url.contains("accounts.google.com")) {
+                            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                            CustomTabsIntent customTabsIntent = builder.build();
+                            customTabsIntent.launchUrl(mainActivity, uri);
+                            return true;
+                        }
                         mainActivity.openExternalBrowser(uri);
                     } else {
                         intent = new Intent(Intent.ACTION_VIEW, uri);

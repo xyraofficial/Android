@@ -277,6 +277,22 @@ public class UrlNavigation {
                         intent = Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME);
                         mainActivity.startActivity(intent);
                     } else if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
+                        // Use Chrome Custom Tabs for Firebase Auth and related stable session handling
+                        if (url.contains("firebaseapp.com") || 
+                            url.contains("googleapis.com/identitytoolkit") || 
+                            url.contains("accounts.google.com") ||
+                            url.contains("__/auth/handler")) {
+                            
+                            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                            builder.setShareState(CustomTabsIntent.SHARE_STATE_ON);
+                            builder.setUrlBarHidingEnabled(true);
+                            
+                            CustomTabsIntent customTabsIntent = builder.build();
+                            customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            
+                            customTabsIntent.launchUrl(mainActivity, uri);
+                            return true;
+                        }
                         mainActivity.openExternalBrowser(uri);
                     } else {
                         intent = new Intent(Intent.ACTION_VIEW, uri);

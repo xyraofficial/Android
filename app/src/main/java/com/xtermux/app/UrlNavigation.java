@@ -279,7 +279,6 @@ public class UrlNavigation {
                     } else if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
                         mainActivity.openExternalBrowser(uri);
                     } else {
-                    } else {
                         intent = new Intent(Intent.ACTION_VIEW, uri);
                         mainActivity.startActivity(intent);
                     }
